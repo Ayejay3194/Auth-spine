@@ -1,0 +1,54 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession()
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const spineUrl = process.env.NEXT_PUBLIC_BUSINESS_SPINE_URL
+    if (!spineUrl) {
+      return NextResponse.json(
+        { error: 'Business Spine not configured' },
+        { status: 500 }
+      )
+    }
+
+    const response = await fetch(`${spineUrl}/api/business/init`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.BUSINESS_SPINE_API_KEY}`,
+        'X-Tenant-ID': process.env.BUSINESS_SPINE_TENANT_ID || 'default-tenant',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId: session.user?.email,
+        timestamp: new Date().toISOString()
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Business Spine init failed: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    return NextResponse.json({
+      success: true,
+      data,
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    console.error('Business Spine initialization error:', error)
+    return NextResponse.json(
+      { error: 'Failed to initialize Business Spine' },
+      { status: 500 }
+    )
+  }
+}

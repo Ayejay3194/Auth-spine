@@ -1,63 +1,21 @@
-import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/db'
+import { z } from "zod";
+import argon2 from "argon2";
+import { prisma } from "@/lib/prisma";
+import { api } from "@/src/core/api";
+
+const Q = z.object({
+  email: z.string().email(),
+  password: z.string().min(10).max(200),
+  role: z.enum(["owner","staff","client","admin"]).optional()
+});
 
 export async function POST(req: Request) {
-  try {
-    const { name, email, password } = await req.json()
-
-    // Validate input
-    if (!name || !email || !password) {
-      return NextResponse.json(
-        { message: 'Missing required fields' },
-        { status: 400 }
-      )
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { message: 'Password must be at least 6 characters' },
-        { status: 400 }
-      )
-    }
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
-
-    if (existingUser) {
-      return NextResponse.json(
-        { message: 'User already exists with this email' },
-        { status: 409 }
-      )
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // Create user
+  return api(async () => {
+    const body = Q.parse(await req.json());
+    const passwordHash = await argon2.hash(body.password, { type: argon2.argon2id });
     const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      }
-    })
-
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user
-
-    return NextResponse.json(
-      { message: 'User created successfully', user: userWithoutPassword },
-      { status: 201 }
-    )
-
-  } catch (error) {
-    console.error('Registration error:', error)
-    return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
-    )
-  }
+      data: { email: body.email, role: (body.role ?? "client") as any, passwordHash }
+    });
+    return { userId: user.id };
+  });
 }

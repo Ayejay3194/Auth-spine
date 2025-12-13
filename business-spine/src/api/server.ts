@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { BusinessSpine } from '../core/business-spine.js';
 import { AssistantContext, Role } from '../core/types.js';
 import { Logger } from '../utils/logger.js';
+import { authMiddleware, optionalAuthMiddleware, AuthenticatedRequest } from './auth-middleware.js';
 
 export class ApiServer {
   private app: express.Application;
@@ -39,10 +40,8 @@ export class ApiServer {
       });
       next();
     });
-  }
 
-  private setupRoutes(): void {
-    // Health check
+    // Health check endpoint (no auth required)
     this.app.get('/health', (req, res) => {
       res.json({ 
         status: 'healthy', 
@@ -50,9 +49,39 @@ export class ApiServer {
         version: '1.0.0'
       });
     });
+  }
+
+  private setupRoutes(): void {
+    // Protected API routes - require authentication
+    this.app.use('/api/business', authMiddleware);
+    this.app.use('/assistant', optionalAuthMiddleware);
+    this.app.use('/system', optionalAuthMiddleware);
+
+    // Business initialization endpoint
+    this.app.post('/api/business/init', (req: AuthenticatedRequest, res) => {
+      try {
+        const { userId, timestamp } = req.body;
+        
+        this.logger.info('Business Spine initialized', {
+          userId: req.userId,
+          tenantId: req.tenantId,
+          timestamp
+        });
+
+        res.json({
+          success: true,
+          tenantId: req.tenantId,
+          modules: this.spine.getConfig().modules.map(m => m.name),
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        this.logger.error('Initialization error', error);
+        res.status(500).json({ error: 'Initialization failed' });
+      }
+    });
 
     // Assistant endpoint
-    this.app.post('/assistant/chat', async (req, res) => {
+    this.app.post('/assistant/chat', async (req: AuthenticatedRequest, res) => {
       try {
         const { message, context } = req.body;
         
