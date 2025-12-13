@@ -1,0 +1,73 @@
+{
+  "project": "Long-Term AI Memory Core",
+  "domains": {
+    "engines": {
+      "core_engine": {
+        "type": "hybrid_or_primary_engine",
+        "description": "Main computation/logic engine for this system.",
+        "features": [
+          "high accuracy",
+          "deterministic behavior where needed",
+          "clearly defined inputs/outputs"
+        ],
+        "notes": "Replace this section with your real engine description."
+      }
+    },
+    "platforms": {
+      "saas_or_app": {
+        "tech_stack": [
+          "Next.js or other web framework",
+          "TypeScript/JavaScript",
+          "PostgreSQL (or your DB)"
+        ],
+        "apps": [
+          "web_frontend",
+          "admin_interface"
+        ],
+        "packages": [
+          "engines",
+          "ui",
+          "infra",
+          "validators",
+          "auth"
+        ]
+      }
+    },
+    "rules": {
+      "lightweight_models_can": [
+        "index files and zips",
+        "build manifests and summaries",
+        "generate documentation drafts",
+        "format tickets and notes"
+      ],
+      "lightweight_models_cannot": [
+        "modify core engine math or logic",
+        "refactor security-critical code",
+        "change validation or permission rules",
+        "alter database schema without review"
+      ]
+    },
+    "architecture": {
+      "central_truth_modules": [
+        "engine-core",
+        "validators-core",
+        "auth-core",
+        "infra-core"
+      ],
+      "suggested_monorepo_structure": {
+        "apps": [
+          "web_app",
+          "admin_app"
+        ],
+        "packages": [
+          "engine_core",
+          "ui_library",
+          "infra_layer",
+          "validator_suite",
+          "shared_config",
+          "database_layer"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+You are about to work on a project that uses a persistent external memory file.
+
+I will now provide you with a JSON memory file that represents the project's
+current long-term state, architecture, rules, and constraints.
+
+Here is the memory JSON:
+
+[PASTE memory.json CONTENT HERE]
+
+Your instructions:
+- Treat this memory as TRUE and FIXED for this session.
+- Do NOT contradict it.
+- Use it as the source of truth for:
+  - architecture and module boundaries
+  - core engine behavior
+  - what lightweight models are allowed vs not allowed to do
+  - which modules are considered "central truth"
+- Do NOT invent new engines, math, or security-critical behavior unless explicitly asked.
+- If you must make assumptions, state them clearly and keep them consistent with this memory.
+
+After reading the memory JSON, respond with a short confirmation like:
+"Memory loaded. Ready to operate within these constraints."

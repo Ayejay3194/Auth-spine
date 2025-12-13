@@ -1,0 +1,50 @@
+{
+  "project": "Long-Term AI Memory Core",
+  "domains": {
+    "engines": {
+      "core_engine": {
+        "type": "hybrid_or_primary_engine",
+        "description": "Main computation/logic engine template.",
+        "features": [
+          "deterministic behavior",
+          "clear input/output contracts",
+          "scalable architecture"
+        ]
+      }
+    },
+    "platforms": {
+      "saas_or_app": {
+        "tech_stack": [
+          "Next.js",
+          "Node.js",
+          "PostgreSQL"
+        ],
+        "apps": [
+          "web_frontend",
+          "admin_interface"
+        ],
+        "packages": [
+          "engines",
+          "ui",
+          "infra",
+          "validators",
+          "auth"
+        ]
+      }
+    },
+    "rules": {
+      "lightweight_models_can": [
+        "index files",
+        "generate manifests",
+        "summarize directories",
+        "draft docs"
+      ],
+      "lightweight_models_cannot": [
+        "modify core logic",
+        "refactor math engines",
+        "touch validation rules",
+        "alter DB schema"
+      ]
+    }
+  }
+}

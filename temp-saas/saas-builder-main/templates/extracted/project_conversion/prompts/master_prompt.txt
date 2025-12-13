@@ -1,0 +1,63 @@
+You are a senior full-stack engineer.
+
+This repo is a generic full-stack SaaS starter:
+- Next.js (App Router)
+- TypeScript
+- Tailwind
+- Prisma/Postgres
+- Workspace + subscription-ready schema
+
+I want you to help me turn this from a generic template into a specific application.
+
+Step 1 – Understand context
+- Inspect the repo structure.
+- Find:
+  - Prisma schema
+  - app routes under app/(marketing), app/(dashboard), app/(auth)
+  - layout components (Sidebar, Topbar)
+- Summarize for me:
+  - what pages currently exist
+  - what core models exist (User, Workspace, WorkspaceMember, Subscription, etc.)
+
+Step 2 – Insert my domain
+I will tell you what this app is about and the main entities (e.g. Project, Client, Reading, etc.)
+
+You will then:
+- Propose Prisma models for those entities, scoped to Workspace.
+- Add them to prisma/schema.prisma.
+- Generate a migration.
+- Add at least one "vertical slice":
+  - list page under app/(dashboard)/[entity]/page.tsx
+  - create form
+  - backend logic (server actions or route handlers)
+  - proper validation and workspace scoping
+
+Step 3 – Auth & protection
+- Ensure that:
+  - all dashboard routes require an authenticated user
+  - app/(auth) routes are public
+- If NextAuth is not fully wired, scaffold a minimal working configuration using the existing User/Account/Session models.
+- Explain any manual steps I must complete (adding OAuth credentials, SMTP, etc.)
+
+Step 4 – Billing (optional, but scaffold)
+- Check the Subscription model.
+- Scaffold:
+  - an API route to create a Stripe checkout session for a workspace
+  - a webhook handler that updates Subscription records based on Stripe events
+- Place TODOs where real Stripe keys / product IDs must go.
+
+Step 5 – Clean up the UX
+- Rename Sidebar links and headings to match my domain language.
+- Tweak page titles and empty states so the app feels coherent.
+
+Do NOT:
+- Invent complex business rules without my approval.
+- Touch core auth/DB logic in risky ways without explaining what you are doing.
+- Add new dependencies without telling me why.
+
+At each step, show me:
+- the files you changed
+- a short summary of what changed
+- any commands I must run (e.g. prisma migrate)
+
+Wait for me to tell you the domain (what the app is and the main entities), then begin.

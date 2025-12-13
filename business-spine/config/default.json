@@ -1,0 +1,72 @@
+{
+  "tenantId": "demo-tenant",
+  "modules": [
+    {
+      "name": "booking",
+      "enabled": true,
+      "settings": {
+        "autoReminders": true,
+        "bufferTime": 15,
+        "maxAdvanceBooking": 90
+      }
+    },
+    {
+      "name": "crm",
+      "enabled": true,
+      "settings": {
+        "duplicateCheck": true,
+        "autoTagging": true
+      }
+    },
+    {
+      "name": "payments",
+      "enabled": true,
+      "settings": {
+        "provider": "stripe",
+        "autoRefund": false
+      }
+    },
+    {
+      "name": "marketing",
+      "enabled": true,
+      "settings": {
+        "emailProvider": "sendgrid",
+        "automationEnabled": true
+      }
+    },
+    {
+      "name": "analytics",
+      "enabled": true,
+      "settings": {
+        "retentionDays": 365,
+        "realTimeUpdates": true
+      }
+    },
+    {
+      "name": "admin_security",
+      "enabled": true,
+      "settings": {
+        "twoFactorAuth": true,
+        "sessionTimeout": 3600
+      }
+    }
+  ],
+  "assistant": {
+    "enabled": true,
+    "engines": ["predictive_scheduling", "client_behavior"],
+    "interval": 300000,
+    "maxSuggestions": 10
+  },
+  "api": {
+    "port": 3000,
+    "corsOrigins": ["http://localhost:3000"],
+    "rateLimit": {
+      "windowMs": 900000,
+      "max": 100
+    }
+  },
+  "logging": {
+    "level": "info",
+    "format": "json"
+  }
+}
