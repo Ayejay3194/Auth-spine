@@ -106,6 +106,18 @@ export type BusinessSpineConfig = {
   assistant: {
     enabled: boolean;
     engines: string[];
+    useLLM?: boolean;
+    teacherMode?: boolean;
+  };
+  llm?: {
+    provider: 'openai' | 'anthropic' | 'local';
+    apiKey?: string;
+    model?: string;
+    maxTokens?: number;
+    temperature?: number;
+    baseUrl?: string;
+    timeout?: number;
+    fallbackEnabled?: boolean;
   };
   api: {
     port: number;
