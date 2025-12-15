@@ -433,3 +433,17 @@ model ReportExport {
 
   @@index([providerId, status, createdAt])
 }
+
+
+model AuthOpsLog {
+  id         String   @id @default(cuid())
+  type       String
+  occurredAt DateTime @default(now())
+  tenantId   String?
+  userId     String?
+  provider   String?
+
+  @@index([occurredAt(sort: Desc)])
+  @@index([type])
+  @@map("auth_ops_logs")
+}

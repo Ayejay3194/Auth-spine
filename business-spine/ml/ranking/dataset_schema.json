@@ -1,0 +1,8 @@
+{
+  "row": {
+    "row_id": "string",
+    "ts": "ISO8601",
+    "features": "numeric map",
+    "label": "int(0|1) positive outcome"
+  }
+}

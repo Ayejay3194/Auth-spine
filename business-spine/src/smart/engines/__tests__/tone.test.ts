@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scoreTone } from "../communication";
+import { scoreTone } from "../../../assistant/engines/communication";
 
 describe("scoreTone", () => {
   it("flags rushed text", () => {
