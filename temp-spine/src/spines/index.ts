@@ -5,4 +5,3 @@ export { marketingSpine } from "./marketing/index.js";
 export { analyticsSpine } from "./analytics/index.js";
 export { admin_securitySpine } from "./admin_security/index.js";
 export { diagnosticsSpine } from "./diagnostics/index.js";
-export { astrologySpine } from "./astrology/index.js";

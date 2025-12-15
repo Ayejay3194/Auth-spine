@@ -1,9 +1,9 @@
 import { Orchestrator } from "./orchestrator.js";
 import { tools } from "../adapters/memory.js";
-import { bookingSpine, crmSpine, paymentsSpine, marketingSpine, analyticsSpine, admin_securitySpine, diagnosticsSpine, astrologySpine } from "../spines/index.js";
+import { bookingSpine, crmSpine, paymentsSpine, marketingSpine, analyticsSpine, admin_securitySpine, diagnosticsSpine } from "../spines/index.js";
 export function createDefaultOrchestrator() {
     return new Orchestrator({
-        spines: [bookingSpine, crmSpine, paymentsSpine, marketingSpine, analyticsSpine, admin_securitySpine, diagnosticsSpine, astrologySpine],
+        spines: [bookingSpine, crmSpine, paymentsSpine, marketingSpine, analyticsSpine, admin_securitySpine, diagnosticsSpine],
         tools,
     });
 }
