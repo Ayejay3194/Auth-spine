@@ -1,5 +1,6 @@
 import { uid } from "../core/util.js";
 import { diagnosticsTool } from "./diagnostics.js";
+import { getAstrologyChart, readAstrologyPlacement, getDailyTransit, getCompatibility, interpretHouse, explainAspect } from "./astrology.js";
 export const db = {
     bookings: new Map(),
     clients: new Map(),
@@ -191,4 +192,11 @@ export const tools = {
             details: { active: 0, waiting: 0, completed: 0, failed: 0 }
         });
     },
+    // Astrology
+    "getAstrologyChart": getAstrologyChart,
+    "readAstrologyPlacement": readAstrologyPlacement,
+    "getDailyTransit": getDailyTransit,
+    "getCompatibility": getCompatibility,
+    "interpretHouse": interpretHouse,
+    "explainAspect": explainAspect,
 };

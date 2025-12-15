@@ -1,6 +1,14 @@
 import { AuditEvent, ToolRegistry, ToolResult } from "../core/types.js";
 import { uid } from "../core/util.js";
 import { diagnosticsTool } from "./diagnostics.js";
+import { 
+  getAstrologyChart, 
+  readAstrologyPlacement, 
+  getDailyTransit, 
+  getCompatibility, 
+  interpretHouse, 
+  explainAspect 
+} from "./astrology.js";
 
 type Booking = { id: string; clientId: string; service: string; startISO: string; endISO: string; status: "booked"|"cancelled" };
 type Client = { id: string; name: string; email?: string; phone?: string; tags: string[]; notes: string[]; doNotBook?: boolean };
@@ -193,5 +201,13 @@ export const tools: ToolRegistry = {
       details: { active: 0, waiting: 0, completed: 0, failed: 0 }
     });
   },
+
+  // Astrology
+  "getAstrologyChart": getAstrologyChart,
+  "readAstrologyPlacement": readAstrologyPlacement,
+  "getDailyTransit": getDailyTransit,
+  "getCompatibility": getCompatibility,
+  "interpretHouse": interpretHouse,
+  "explainAspect": explainAspect,
 };
 
