@@ -1,4 +1,4 @@
-import AuthOpsPanel from "@/src/components-ops/admin/AuthOpsPanel";
+import AuthOpsPanel from "@/src/ops/components/AuthOpsPanel";
 
 export default function AuthOpsPage() {
   return (

@@ -6,9 +6,13 @@
 
 A comprehensive, enterprise-grade business automation platform with mobile app, multi-tenancy, advanced scheduling, marketplace, complete compliance, **PLUS** a universal operational backbone that works for SaaS, e-commerce, fintech, healthcare, education, logistics, and any other vertical.
 
-## 📖 **[READ THE COMPLETE PLATFORM GUIDE](./COMPLETE_PLATFORM_GUIDE.md)** 
+## 📖 **[READ THE COMPLETE PLATFORM GUIDE](./docs/01-guides/COMPLETE_PLATFORM_GUIDE.md)** 
 
 Everything you need to know about the platform + operations spine in one place!
+
+## 📚 **[DOCUMENTATION INDEX](./docs/README.md)**
+
+All documentation is now organized in the `docs/` directory with clear navigation.
 
 ## Quick Start
 
@@ -62,23 +66,28 @@ npm run dev
 
 ## Documentation
 
-### 🌟 **[COMPLETE PLATFORM GUIDE](./COMPLETE_PLATFORM_GUIDE.md)** - **START HERE!**
+### 🌟 **[COMPLETE PLATFORM GUIDE](./docs/01-guides/COMPLETE_PLATFORM_GUIDE.md)** - **START HERE!**
 Everything about the platform + operations spine in one comprehensive guide
 
-### Universal Operations Spine (Dec 15, 2025)
-- **[UNIVERSAL_OPS_SPINE_README.md](./UNIVERSAL_OPS_SPINE_README.md)** - Complete ops spine guide
-- **[OPS_INTEGRATION_SUMMARY.md](./OPS_INTEGRATION_SUMMARY.md)** - Technical integration details
-- **[QUICK_START_OPS_SPINE.md](./QUICK_START_OPS_SPINE.md)** - 5-minute setup
-- **[GENERICIZATION_COMPLETE.md](./GENERICIZATION_COMPLETE.md)** - How it's 100% generic
-- **[INTEGRATION_COMPLETE.md](./INTEGRATION_COMPLETE.md)** - Integration completion
+### Quick Links
+- **[Quick Start](./docs/00-quick-start/QUICK_START.md)** - Get started in 5 minutes
+- **[Universal Ops Spine](./docs/01-guides/UNIVERSAL_OPS_SPINE_README.md)** - Operations backbone guide
+- **[Financial Metrics](./docs/05-analysis/FINANCIAL_METRICS_GUIDE.md)** - Financial capabilities
+- **[Platform Valuation](./docs/05-analysis/PLATFORM_VALUATION.md)** - $800K-$1.2M valuation
+- **[Deployment Guide](./docs/01-guides/UNIFIED_DEPLOYMENT_GUIDE.md)** - Production deployment
+- **[Full Documentation Index](./docs/README.md)** - Browse all docs
 
-### Platform Documentation
-- **[FINAL_COMPLETION_STATUS.md](./FINAL_COMPLETION_STATUS.md)** - 146-feature breakdown
-- **[DEPLOYMENT_READY_SUMMARY.md](./DEPLOYMENT_READY_SUMMARY.md)** - Deployment guide
-- **[QUICK_START.md](./QUICK_START.md)** - Platform quick start
-- **[UNIFIED_DEPLOYMENT_GUIDE.md](./UNIFIED_DEPLOYMENT_GUIDE.md)** - Complete deployment guide
-- **[WIRING_COMPLETION_SUMMARY.md](./WIRING_COMPLETION_SUMMARY.md)** - Feature wiring status
-- **[DEPLOYMENT_READY_SUMMARY.md](./DEPLOYMENT_READY_SUMMARY.md)** - Deployment guide
+### Documentation Structure
+```
+docs/
+├── 00-quick-start/     - Setup guides
+├── 01-guides/          - Comprehensive guides
+├── 02-deployment/      - Deployment docs
+├── 03-integration/     - Integration guides
+├── 04-completion/      - Completion status
+├── 05-analysis/        - Analysis & valuation
+└── 06-legacy/          - Historical docs
+```
 
 ## Deployment
 

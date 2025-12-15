@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { computeAuthMetrics, AuthLogEvent } from "@/src/ops-runtime/metrics/authMetrics";
+import { computeAuthMetrics, AuthLogEvent } from "@/src/ops/metrics/authMetrics";
 
 /**
  * Pull endpoint that returns current auth metrics snapshot.

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { runOpsActions } from "@/src/ops-runtime/actions/runner";
+import { runOpsActions } from "@/src/ops/actions/runner";
 
 /**
  * Guarded endpoint to apply ops actions (feature flags / mitigations).

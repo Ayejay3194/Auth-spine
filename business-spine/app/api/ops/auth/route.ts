@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { deriveAuthIncidents } from "@/src/ops-spine/alerts/authAlertRules";
-import { runAuthOpsSpine } from "@/src/ops-spine/spine/authOpsSpine";
-import { notifyAdminOfAuthIncident } from "@/src/ops-spine/alerts/notifyAdmin";
+import { deriveAuthIncidents } from "@/src/ops/alerts/authAlertRules";
+import { runAuthOpsSpine } from "@/src/ops/spine/authOpsSpine";
+import { notifyAdminOfAuthIncident } from "@/src/ops/alerts/notifyAdmin";
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));

@@ -1,1 +1,0 @@
-Paste memory.json and load it as the session truth.
