@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'StyleSeat Full Platform',
-  description: 'Enterprise-grade business management platform',
+  title: 'Auth-Spine Platform',
+  description: 'Universal business automation platform',
 };
 
 export default function RootLayout({

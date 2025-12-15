@@ -10,9 +10,9 @@ const prisma = new PrismaClient();
 const url = process.env.REDIS_URL || "redis://localhost:6379";
 const connection = new Redis(url);
 
-const log = (m) => console.log("[worker]", m);
+const log = (m: string) => console.log("[worker]", m);
 
-function sign(secret, body, ts) {
+function sign(secret: string, body: string, ts: string): string {
   return crypto.createHmac("sha256", secret).update(ts + "." + body).digest("hex");
 }
 
@@ -63,9 +63,19 @@ new Worker("reports", async job => {
   const exp = await prisma.reportExport.findUnique({ where: { id: exportId } });
   if (!exp) return { ok: false };
 
-  // Demo report: invoices by provider
-  const invoices = await prisma.invoice.findMany({ where: { providerId: exp.providerId }, take: 500, orderBy: { createdAt: "desc" } });
-  const rows = invoices.map(i => ({ invoiceId: i.id, amount: i.amount, status: i.status, createdAt: i.createdAt.toISOString() }));
+  // Demo report: bookings by provider (using available model)
+  const bookings = await prisma.booking.findMany({ 
+    where: { providerId: exp.providerId }, 
+    take: 500, 
+    orderBy: { createdAt: "desc" } 
+  });
+  const rows = bookings.map((b: any) => ({ 
+    bookingId: b.id, 
+    clientId: b.clientId, 
+    startAt: b.startAt?.toISOString() || '', 
+    status: b.status, 
+    createdAt: b.createdAt.toISOString() 
+  }));
 
   const csv = stringify(rows, { header: true });
   const dir = path.join(process.cwd(), "public", "exports");
@@ -79,3 +89,4 @@ new Worker("reports", async job => {
 }, { connection });
 
 log("Enterprise workers up.");
+
