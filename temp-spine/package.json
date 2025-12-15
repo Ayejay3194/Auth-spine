@@ -5,7 +5,20 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "node --enable-source-maps dist/demo.js",
-    "test": "node --enable-source-maps dist/tests/run.js"
+    "dev": "npm run build && node --enable-source-maps dist/demo.js",
+    "test": "npm run build && node --enable-source-maps dist/tests/run.js",
+    "test:integration": "npm run build && node --enable-source-maps dist/tests/integration.js",
+    "test:api": "npm run build && node --enable-source-maps dist/tests/api.js",
+    "test:diagnostics": "npm run build && node --enable-source-maps dist/test-diagnostics.js",
+    "test:all": "npm run test:integration && npm run test:api && npm run test:diagnostics",
+    "watch": "tsc -p tsconfig.json --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.2"
   }
 }
