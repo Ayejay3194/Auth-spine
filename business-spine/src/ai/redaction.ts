@@ -11,7 +11,7 @@
  * LLM gets business context, not the keys to the kingdom.
  */
 
-interface SafeDataSnapshot {
+export interface SafeDataSnapshot {
   businessContext: {
     tenantId: string;
     businessType: string;

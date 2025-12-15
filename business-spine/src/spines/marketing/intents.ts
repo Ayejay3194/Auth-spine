@@ -4,7 +4,7 @@ export const patterns: Pattern[] = [
   {
     "spine": "marketing",
     "intent": "create_promo",
-    "re": "create promo|new promo|promo code|marketing campaign|campaign",
+    "re": "create promo|new promo|promo code",
     "baseConfidence": 0.7,
     "hint": "create promo"
   },

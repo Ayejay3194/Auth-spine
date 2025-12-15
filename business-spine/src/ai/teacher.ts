@@ -426,7 +426,7 @@ You MUST respond with valid JSON matching this schema:
         urgency: ticketData.urgency,
         customerContext: ticketData.customer
       },
-      options: { tone: 'empathetic' }
+      options: { tone: 'friendly' }
     });
   }
 

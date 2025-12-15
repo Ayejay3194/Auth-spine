@@ -49,8 +49,7 @@ export {
   // Rule-based recommendations
   generateRecommendations,
   generateQuickInsights,
-  generateActionableTips,
-  type Recommendation
+  generateActionableTips
 } from './recommendations.js';
 
 export {

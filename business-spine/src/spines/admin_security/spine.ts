@@ -41,8 +41,8 @@
 
     export const spine: Spine = {
       name: "admin_security",
-      description: "Admin/Security: audit trail",
       version: "1.0.0",
+      description: "Admin/Security: audit trail",
       detectIntent: (text, ctx) => detectByPatterns(patterns, text, ctx),
       extractEntities: (intent: Intent, text: string, ctx: AssistantContext): Extraction => {
         const entities = baseEntities(text, ctx);

@@ -131,13 +131,13 @@ export class TeacherBusinessSpine {
   }
 
   // Core operations - use original system only
-  async processRequest(message: string, context: AssistantContext, options?: { explain?: boolean }): Promise<any> {
+  async processRequest(message: string, context: AssistantContext, options?: { explain?: boolean; confirmToken?: string }): Promise<any> {
     if (options?.explain && this.teacherEnabled) {
       // Use teacher orchestrator for explanations
       return await this.teacherOrchestrator.handle(message, context, options);
     } else {
       // Use original orchestrator for all core operations
-      return await this.orchestrator.handle(message, context, options);
+      return await this.orchestrator.handle(message, context, options as any);
     }
   }
 

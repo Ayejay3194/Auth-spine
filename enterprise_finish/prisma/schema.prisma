@@ -1,0 +1,389 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+enum Role { owner staff client admin system }
+enum BookingStatus { pending confirmed cancelled completed no_show }
+enum PayoutStatus { pending paid failed }
+enum ReviewStatus { visible hidden flagged }
+enum CampaignStatus { draft queued sending sent paused }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      Role     @default(client)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  provider  Provider?
+  client    Client?
+  passwordHash String?
+  sessions     Session[]
+\}
+
+model Provider {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  businessName String?
+  bio         String?
+  yearsExp    Int?
+  specialties String[] @default([])
+  location    String?
+  serviceArea String?
+  verified    Boolean  @default(false)
+  licenseId   String?
+  stripeAccountId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  services    Service[]
+  media       Media[]
+  bookings    Booking[]
+  reviews     Review[]
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  phone     String?
+  preferences Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id])
+  bookings  Booking[]
+  favorites Favorite[]
+}
+
+model Service {
+  id         String   @id @default(cuid())
+  providerId String
+  name       String
+  description String?
+  priceCents Int
+  durationMin Int
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+
+  @@index([providerId, active])
+}
+
+model AvailabilitySlot {
+  id         String   @id @default(cuid())
+  providerId String
+  startAt    DateTime
+  endAt      DateTime
+  capacity   Int      @default(1)
+  createdAt  DateTime @default(now())
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+  @@index([providerId, startAt])
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  providerId String
+  clientId   String
+  serviceId  String
+  startAt    DateTime
+  endAt      DateTime
+  status     BookingStatus @default(pending)
+  notes      String?
+  depositCents Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+  client     Client   @relation(fields: [clientId], references: [id])
+  service    Service  @relation(fields: [serviceId], references: [id])
+  payment    PaymentIntent?
+
+  @@index([providerId, startAt])
+  @@index([clientId, createdAt])
+}
+
+model PaymentIntent {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  stripePiId  String?
+  amountCents Int
+  currency    String   @default("usd")
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  booking     Booking @relation(fields: [bookingId], references: [id])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  providerId String
+  clientId   String
+  bookingId  String?
+  rating     Int
+  comment    String?
+  photoUrl   String?
+  status     ReviewStatus @default(visible)
+  createdAt  DateTime @default(now())
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+  client     Client   @relation(fields: [clientId], references: [id])
+
+  @@index([providerId, createdAt])
+}
+
+model Favorite {
+  id         String @id @default(cuid())
+  clientId   String
+  providerId String
+  createdAt  DateTime @default(now())
+
+  client     Client   @relation(fields: [clientId], references: [id])
+  provider   Provider @relation(fields: [providerId], references: [id])
+
+  @@unique([clientId, providerId])
+}
+
+model Media {
+  id         String @id @default(cuid())
+  providerId String
+  type       String
+  url        String
+  caption    String?
+  createdAt  DateTime @default(now())
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+  @@index([providerId, createdAt])
+}
+
+model Campaign {
+  id          String @id @default(cuid())
+  providerId  String
+  channel     String // email|sms|push
+  segment     String // json selector or named segment
+  templateKey String
+  status      CampaignStatus @default(draft)
+  scheduledAt DateTime?
+  createdAt   DateTime @default(now())
+
+  provider    Provider @relation(fields: [providerId], references: [id])
+}
+
+model AutomationRule {
+  id         String @id @default(cuid())
+  providerId String
+  name       String
+  trigger    String
+  enabled    Boolean @default(true)
+  configJson Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+  @@index([providerId, enabled])
+}
+
+model AuditEvent {
+  id        String @id @default(cuid())
+  actorUserId String
+  role      Role
+  type      String
+  details   Json
+  createdAt DateTime @default(now())
+
+  @@index([actorUserId, createdAt])
+  @@index([type, createdAt])
+}
+
+model WaitlistEntry {
+  id          String   @id @default(cuid())
+  providerId  String
+  clientId    String
+  serviceId   String
+  windowStart DateTime
+  windowEnd   DateTime
+  status      String   @default("active") // active|matched|cancelled
+  createdAt   DateTime @default(now())
+
+  provider    Provider @relation(fields: [providerId], references: [id])
+  client      Client   @relation(fields: [clientId], references: [id])
+  service     Service  @relation(fields: [serviceId], references: [id])
+
+  @@index([providerId, status, createdAt])
+}
+
+model StaffMember {
+  id         String   @id @default(cuid())
+  providerId String
+  userId     String?
+  name       String
+  role       String   @default("staff")
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  provider   Provider @relation(fields: [providerId], references: [id])
+
+  @@index([providerId, active])
+}
+
+model CommissionRule {
+  id         String   @id @default(cuid())
+  providerId String
+  staffId    String?
+  serviceId  String?
+  percentBps Int
+  flatCents  Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([providerId, active])
+}
+
+model CommissionLedger {
+  id          String   @id @default(cuid())
+  providerId  String
+  bookingId   String
+  staffId     String
+  amountCents Int
+  status      String   @default("pending") // pending|paid|void
+  createdAt   DateTime @default(now())
+
+  @@index([providerId, status, createdAt])
+}
+
+model LoyaltyAccount {
+  id         String   @id @default(cuid())
+  providerId String
+  clientId   String
+  points     Int      @default(0)
+  tier       String   @default("standard") // standard|vip
+  updatedAt  DateTime @updatedAt
+
+  @@unique([providerId, clientId])
+}
+
+model ReferralCode {
+  id         String   @id @default(cuid())
+  providerId String
+  clientId   String
+  code       String   @unique
+  uses       Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([providerId, createdAt])
+}
+
+model GiftCard {
+  id           String  @id @default(cuid())
+  providerId   String
+  code         String  @unique
+  initialCents Int
+  balanceCents Int
+  currency     String  @default("usd")
+  active       Boolean @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model MessageLog {
+  id          String  @id @default(cuid())
+  providerId  String
+  clientId    String
+  channel     String  // email|sms|push
+  templateKey String
+  payload     Json
+  status      String  @default("queued") // queued|sent|failed
+  createdAt   DateTime @default(now())
+
+  @@index([providerId, createdAt])
+}
+
+model WebhookEndpoint {
+  id         String  @id @default(cuid())
+  providerId String
+  url        String
+  secret     String
+  events     String[] @default([])
+  active     Boolean @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([providerId, active])
+}
+
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  label       String
+  keyHash     String
+  prefix      String
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([prefix])
+}
+
+model MfaSecret {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  secretEnc String
+  enabledAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+model MfaRecoveryCode {
+  id        String   @id @default(cuid())
+  userId    String
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  tokenHash  String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([tokenHash])
+}
+
+
+model WebhookDelivery {
+  id          String   @id @default(cuid())
+  webhookId   String
+  eventType   String
+  payload     Json
+  attempt     Int      @default(0)
+  status      String   @default("queued") // queued|delivered|failed
+  lastError   String?
+  createdAt   DateTime @default(now())
+  deliveredAt DateTime?
+
+  @@index([webhookId, status, createdAt])
+}
+
+
+model ReportExport {
+  id         String   @id @default(cuid())
+  providerId String
+  report     String
+  format     String   @default("csv")
+  status     String   @default("queued") // queued|ready|failed
+  url        String?
+  createdAt  DateTime @default(now())
+
+  @@index([providerId, status, createdAt])
+}

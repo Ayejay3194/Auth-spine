@@ -206,11 +206,12 @@ Suggestions are designed to be helpful but optional - users can accept or ignore
   }
 
   private async explainSystem(topic: string, userLevel: 'beginner' | 'intermediate' | 'advanced' = 'intermediate'): Promise<any> {
-    const staticContent = this.systemDocumentation.get(topic);
+    const staticContent = this.systemDocumentation.get(topic) || '';
+    const level: 'beginner' | 'intermediate' | 'advanced' = userLevel || 'intermediate';
     
     if (this.llmService && await this.llmService.isAvailable()) {
       try {
-        const systemPrompt = this.getSystemPrompt(userLevel, 'system');
+        const systemPrompt = this.getSystemPrompt(level, 'system');
         const userPrompt = `Explain this business automation system topic: ${topic}
 
 Static documentation: ${staticContent}
@@ -222,7 +223,7 @@ Provide a comprehensive explanation as JSON with:
   "examples": ["Example 1", "Example 2"],
   "keyPoints": ["Key point 1", "Key point 2"],
   "relatedTopics": ["Related topic 1"],
-  "userLevel": "${userLevel}",
+  "userLevel": "${level}",
   "estimatedReadTime": "2-3 minutes"
 }`;
 
@@ -231,14 +232,14 @@ Provide a comprehensive explanation as JSON with:
           { role: 'user', content: userPrompt }
         ]);
 
-        return this.parseTeachingResponse(response.content, topic, userLevel);
+        return this.parseTeachingResponse(response.content, topic, level);
       } catch (error) {
         this.logger.warn('LLM explanation failed, using static content', error);
       }
     }
 
     // Fallback to static content
-    return this.getStaticExplanation(topic, staticContent, userLevel);
+    return this.getStaticExplanation(topic, staticContent, level);
   }
 
   private async explainIntent(intent: string, context: any, userLevel: 'beginner' | 'intermediate' | 'advanced' = 'intermediate'): Promise<any> {

@@ -43,8 +43,8 @@
 
     export const spine: Spine = {
       name: "analytics",
-      description: "Analytics: week summary report",
       version: "1.0.0",
+      description: "Analytics: week summary report",
       detectIntent: (text, ctx) => detectByPatterns(patterns, text, ctx),
       extractEntities: (intent: Intent, text: string, ctx: AssistantContext): Extraction => {
         const entities = baseEntities(text, ctx);

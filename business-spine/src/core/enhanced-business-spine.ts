@@ -327,13 +327,14 @@ export class EnhancedBusinessSpine {
   }> {
     const llmAvailable = this.llmService ? await this.llmService.isAvailable() : false;
     
+    const capabilities = await this.smartAssistant.getCapabilities();
     return {
       spines: this.spines.map(s => ({
         name: s.name,
         version: s.version,
         description: s.description
       })),
-      engines: await this.smartAssistant.getCapabilities(),
+      engines: capabilities.engines,
       llm: {
         configured: !!this.llmService,
         available: llmAvailable,

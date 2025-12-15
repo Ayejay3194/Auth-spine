@@ -69,8 +69,8 @@
 
     export const spine: Spine = {
       name: "crm",
-      description: "Client CRM: lookup, notes, tags, do-not-book flags",
       version: "1.0.0",
+      description: "Client CRM: lookup, notes, tags, do-not-book flags",
       detectIntent: (text, ctx) => detectByPatterns(patterns, text, ctx),
       extractEntities: (intent: Intent, text: string, ctx: AssistantContext): Extraction => {
         const entities = baseEntities(text, ctx);

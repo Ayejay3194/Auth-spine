@@ -1,11 +1,47 @@
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
 
-enum Role { owner staff client admin system }
-enum BookingStatus { pending confirmed cancelled completed no_show }
-enum PayoutStatus { pending paid failed }
-enum ReviewStatus { visible hidden flagged }
-enum CampaignStatus { draft queued sending sent paused }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  owner
+  staff
+  client
+  admin
+  system
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+  no_show
+}
+
+enum PayoutStatus {
+  pending
+  paid
+  failed
+}
+
+enum ReviewStatus {
+  visible
+  hidden
+  flagged
+}
+
+enum CampaignStatus {
+  draft
+  queued
+  sending
+  sent
+  paused
+}
 
 model User {
   id        String   @id @default(cuid())
@@ -19,7 +55,7 @@ model User {
   client    Client?
   passwordHash String?
   sessions     Session[]
-\}
+}
 
 model Provider {
   id          String   @id @default(cuid())
@@ -41,6 +77,12 @@ model Provider {
   media       Media[]
   bookings    Booking[]
   reviews     Review[]
+  campaigns   Campaign[]
+  automationRules AutomationRule[]
+  waitlistEntries WaitlistEntry[]
+  staffMembers StaffMember[]
+  favorites   Favorite[]
+  availabilitySlots AvailabilitySlot[]
 }
 
 model Client {
@@ -54,6 +96,8 @@ model Client {
   user      User     @relation(fields: [userId], references: [id])
   bookings  Booking[]
   favorites Favorite[]
+  reviews   Review[]
+  waitlistEntries WaitlistEntry[]
 }
 
 model Service {
@@ -68,6 +112,8 @@ model Service {
   updatedAt  DateTime @updatedAt
 
   provider   Provider @relation(fields: [providerId], references: [id])
+  bookings   Booking[]
+  waitlistEntries WaitlistEntry[]
 
   @@index([providerId, active])
 }

@@ -45,22 +45,22 @@
       // clientQuery: email wins; else "for NAME"
       const m = text.match(/\bfor\s+([a-z][a-z\s'-]{1,40})\b/i);
       if (m) out.clientQuery = m[1].trim();
+      if (email) out.clientQuery = email;
 
-  return out;
-}
+      return out;
+    }
 
-export const spine: Spine = {
-  name: "marketing",
-  description: "Marketing campaigns, automation, customer engagement",
-  version: "1.0.0",
-  detectIntent: (text, ctx) => detectByPatterns(patterns, text, ctx),
-  extractEntities: (intent: Intent, text: string, ctx: AssistantContext): Extraction => {
-    const entities = baseEntities(text, ctx);
+    export const spine: Spine = {
+      name: "marketing",
+      version: "1.0.0",
+      description: "Marketing: promos",
+      detectIntent: (text, ctx) => detectByPatterns(patterns, text, ctx),
+      extractEntities: (intent: Intent, text: string, ctx: AssistantContext): Extraction => {
+        const entities = baseEntities(text, ctx);
 
-    // per-intent extraction
-    if (intent.name === "book") {
-      const svc = text.match(/\b(?:service|for)\s+([a-z][a-z\s'-]{2,40})\b/i);
-      if (svc) (entities as any).service = svc[1].trim();
+        // per-intent extraction
+        if (intent.name === "book") {
+          const svc = text.match(/\b(?:service|for)\s+([a-z][a-z\s'-]{2,40})\b/i);
           if (svc) (entities as any).service = svc[1].trim();
 
           const dm = text.match(/\b(\d{1,3})\s*(?:min|mins|minutes)\b/i);

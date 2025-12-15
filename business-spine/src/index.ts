@@ -1,5 +1,4 @@
 import { BusinessSpine } from './core/business-spine.js';
-import { ApiServer } from './api/server.js';
 import { BusinessSpineConfig } from './core/types.js';
 // Simple inline engines for demo
 const demoEngines = {
@@ -60,41 +59,6 @@ async function createBusinessSpine(config?: Partial<BusinessSpineConfig>): Promi
   return spine;
 }
 
-async function startServer(spine: BusinessSpine): Promise<ApiServer> {
-  const server = new ApiServer(spine);
-  await server.start();
-  return server;
-}
-
-// Main function for standalone usage
-async function main(): Promise<void> {
-  try {
-    const logger = new Logger(DEFAULT_CONFIG.logging);
-    logger.info('Starting Business Spine...');
-
-    const spine = await createBusinessSpine();
-    const server = await startServer(spine);
-
-    logger.info('Business Spine started successfully');
-
-    // Graceful shutdown
-    process.on('SIGINT', async () => {
-      logger.info('Shutting down Business Spine...');
-      await spine.shutdown();
-      process.exit(0);
-    });
-
-  } catch (error) {
-    console.error('Failed to start Business Spine:', error);
-    process.exit(1);
-  }
-}
-
 // Export for programmatic usage
-export { BusinessSpine, ApiServer, createBusinessSpine, startServer };
+export { BusinessSpine, createBusinessSpine };
 export type { BusinessSpineConfig };
-
-// Run if this is the main module
-if (require.main === module) {
-  main();
-}

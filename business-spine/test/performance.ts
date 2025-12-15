@@ -136,7 +136,7 @@ class PerformanceTester {
     for (let i = 0; i < 50; i++) {
       const toolTest = toolTests[i % toolTests.length];
       try {
-        const result = await this.spine.tools[toolTest.tool]({
+        const result = await (this.spine as any).tools[toolTest.tool]({
           ctx: testContext,
           input: toolTest.input
         });
@@ -189,8 +189,8 @@ class PerformanceTester {
     for (let i = 0; i < 100; i++) {
       // Simulate concurrent operations
       await Promise.all([
-        this.spine.orchestrator.detect(`test query ${i}`, testContext),
-        this.spine.tools['crm.findClient']({ ctx: testContext, input: { clientQuery: 'Alex' } })
+        (this.spine as any).orchestrator.detect(`test query ${i}`, testContext),
+        (this.spine as any).tools['crm.findClient']({ ctx: testContext, input: { clientQuery: 'Alex' } })
       ]);
     }
   }

@@ -55,30 +55,30 @@
       if (m) out.clientQuery = m[1].trim();
       if (email) out.clientQuery = email;
 
-  return out;
-}
-
-export const spine: Spine = {
-  name: "booking",
-  description: "Appointment booking, cancellation, and scheduling management",
-  version: "1.0.0",
-  detectIntent: (text, ctx) => detectByPatterns(patterns, text, ctx),
-  extractEntities: (intent: Intent, text: string, ctx: AssistantContext): Extraction => {
-    const entities = baseEntities(text, ctx);
-
-    // per-intent extraction
-    if (intent.name === "book") {
-      const svc = text.match(/\b(?:service|for)\s+([a-z][a-z\s'-]{2,40})\b/i);
-      if (svc) (entities as any).service = svc[1].trim();
-
-      const dm = text.match(/\b(\d{1,3})\s*(?:min|mins|minutes)\b/i);
-      if (dm) (entities as any).durationMin = Number(dm[1]);
-      const dh = text.match(/\b(\d+(?:\.\d+)?)\s*h\b/i);
-      if (dh) (entities as any).durationMin = Math.round(Number(dh[1]) * 60);
-      if (!(entities as any).durationMin) (entities as any).durationMin = 60;
-
-      if ((entities as any).dateTimeISO) (entities as any).startISO = (entities as any).dateTimeISO;
+      return out;
     }
+
+    export const spine: Spine = {
+      name: "booking",
+      version: "1.0.0",
+      description: "Booking + calendar ops: book, cancel, list",
+      detectIntent: (text, ctx) => detectByPatterns(patterns, text, ctx),
+      extractEntities: (intent: Intent, text: string, ctx: AssistantContext): Extraction => {
+        const entities = baseEntities(text, ctx);
+
+        // per-intent extraction
+        if (intent.name === "book") {
+          const svc = text.match(/\b(?:service|for)\s+([a-z][a-z\s'-]{2,40})\b/i);
+          if (svc) (entities as any).service = svc[1].trim();
+
+          const dm = text.match(/\b(\d{1,3})\s*(?:min|mins|minutes)\b/i);
+          if (dm) (entities as any).durationMin = Number(dm[1]);
+          const dh = text.match(/\b(\d+(?:\.\d+)?)\s*h\b/i);
+          if (dh) (entities as any).durationMin = Math.round(Number(dh[1]) * 60);
+          if (!(entities as any).durationMin) (entities as any).durationMin = 60;
+
+          if ((entities as any).dateTimeISO) (entities as any).startISO = (entities as any).dateTimeISO;
+        }
 
         if (intent.name === "create_invoice") {
           const mm = text.match(/\bmemo\s+(.+)$/i);

@@ -1,6 +1,6 @@
-export { spine as bookingSpine } from "./booking/spine.js";
-export { spine as crmSpine } from "./crm/spine.js";
-export { spine as paymentsSpine } from "./payments/spine.js";
-export { spine as marketingSpine } from "./marketing/spine.js";
-export { spine as analyticsSpine } from "./analytics/spine.js";
-export { spine as adminSecuritySpine } from "./admin_security/spine.js";
+export { bookingSpine } from "./booking/index.js";
+export { crmSpine } from "./crm/index.js";
+export { paymentsSpine } from "./payments/index.js";
+export { marketingSpine } from "./marketing/index.js";
+export { analyticsSpine } from "./analytics/index.js";
+export { admin_securitySpineSpine as admin_securitySpine } from "./admin_security/index.js";

@@ -1,0 +1,21 @@
+image:
+  repository: your-registry/business-spine
+  tag: latest
+  pullPolicy: IfNotPresent
+
+env:
+  DATABASE_URL: ""
+  REDIS_URL: ""
+  JWT_SECRET: ""
+  APP_SECRET: ""
+  SENTRY_DSN: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  host: business-spine.local
+
+resources: {}
