@@ -1,0 +1,192 @@
+/* Smooth animations and transitions */
+
+/* Fade in animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Smooth scale animations */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Pulse animation for attention */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Bounce animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Shimmer loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Smooth page transitions */
+.page-enter {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.page-exit {
+  animation: fadeInUp 0.3s ease-out reverse;
+}
+
+/* Smooth sidebar transitions */
+.sidebar-enter {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.sidebar-exit {
+  animation: slideInLeft 0.3s ease-out reverse;
+}
+
+/* Modal animations */
+.modal-enter {
+  animation: scaleIn 0.2s ease-out;
+}
+
+.modal-overlay-enter {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Notification animations */
+.notification-enter {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.notification-exit {
+  animation: slideInRight 0.3s ease-out reverse;
+}
+
+/* Smooth hover effects */
+.smooth-hover {
+  transition: all 0.2s ease-out;
+}
+
+.smooth-hover:hover {
+  transform: translateY(-2px);
+}
+
+/* Button animations */
+.button-press {
+  transition: all 0.15s ease-out;
+}
+
+.button-press:active {
+  transform: scale(0.98);
+}
+
+/* Loading skeleton animation */
+.skeleton-loading {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Smooth color transitions */
+.smooth-color {
+  transition: color 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out;
+}
+
+/* Smooth transform transitions */
+.smooth-transform {
+  transition: transform 0.2s ease-out;
+}
+
+/* Smooth opacity transitions */
+.smooth-opacity {
+  transition: opacity 0.2s ease-out;
+}
+
+/* Smooth all transitions */
+.smooth-all {
+  transition: all 0.2s ease-out;
+}
+
+/* Disable animations for reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

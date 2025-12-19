@@ -1,0 +1,9 @@
+{
+  "name": "admin-suite-component",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "lucide-react": "^0.542.0"
+  }
+}

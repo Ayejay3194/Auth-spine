@@ -1,0 +1,227 @@
+/* Cupertino Blank State Styles */
+
+/* Root container */
+.cupertino-blank {
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg,
+    rgba(245,245,247,1) 0%,
+    rgba(235,235,238,1) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+               "SF Pro Display", system-ui, sans-serif;
+}
+
+/* Dark mode variant */
+.dark .cupertino-blank {
+  background: linear-gradient(
+    180deg,
+    rgba(28,28,30,1) 0%,
+    rgba(44,44,46,1) 100%
+  );
+}
+
+/* Card */
+.cupertino-card {
+  width: 320px;
+  padding: 28px 24px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.06),
+    0 8px 24px rgba(0,0,0,0.08);
+  text-align: center;
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Dark mode card */
+.dark .cupertino-card {
+  background: rgba(44,44,46,0.7);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.2),
+    0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* Icon */
+.cupertino-icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 14px;
+  border-radius: 12px;
+  background: rgba(120,120,128,0.12);
+  color: rgba(60,60,67,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Dark mode icon */
+.dark .cupertino-icon {
+  background: rgba(120,120,128,0.2);
+  color: rgba(235,235,240,0.6);
+}
+
+/* Title */
+.cupertino-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: rgba(0,0,0,0.88);
+  margin: 0 0 6px;
+  line-height: 1.2;
+}
+
+/* Dark mode title */
+.dark .cupertino-title {
+  color: rgba(255,255,255,0.92);
+}
+
+/* Subtitle */
+.cupertino-subtitle {
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(60,60,67,0.6);
+  margin: 0 0 18px;
+  font-weight: 400;
+}
+
+/* Dark mode subtitle */
+.dark .cupertino-subtitle {
+  color: rgba(235,235,240,0.6);
+}
+
+/* Button */
+.cupertino-button {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: rgba(0,122,255,0.95);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+  min-width: 120px;
+}
+
+.cupertino-button:hover {
+  transform: translateY(-0.5px);
+  box-shadow: 0 4px 12px rgba(0,122,255,0.35);
+}
+
+.cupertino-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Dark mode button */
+.dark .cupertino-button {
+  background: rgba(10,132,255,0.95);
+}
+
+.dark .cupertino-button:hover {
+  box-shadow: 0 4px 12px rgba(10,132,255,0.4);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .cupertino-card {
+    width: 280px;
+    padding: 24px 20px;
+  }
+  
+  .cupertino-title {
+    font-size: 18px;
+  }
+  
+  .cupertino-subtitle {
+    font-size: 13px;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cupertino-card {
+    animation: none;
+  }
+  
+  .cupertino-button {
+    transition: none;
+  }
+  
+  .cupertino-icon {
+    transition: none;
+  }
+}
+
+/* Skeleton loader */
+.cupertino-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(235,235,240,0.5) 25%,
+    rgba(200,200,205,0.5) 50%,
+    rgba(235,235,240,0.5) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .cupertino-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(72,72,78,0.5) 25%,
+    rgba(99,99,105,0.5) 50%,
+    rgba(72,72,78,0.5) 75%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cupertino-card {
+    animation: none;
+  }
+  
+  .cupertino-button {
+    transition: none;
+  }
+  
+  .cupertino-icon {
+    transition: none;
+  }
+  
+  .cupertino-skeleton {
+    animation: none;
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "booking_id": "string",
+  "version": 1,
+  "changed_by": "user_id",
+  "reason": "string",
+  "changed_at": "ISO-8601",
+  "diff": {
+    "start_time": { "from": "ISO-8601", "to": "ISO-8601" },
+    "status": { "from": "string", "to": "string" }
+  }
+}

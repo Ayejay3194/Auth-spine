@@ -1,0 +1,12 @@
+{
+  "name": "supabase-saas-security-kit-next",
+  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "lint": "echo \"(wire eslint here)\"",
+    "test": "echo \"(wire vitest/jest here)\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}

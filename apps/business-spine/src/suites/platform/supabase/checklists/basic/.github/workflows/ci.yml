@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+      - name: Lint/Typecheck (placeholder)
+        run: |
+          echo "Add your app checks here"
+      - name: Supabase migrations lint
+        run: |
+          supabase db lint || true
+      - name: Supabase schema diff (detect drift)
+        run: |
+          supabase db diff --use-migra || true

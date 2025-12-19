@@ -1,0 +1,9 @@
+{
+  "name": "ops-dashboard-spine-kit",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm --workspace apps/admin run dev",
+    "build": "npm --workspace apps/admin run build"
+  }
+}

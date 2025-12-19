@@ -1,0 +1,14 @@
+{
+  "policy_id": "string",
+  "name": "string",
+  "scope": { "tenant_id": "string", "location_id": "string|null", "service_type": "string|null" },
+  "rules": [
+    {
+      "if": { "hours_before": { "lt": 24 }, "is_no_show": false },
+      "then": { "charge_action": "fee_only", "fee": { "type": "percent", "value": 25 } }
+    }
+  ],
+  "version": 1,
+  "effective_at": "ISO-8601",
+  "created_by": "user_id"
+}

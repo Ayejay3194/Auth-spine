@@ -1,0 +1,26 @@
+[
+  {
+    "id": "SEC-AUTH-001",
+    "description": "TLS enforced for all traffic",
+    "severity": "CRITICAL",
+    "enforcement": "CI",
+    "evidence": "https_redirect + HSTS headers",
+    "status": "REQUIRED"
+  },
+  {
+    "id": "SEC-AI-007",
+    "description": "External assistant forbidden from raw DB access",
+    "severity": "CRITICAL",
+    "enforcement": "RUNTIME",
+    "evidence": "Facade APIs + sanitize layer",
+    "status": "REQUIRED"
+  },
+  {
+    "id": "SEC-DATA-004",
+    "description": "Sensitive fields sanitized before external output",
+    "severity": "CRITICAL",
+    "enforcement": "RUNTIME",
+    "evidence": "safeReturn() guard",
+    "status": "REQUIRED"
+  }
+]

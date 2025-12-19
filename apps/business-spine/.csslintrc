@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "unknown-at-rules": false,
+    "important": false,
+    "box-sizing": false,
+    "universal-selector": false,
+    "unqualified-attributes": false,
+    "zero-units": false,
+    "overqualified-elements": false,
+    "fallback-colors": false,
+    "duplicate-properties": false,
+    "empty-rules": false,
+    "selector-max-attribute": 0,
+    "selector-max-class": 0,
+    "selector-max-compound-selectors": 0,
+    "selector-max-id": 0,
+    "selector-max-pseudo-class": 0,
+    "selector-max-specificity": 0,
+    "selector-max-type": 0,
+    "selector-max-universal": 0
+  },
+  "ignore": [
+    "node_modules/**",
+    "dist/**",
+    "build/**"
+  ]
+}

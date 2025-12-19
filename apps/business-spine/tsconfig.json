@@ -1,0 +1,197 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ],
+      "@/suites/*": [
+        "./src/suites/*"
+      ],
+      "@/suites/core/*": [
+        "./src/suites/core/*"
+      ],
+      "@/suites/ui/*": [
+        "./src/suites/ui/*"
+      ],
+      "@/suites/navigation/*": [
+        "./src/suites/navigation/*"
+      ],
+      "@/suites/tools/*": [
+        "./src/suites/tools/*"
+      ],
+      "@/suites/shared/*": [
+        "./src/suites/shared/*"
+      ],
+      "@/suites/business/*": [
+        "./src/suites/business/*"
+      ],
+      "@/suites/business/crm/*": [
+        "./src/suites/business/crm/*"
+      ],
+      "@/suites/business/booking/*": [
+        "./src/suites/business/booking/*"
+      ],
+      "@/suites/business/payroll/*": [
+        "./src/suites/business/payroll/*"
+      ],
+      "@/suites/business/financial/*": [
+        "./src/suites/business/financial/*"
+      ],
+      "@/suites/business/analytics/*": [
+        "./src/suites/business/analytics/*"
+      ],
+      "@/suites/business/reporting/*": [
+        "./src/suites/business/reporting/*"
+      ],
+      "@/suites/security/*": [
+        "./src/suites/security/*"
+      ],
+      "@/suites/security/authentication/*": [
+        "./src/suites/security/authentication/*"
+      ],
+      "@/suites/security/authorization/*": [
+        "./src/suites/security/authorization/*"
+      ],
+      "@/suites/security/audit/*": [
+        "./src/suites/security/audit/*"
+      ],
+      "@/suites/security/compliance/*": [
+        "./src/suites/security/compliance/*"
+      ],
+      "@/suites/security/defense/*": [
+        "./src/suites/security/defense/*"
+      ],
+      "@/suites/security/governance/*": [
+        "./src/suites/security/governance/*"
+      ],
+      "@/suites/infrastructure/*": [
+        "./src/suites/infrastructure/*"
+      ],
+      "@/suites/infrastructure/monitoring/*": [
+        "./src/suites/infrastructure/monitoring/*"
+      ],
+      "@/suites/infrastructure/deployment/*": [
+        "./src/suites/infrastructure/deployment/*"
+      ],
+      "@/suites/infrastructure/kill-switches/*": [
+        "./src/suites/infrastructure/kill-switches/*"
+      ],
+      "@/suites/infrastructure/ops-dashboard/*": [
+        "./src/suites/infrastructure/ops-dashboard/*"
+      ],
+      "@/suites/platform/*": [
+        "./src/suites/platform/*"
+      ],
+      "@/suites/platform/saas/*": [
+        "./src/suites/platform/saas/*"
+      ],
+      "@/suites/platform/paas/*": [
+        "./src/suites/platform/paas/*"
+      ],
+      "@/suites/platform/supabase/*": [
+        "./src/suites/platform/supabase/*"
+      ],
+      "@/suites/platform/validation/*": [
+        "./src/suites/platform/validation/*"
+      ],
+      "@/suites/platform/patterns/*": [
+        "./src/suites/platform/patterns/*"
+      ],
+      "@/suites/integrations/*": [
+        "./src/suites/integrations/*"
+      ],
+      "@/suites/integrations/payments/*": [
+        "./src/suites/integrations/payments/*"
+      ],
+      "@/suites/integrations/notifications/*": [
+        "./src/suites/integrations/notifications/*"
+      ],
+      "@/suites/integrations/storage/*": [
+        "./src/suites/integrations/storage/*"
+      ],
+      "@/suites/integrations/apis/*": [
+        "./src/suites/integrations/apis/*"
+      ],
+      "@/suites/legal/*": [
+        "./src/suites/legal/*"
+      ],
+      "@/suites/legal/compliance/*": [
+        "./src/suites/legal/compliance/*"
+      ],
+      "@/suites/legal/governance/*": [
+        "./src/suites/legal/governance/*"
+      ],
+      "@/suites/legal/documentation/*": [
+        "./src/suites/legal/documentation/*"
+      ],
+      "@/suites/development/*": [
+        "./src/suites/development/*"
+      ],
+      "@/suites/development/testing/*": [
+        "./src/suites/development/testing/*"
+      ],
+      "@/suites/development/debugging/*": [
+        "./src/suites/development/debugging/*"
+      ],
+      "@/suites/development/linting/*": [
+        "./src/suites/development/linting/*"
+      ],
+      "@/suites/development/documentation/*": [
+        "./src/suites/development/documentation/*"
+      ],
+      "@/suites/enterprise/*": [
+        "./src/suites/enterprise/*"
+      ],
+      "@/suites/enterprise/multi-tenancy/*": [
+        "./src/suites/enterprise/multi-tenancy/*"
+      ],
+      "@/suites/enterprise/enterprise-auth/*": [
+        "./src/suites/enterprise/enterprise-auth/*"
+      ],
+      "@/suites/enterprise/enterprise-security/*": [
+        "./src/suites/enterprise/enterprise-security/*"
+      ],
+      "@/suites/enterprise/enterprise-monitoring/*": [
+        "./src/suites/enterprise/enterprise-monitoring/*"
+      ]
+    },
+    "jsx": "preserve",
+    "types": [
+      "node"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "apps/**/*",
+    "dist/**/*",
+    "src/api/**/*",
+    "src/api.bak/**/*"
+  ]
+}

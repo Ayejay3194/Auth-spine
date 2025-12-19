@@ -1,0 +1,12 @@
+{
+  "reasons": [
+    "service_not_provided",
+    "provider_no_show",
+    "customer_no_show",
+    "late_cancellation_disagreement",
+    "incorrect_charge",
+    "quality_issue",
+    "booking_changed_without_consent",
+    "other"
+  ]
+}

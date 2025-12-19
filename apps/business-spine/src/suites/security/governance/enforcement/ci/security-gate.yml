@@ -1,0 +1,21 @@
+name: security-governance-gate
+on: [pull_request, push]
+
+jobs:
+  enforce-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify control registry exists
+        run: test -f controls/control-registry.json
+
+      - name: Fail on missing CRITICAL controls
+        run: |
+          jq -e '.[] | select(.severity=="CRITICAL" and .status!="REQUIRED")' controls/control-registry.json && exit 1 || echo "All critical controls enforced"
+
+      - name: Check for risk acceptances
+        run: |
+          if ls risk/*.md 1> /dev/null 2>&1; then
+            echo "Risk acceptance present – ensure expiration is valid"
+          fi

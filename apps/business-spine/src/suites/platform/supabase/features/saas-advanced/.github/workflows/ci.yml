@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install
+        run: npm ci
+        working-directory: next
+      - name: Lint
+        run: npm run lint
+        working-directory: next
+      - name: Test
+        run: npm test
+        working-directory: next
+      # Add: secret scanning, dependency scanning, SAST, etc.

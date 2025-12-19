@@ -1,0 +1,13 @@
+name: security-checks
+on: [push]
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run SAST
+        run: echo "Run SAST tool here"
+      - name: Dependency Scan
+        run: echo "Run SCA here"
+      - name: Secrets Scan
+        run: echo "Scan git history"

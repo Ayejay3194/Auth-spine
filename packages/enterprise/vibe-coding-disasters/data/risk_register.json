@@ -1,0 +1,1294 @@
+{
+  "generated_at": "2025-12-16T05:52:43.118548Z",
+  "item_count": 184,
+  "items": [
+    {
+      "id": "vibe_0001",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No authentication on critical endpoints",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "vibe_0002",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Hardcoded admin credentials in code",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "vibe_0003",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "JWT tokens without expiration",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0004",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No token refresh mechanism",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0005",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Session tokens stored in localStorage (XSS vulnerable)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0006",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Weak password requirements (no minimum length)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0007",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No password hashing (storing plain text passwords)",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "vibe_0008",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Using weak hashing algorithms (MD5, SHA1)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0009",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No rate limiting on login attempts",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0010",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Missing CSRF protection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0011",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No email verification on signup",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0012",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Authorization checks only on frontend",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0013",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "User can edit their own role/permissions",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0014",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Missing authentication on API endpoints",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0015",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Anyone can access other users\u2019 data",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "vibe_0016",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No session timeout",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0017",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Forgot password without token expiration",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0018",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Password reset tokens never expire",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0019",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Using GET requests for sensitive operations",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0020",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No account lockout after failed attempts",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0021",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Predictable session IDs",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0022",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Session fixation vulnerabilities",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0023",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "No logout functionality",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0024",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Logout doesn\u2019t invalidate tokens",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0025",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Authentication & Authorization Disasters",
+      "text": "Auth state only checked once on page load",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0026",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "SQL injection everywhere (string concatenation in queries)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0027",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "No parameterized queries",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0028",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Raw SQL with user input",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0029",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "XSS attacks (no output encoding)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0030",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Dangerously setting innerHTML with user content",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0031",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "No input sanitization",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0032",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Command injection in system calls",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0033",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "LDAP injection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0034",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "XML injection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0035",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "NoSQL injection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0036",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "GraphQL injection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0037",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Template injection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0038",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Server-side template injection (SSTI)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0039",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Code injection in eval()",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0040",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Using eval() with user input",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0041",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Unsafe deserialization",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0042",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Path traversal vulnerabilities",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0043",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "File inclusion vulnerabilities",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0044",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Injection Vulnerabilities",
+      "text": "Header injection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0045",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "API returns all user data including passwords",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0046",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Exposing internal IDs that reveal system info",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0047",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Verbose error messages with stack traces in production",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0048",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Database credentials in frontend code",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0049",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "API keys committed to Git",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "vibe_0050",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": ".env files in version control",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "vibe_0051",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Secrets in Docker images",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0052",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Debug mode enabled in production",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0053",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Source maps exposed in production",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0054",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Directory listing enabled",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0055",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Backup files accessible (.bak, .old)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0056",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Git folder exposed (.git directory accessible)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0057",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Internal API documentation publicly accessible",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0058",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "GraphQL introspection enabled in production",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0059",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Database directly accessible from internet",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0060",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Admin panel at /admin with no protection",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0061",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Exposing user email addresses publicly",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0062",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "PII in URLs or logs",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0063",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Sensitive data in query parameters",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0064",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Logging passwords or tokens",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0065",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Exposing server/framework version in headers",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0066",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "CORS allowing all origins (*)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0067",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "No encryption for sensitive data",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0068",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Data Exposure",
+      "text": "Storing credit cards directly",
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "vibe_0069",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Horizontal privilege escalation (access other users\u2019 data by changing ID)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0070",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Vertical privilege escalation (regular user accessing admin features)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0071",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Insecure direct object references (IDOR)",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0072",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Missing authorization checks",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0073",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Only client-side authorization",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0074",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Can access resources by guessing IDs",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0075",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Sequential/predictable IDs",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0076",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "No ownership verification",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0077",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Mass assignment vulnerabilities",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0078",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "User can modify any field in update requests",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0079",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "No role-based access control",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0080",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Everyone is admin by default",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0081",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Admin functionality accessible to all",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0082",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "API endpoints with no access control",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0083",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "File uploads accessible by direct URL",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0084",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "Access Control Issues",
+      "text": "Private files in public folder",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0085",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "No file type validation",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0086",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Accepting any file extension",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0087",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "No file size limits",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0088",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Files saved with original names",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0089",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Uploaded files executed by server",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0090",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "PHP/executable files can be uploaded",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0091",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "No virus scanning",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0092",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Files stored in web-accessible directory",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0093",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "No filename sanitization",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0094",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Path traversal in file uploads",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0095",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Zip bombs",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0096",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "XXE attacks via XML uploads",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0097",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Image processing vulnerabilities",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0098",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "No content-type validation",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0099",
+      "category": "SECURITY VULNERABILITIES",
+      "subcategory": "File Upload Vulnerabilities",
+      "text": "Accepting SVG with embedded JavaScript",
+      "severity": "HIGH"
+    },
+    {
+      "id": "vibe_0100",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "No database schema at all",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0101",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Using wrong data types (storing dates as strings)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0102",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "No primary keys",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0103",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "No foreign key constraints",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0104",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Missing indexes on queried columns",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0105",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Index on every column (over-indexing)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0106",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Denormalization without reason",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0107",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Extreme normalization causing joins on joins",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0108",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "No NOT NULL constraints where needed",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0109",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "No UNIQUE constraints where needed",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0110",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "No default values",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0111",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Timestamps stored as strings",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0112",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Boolean values as strings (\u201ctrue\u201d/\u201cfalse\u201d)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0113",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Money stored as floats (rounding errors)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0114",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Using VARCHAR(255) for everything",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0115",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "No constraints on important fields",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0116",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Missing CASCADE rules",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0117",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Circular foreign key dependencies",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0118",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Schema & Design Problems",
+      "text": "Polymorphic associations without type safety",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0119",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "N+1 query problem everywhere",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0120",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "SELECT * in all queries",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0121",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "No pagination (loading all records)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0122",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Missing WHERE clauses",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0123",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Using OR instead of IN for multiple values",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0124",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Subqueries instead of JOINs",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0125",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Inefficient JOINs",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0126",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "No query optimization",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0127",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "LIKE queries without indexes",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0128",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Leading wildcard searches (%value)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0129",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "No query result caching",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0130",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Queries in loops",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0131",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Full table scans on large tables",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0132",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "No use of LIMIT",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0133",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Fetching data not used in application",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0134",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Using COUNT(*) on large tables",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0135",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "No aggregate function optimization",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0136",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Query Problems",
+      "text": "Sorting in application instead of database",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0137",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "No data validation",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0138",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Duplicate data everywhere",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0139",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Orphaned records (referential integrity violations)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0140",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Inconsistent data formats",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0141",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Mixed timezones",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0142",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "No audit trail",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0143",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Soft deletes breaking foreign keys",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0144",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "No transactions for multi-step operations",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0145",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Race conditions in updates",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0146",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Lost updates problem",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0147",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Dirty reads",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0148",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "No locking strategy",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0149",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Deadlocks",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0150",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Stale data being used",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0151",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "No data migration strategy",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0152",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Schema changes in production without testing",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0153",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "Data loss during migrations",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0154",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Data Integrity Issues",
+      "text": "No rollback plan for migrations",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0155",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "No connection pooling",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0156",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Opening new connection for each query",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0157",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Connection leaks",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0158",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Not closing connections",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0159",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Max connections reached constantly",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0160",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "No query timeout",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0161",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Long-running queries blocking others",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0162",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Table locks during peak hours",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0163",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "No read replicas for heavy read workload",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0164",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Single point of failure",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0165",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "No database backup",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0166",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Backups never tested",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0167",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "No point-in-time recovery",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0168",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Database on same server as application",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0169",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Insufficient database resources",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0170",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "No monitoring of database performance",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0171",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Connection & Performance Issues",
+      "text": "Ignoring slow query logs",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0172",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "RLS not enabled at all",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0173",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "RLS policies too permissive",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0174",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "Forgetting to add policies for new tables",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0175",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "Bypassing RLS with service role in client",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0176",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "Testing with service role (not catching RLS issues)",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0177",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "RLS policies with performance problems",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0178",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "Complex RLS causing slow queries",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0179",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "RLS not covering all CRUD operations",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0180",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "Missing policies for edge cases",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0181",
+      "category": "DATABASE DISASTERS",
+      "subcategory": "Row Level Security (RLS) Issues",
+      "text": "RLS only on some tables in multi-table queries",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0182",
+      "category": "LEGAL & COMPLIANCE DISASTERS",
+      "subcategory": "Privacy Violations",
+      "text": "No privacy policy",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0183",
+      "category": "LEGAL & COMPLIANCE DISASTERS",
+      "subcategory": "Privacy Violations",
+      "text": "Collecting data without consent",
+      "severity": "MEDIUM"
+    },
+    {
+      "id": "vibe_0184",
+      "category": "LEGAL & COMPLIANCE DISASTERS",
+      "subcategory": "Privacy Violations",
+      "text": "No GDPR compliance",
+      "severity": "MEDIUM"
+    }
+  ]
+}
