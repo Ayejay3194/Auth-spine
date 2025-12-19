@@ -1,0 +1,44 @@
+import express from 'express'
+import cors from 'cors'
+import { z } from 'zod'
+import { verifyHs256Bearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared-auth'
+
+const PORT = Number(process.env.PORT ?? 4100)
+const AUTH_ISSUER = String(process.env.AUTH_ISSUER ?? 'http://localhost:4000')
+const JWT_SECRET = String(process.env.JWT_SECRET ?? 'dev_secret_change_me')
+const REQUIRED_AUD = String(process.env.REQUIRED_AUD ?? 'app_one')
+const REQUIRED_SCOPES = String(process.env.REQUIRED_SCOPES ?? 'read').split(',').map(s=>s.trim()).filter(Boolean)
+
+const app = express()
+app.use(cors({ origin: true }))
+app.use(express.json())
+
+app.get('/health', (_req, res) => res.json({ ok:true, required: { aud: REQUIRED_AUD, scopes: REQUIRED_SCOPES } }))
+
+app.get('/me', async (req, res) => {
+  try {
+    const c = await verifyHs256Bearer(req.header('authorization'), AUTH_ISSUER, JWT_SECRET)
+    requireAudience(REQUIRED_AUD)(c)
+    denyIfBanned()(c)
+    requireScopes(REQUIRED_SCOPES)(c)
+    res.json({ ok:true, sub:c.sub, aud:c.aud, scp:c.scp, risk:c.risk, entitlements:c.entitlements })
+  } catch (e:any) {
+    res.status(401).json({ ok:false, error: String(e.message ?? e) })
+  }
+})
+
+app.post('/resource', async (req, res) => {
+  const body = z.object({ name: z.string().min(1) }).safeParse(req.body)
+  if (!body.success) return res.status(400).json({ error: 'bad_request' })
+  try {
+    const c = await verifyHs256Bearer(req.header('authorization'), AUTH_ISSUER, JWT_SECRET)
+    requireAudience(REQUIRED_AUD)(c)
+    denyIfBanned()(c)
+    requireScopes(REQUIRED_SCOPES)(c)
+    res.json({ ok:true, created: { id: 'r_' + Math.random().toString(16).slice(2), name: body.data.name }, by: c.sub })
+  } catch (e:any) {
+    res.status(403).json({ ok:false, error: String(e.message ?? e) })
+  }
+})
+
+app.listen(PORT, () => console.log('resource-api on', `http://localhost:${PORT}`))

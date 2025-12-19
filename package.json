@@ -1,98 +1,16 @@
 {
-  "name": "auth-spine",
-  "version": "1.0.0",
-  "description": "Auth-spine - Complete Enterprise Authentication and Authorization Platform",
-  "main": "index.js",
-  "scripts": {
-    "dev": "concurrently \"npm run dev:business-spine\" \"npm run dev:enterprise\"",
-    "dev:business-spine": "cd business-spine && npm run dev",
-    "dev:enterprise": "cd packages/enterprise && npm run dev",
-    "build": "npm run build:business-spine && npm run build:enterprise",
-    "build:business-spine": "cd business-spine && npm run build",
-    "build:enterprise": "cd packages/enterprise && npm run build",
-    "test": "npm run test:business-spine && npm run test:enterprise",
-    "test:business-spine": "cd business-spine && npm run test",
-    "test:enterprise": "cd packages/enterprise && npm run test",
-    "lint": "npm run lint:business-spine && npm run lint:enterprise",
-    "lint:business-spine": "cd business-spine && npm run lint",
-    "lint:enterprise": "cd packages/enterprise && npm run lint",
-    "type-check": "npm run type-check:business-spine && npm run type-check:enterprise",
-    "type-check:business-spine": "cd business-spine && npm run type-check",
-    "type-check:enterprise": "cd packages/enterprise && npm run type-check",
-    "deploy": "npm run build && npm run deploy:production",
-    "deploy:production": "./tools/scripts/deploy.sh",
-    "start": "npm run start:business-spine",
-    "start:business-spine": "cd business-spine && npm start",
-    "clean": "npm run clean:business-spine && npm run clean:enterprise",
-    "clean:business-spine": "cd business-spine && npm run clean",
-    "clean:enterprise": "cd packages/enterprise && npm run clean",
-    "setup": "npm run setup:business-spine && npm run setup:enterprise",
-    "setup:business-spine": "cd business-spine && npm install",
-    "setup:enterprise": "cd packages/enterprise && npm install",
-    "health-check": "node scripts/health-check.js",
-    "integration-test": "node scripts/integration-test.js",
-    "docs:generate": "npm run docs:business-spine && npm run docs:enterprise",
-    "docs:business-spine": "cd business-spine && npm run docs:generate",
-    "docs:enterprise": "cd packages/enterprise && npm run docs:generate"
-  },
+  "name": "auth-spine-multiclient-starter",
+  "private": true,
   "workspaces": [
-    "business-spine",
-    "packages/enterprise",
-    "packages/enterprise/*"
+    "packages/*",
+    "apps/*"
   ],
-  "keywords": [
-    "authentication",
-    "authorization",
-    "enterprise",
-    "security",
-    "compliance",
-    "governance",
-    "supabase",
-    "nextjs",
-    "typescript",
-    "rbac",
-    "audit",
-    "monitoring"
-  ],
-  "author": "Auth-spine Team",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/auth-spine/auth-spine.git"
+  "scripts": {
+    "dev:auth": "npm run dev -w @spine/auth-server",
+    "dev:all": "concurrently -n auth,api,ui -c auto \"npm run dev -w @spine/auth-server\" \"npm run dev -w @spine/resource-api\" \"npm run dev -w @spine/demo-ui\"",
+    "typecheck": "npm run typecheck -ws"
   },
-  "bugs": {
-    "url": "https://github.com/auth-spine/auth-spine/issues"
-  },
-  "homepage": "https://github.com/auth-spine/auth-spine#readme",
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "concurrently": "^8.2.0",
-    "eslint": "^8.45.0",
-    "typescript": "^5.0.0",
-    "vitest": "^0.34.0",
-    "playwright": "^1.37.0"
-  },
-  "dependencies": {
-    "dotenv": "^16.3.1"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
-  "config": {
-    "business-spine": {
-      "port": 3000,
-      "host": "localhost"
-    },
-    "enterprise": {
-      "port": 3001,
-      "host": "localhost"
-    }
-  },
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/sponsors/auth-spine"
+    "concurrently": "^9.0.1"
   }
 }

@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, JwtPayload } from '../../../../packages/auth/src/index'
+import { verifyToken, JwtPayload, verifyHs256Bearer, SpineJwtClaims, requireAudience, requireScopes, denyIfBanned } from '../../../../packages/auth/src/index'
 import { prisma } from '@/lib/prisma'
 
 export enum Role {
@@ -81,7 +81,13 @@ export function hasPermission(role: Role, resource: string, action: string): boo
 
 export async function rbacMiddleware(
   request: NextRequest,
-  requiredPermission: { resource: string; action: string }
+  requiredPermission: { resource: string; action: string },
+  multiclientConfig?: {
+    clientId?: string
+    requiredScopes?: string[]
+    issuer?: string
+    secret?: string
+  }
 ): Promise<NextResponse | null> {
   try {
     // Get token from request
@@ -96,14 +102,57 @@ export async function rbacMiddleware(
       )
     }
 
-    // Verify JWT token
-    const jwtPayload = await verifyToken(token)
+    let user: any = null
+    let claims: SpineJwtClaims | null = null
+
+    // Try multiclient verification first if config provided
+    if (multiclientConfig?.clientId && multiclientConfig?.issuer && multiclientConfig?.secret) {
+      try {
+        claims = await verifyHs256Bearer(authHeader, multiclientConfig.issuer, multiclientConfig.secret)
+        
+        // Validate audience
+        requireAudience(multiclientConfig.clientId)(claims)
+        
+        // Validate scopes if required
+        if (multiclientConfig.requiredScopes) {
+          requireScopes(multiclientConfig.requiredScopes)(claims)
+        }
+        
+        // Check risk state
+        denyIfBanned()(claims)
+        
+        // Get user from database for role information
+        user = await prisma.user.findUnique({
+          where: { id: claims.sub },
+          select: { id: true, role: true, email: true }
+        })
+        
+        // Merge multiclient claims with user role
+        if (user) {
+          user = {
+            ...user,
+            aud: claims.aud,
+            scp: claims.scp,
+            risk: claims.risk,
+            entitlements: claims.entitlements
+          }
+        }
+      } catch (multiclientError: any) {
+        // Fall back to legacy verification if multiclient fails
+        console.warn('Multiclient verification failed, falling back to legacy:', multiclientError.message)
+      }
+    }
     
-    // Get user with role from database
-    const user = await prisma.user.findUnique({
-      where: { id: jwtPayload.userId },
-      select: { id: true, role: true, email: true }
-    })
+    // Fallback to legacy JWT verification
+    if (!user) {
+      const jwtPayload = await verifyToken(token)
+      
+      // Get user with role from database
+      user = await prisma.user.findUnique({
+        where: { id: jwtPayload.userId },
+        select: { id: true, role: true, email: true }
+      })
+    }
 
     if (!user) {
       return NextResponse.json(
@@ -112,7 +161,7 @@ export async function rbacMiddleware(
       )
     }
 
-    // Check permission
+    // Check permission (using role from database)
     const hasAccess = hasPermission(
       user.role as Role,
       requiredPermission.resource,
@@ -130,7 +179,10 @@ export async function rbacMiddleware(
               path: request.nextUrl.pathname,
               method: request.method,
               requiredPermission,
-              userRole: user.role
+              userRole: user.role,
+              clientId: user.aud,
+              scopes: user.scp,
+              risk: user.risk
             }
           }
         })
@@ -149,6 +201,11 @@ export async function rbacMiddleware(
     response.headers.set('x-user-id', user.id)
     response.headers.set('x-user-role', user.role)
     response.headers.set('x-user-email', user.email)
+    
+    // Add multiclient context if available
+    if (user.aud) response.headers.set('x-client-id', user.aud)
+    if (user.scp) response.headers.set('x-scopes', user.scp.join(','))
+    if (user.risk) response.headers.set('x-risk-state', user.risk)
 
     return null // Continue to next middleware/handler
   } catch (error) {
@@ -163,10 +220,16 @@ export async function rbacMiddleware(
 // Higher-order function for API routes
 export function withRBAC(
   handler: (req: NextRequest, context?: any) => Promise<NextResponse>,
-  requiredPermission: { resource: string; action: string }
+  requiredPermission: { resource: string; action: string },
+  multiclientConfig?: {
+    clientId?: string
+    requiredScopes?: string[]
+    issuer?: string
+    secret?: string
+  }
 ) {
   return async (request: NextRequest, context?: any) => {
-    const authResult = await rbacMiddleware(request, requiredPermission)
+    const authResult = await rbacMiddleware(request, requiredPermission, multiclientConfig)
     
     if (authResult) {
       return authResult
@@ -174,4 +237,21 @@ export function withRBAC(
 
     return handler(request, context)
   }
+}
+
+// Helper function for multiclient protection
+export function withMulticlientRBAC(
+  handler: (req: NextRequest, context?: any) => Promise<NextResponse>,
+  requiredPermission: { resource: string; action: string },
+  clientId: string,
+  requiredScopes: string[] = [],
+  issuer?: string,
+  secret?: string
+) {
+  return withRBAC(handler, requiredPermission, {
+    clientId,
+    requiredScopes,
+    issuer: issuer || process.env.ISSUER || `http://localhost:4000`,
+    secret: secret || process.env.JWT_SECRET || 'dev_secret_change_me'
+  })
 }

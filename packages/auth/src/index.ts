@@ -1,17 +1,36 @@
 import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
 
+export type RiskState = 'ok' | 'restricted' | 'banned'
+
 export type JwtPayload = {
   userId: string
   email?: string
   role?: string
+  // Multiclient extensions
+  aud?: string           // client_id
+  scp?: string[]         // scopes
+  risk?: RiskState
+  entitlements?: Record<string, boolean>
+}
+
+export type SpineJwtClaims = {
+  iss: string
+  sub: string
+  aud: string           // client_id
+  scp: string[]         // scopes
+  risk: RiskState
+  entitlements: Record<string, boolean>
 }
 
 export enum ErrorCode {
   AUTH_UNAUTHORIZED = 'AUTH_UNAUTHORIZED',
   AUTH_INVALID_TOKEN = 'AUTH_INVALID_TOKEN',
   AUTH_MISSING_TOKEN = 'AUTH_MISSING_TOKEN',
-  AUTH_EXPIRED_TOKEN = 'AUTH_EXPIRED_TOKEN'
+  AUTH_EXPIRED_TOKEN = 'AUTH_EXPIRED_TOKEN',
+  AUTH_WRONG_CLIENT = 'AUTH_WRONG_CLIENT',
+  AUTH_MISSING_SCOPE = 'AUTH_MISSING_SCOPE',
+  AUTH_BANNED = 'AUTH_BANNED'
 }
 
 export class AuthError extends Error {
@@ -44,6 +63,42 @@ export async function verifyToken(token: string) {
     return payload as any as JwtPayload
   } catch (e: any) {
     throw new AuthError(e?.message || 'Invalid token', ErrorCode.AUTH_UNAUTHORIZED)
+  }
+}
+
+// Multiclient verification functions
+export async function verifyHs256Bearer(authorization: string | undefined, issuer: string, secret: string): Promise<SpineJwtClaims> {
+  if (!authorization || !authorization.startsWith('Bearer ')) throw new AuthError('missing_bearer', ErrorCode.AUTH_MISSING_TOKEN)
+  const token = authorization.slice('Bearer '.length)
+  const key = new TextEncoder().encode(secret)
+  const { payload } = await jwtVerify(token, key, { issuer })
+  const p = payload as any
+  return {
+    iss: String(p.iss),
+    sub: String(p.sub),
+    aud: String(p.aud),
+    scp: Array.isArray(p.scp) ? p.scp.map(String) : [],
+    risk: (p.risk ?? 'ok'),
+    entitlements: (p.entitlements ?? {}) as Record<string, boolean>
+  }
+}
+
+export function requireAudience(aud: string) {
+  return (c: SpineJwtClaims) => { 
+    if (c.aud !== aud) throw new AuthError('wrong_audience', ErrorCode.AUTH_WRONG_CLIENT) 
+  }
+}
+
+export function requireScopes(scopes: string[]) {
+  return (c: SpineJwtClaims) => {
+    const set = new Set(c.scp)
+    for (const s of scopes) if (!set.has(s)) throw new AuthError('missing_scope:' + s, ErrorCode.AUTH_MISSING_SCOPE)
+  }
+}
+
+export function denyIfBanned() {
+  return (c: SpineJwtClaims) => { 
+    if (c.risk === 'banned') throw new AuthError('banned', ErrorCode.AUTH_BANNED) 
   }
 }
 

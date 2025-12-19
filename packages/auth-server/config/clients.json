@@ -1,0 +1,81 @@
+{
+  "clients": [
+    {
+      "client_id": "business_spine",
+      "allowed_scopes": [
+        "users:read",
+        "users:update",
+        "bookings:read",
+        "bookings:create",
+        "bookings:update",
+        "payments:read",
+        "payments:create",
+        "analytics:read",
+        "reports:read",
+        "admin:read",
+        "admin:update"
+      ],
+      "default_scopes": [
+        "bookings:read",
+        "profile:read"
+      ]
+    },
+    {
+      "client_id": "mobile_app",
+      "allowed_scopes": [
+        "profile:read",
+        "profile:update",
+        "bookings:read",
+        "bookings:create",
+        "schedule:read"
+      ],
+      "default_scopes": [
+        "profile:read",
+        "bookings:read"
+      ]
+    },
+    {
+      "client_id": "admin_portal",
+      "allowed_scopes": [
+        "users:read",
+        "users:update",
+        "users:create",
+        "users:delete",
+        "bookings:read",
+        "bookings:create",
+        "bookings:update",
+        "bookings:delete",
+        "payments:read",
+        "payments:create",
+        "payments:update",
+        "payments:refund",
+        "analytics:read",
+        "reports:read",
+        "admin:read",
+        "admin:update",
+        "launch-gate:read",
+        "launch-gate:update",
+        "kill-switches:read",
+        "kill-switches:update"
+      ],
+      "default_scopes": [
+        "admin:read",
+        "users:read",
+        "reports:read"
+      ]
+    },
+    {
+      "client_id": "api_service",
+      "allowed_scopes": [
+        "users:read",
+        "bookings:read",
+        "payments:read",
+        "analytics:read"
+      ],
+      "default_scopes": [
+        "users:read",
+        "bookings:read"
+      ]
+    }
+  ]
+}

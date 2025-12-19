@@ -1,0 +1,83 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "email": "admin@demo.com",
+      "password": "password",
+      "role": "admin",
+      "scopes": [
+        "users:read",
+        "users:update",
+        "bookings:read",
+        "bookings:create",
+        "bookings:update",
+        "payments:read",
+        "payments:create",
+        "analytics:read",
+        "reports:read",
+        "admin:read",
+        "admin:update"
+      ],
+      "risk": "ok",
+      "entitlements": {
+        "premium": true,
+        "admin_access": true
+      }
+    },
+    {
+      "id": "u2",
+      "email": "manager@demo.com",
+      "password": "password",
+      "role": "manager",
+      "scopes": [
+        "users:read",
+        "users:update",
+        "bookings:read",
+        "bookings:create",
+        "bookings:update",
+        "payments:read",
+        "payments:create",
+        "reports:read",
+        "admin:read"
+      ],
+      "risk": "ok",
+      "entitlements": {
+        "premium": true,
+        "team_management": true
+      }
+    },
+    {
+      "id": "u3",
+      "email": "staff@demo.com",
+      "password": "password",
+      "role": "staff",
+      "scopes": [
+        "bookings:read",
+        "bookings:update",
+        "profile:read",
+        "profile:update",
+        "schedule:read"
+      ],
+      "risk": "ok",
+      "entitlements": {
+        "premium": false
+      }
+    },
+    {
+      "id": "u4",
+      "email": "client@demo.com",
+      "password": "password",
+      "role": "client",
+      "scopes": [
+        "profile:read",
+        "profile:update",
+        "bookings:read",
+        "bookings:create"
+      ],
+      "risk": "ok",
+      "entitlements": {
+        "premium": false
+      }
+    }
+  ]
+}
