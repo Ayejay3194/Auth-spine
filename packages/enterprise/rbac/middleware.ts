@@ -4,8 +4,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
-import { prisma } from '@/lib/prisma';
+import { verifyToken, JwtPayload } from '../../../auth/src/index';
+import { prisma } from '../../../apps/business-spine/lib/prisma';
 
 export enum Role {
   OWNER = 'owner',
@@ -37,7 +37,13 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { resource: 'payments', action: 'read' },
     { resource: 'payments', action: 'update' },
     { resource: 'analytics', action: 'read' },
-    { resource: 'reports', action: 'read' }
+    { resource: 'reports', action: 'read' },
+    { resource: 'admin', action: 'read' },
+    { resource: 'admin', action: 'update' },
+    { resource: 'launch-gate', action: 'read' },
+    { resource: 'launch-gate', action: 'update' },
+    { resource: 'kill-switches', action: 'read' },
+    { resource: 'kill-switches', action: 'update' }
   ],
   [Role.MANAGER]: [
     { resource: 'bookings', action: 'create' },
@@ -48,7 +54,8 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { resource: 'schedules', action: 'create' },
     { resource: 'schedules', action: 'read' },
     { resource: 'schedules', action: 'update' },
-    { resource: 'reports', action: 'read' }
+    { resource: 'reports', action: 'read' },
+    { resource: 'admin', action: 'read' }
   ],
   [Role.STAFF]: [
     { resource: 'bookings', action: 'read' },
@@ -78,18 +85,23 @@ export async function rbacMiddleware(
 ): Promise<NextResponse | null> {
   try {
     // Get token from request
-    const token = await getToken({ req: request });
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : 
+                  request.cookies.get('auth-token')?.value;
     
-    if (!token?.userId) {
+    if (!token) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
+    // Verify JWT token
+    const jwtPayload = await verifyToken(token);
+    
     // Get user with role from database
     const user = await prisma.user.findUnique({
-      where: { id: token.userId as string },
+      where: { id: jwtPayload.userId },
       select: { id: true, role: true, email: true }
     });
 
@@ -109,18 +121,22 @@ export async function rbacMiddleware(
 
     if (!hasAccess) {
       // Log unauthorized access attempt
-      await prisma.auditLog.create({
-        data: {
-          eventType: 'UNAUTHORIZED_ACCESS',
-          userId: user.id,
-          metadata: {
-            path: request.nextUrl.pathname,
-            method: request.method,
-            requiredPermission,
-            userRole: user.role
+      try {
+        await prisma.auditLog.create({
+          data: {
+            eventType: 'UNAUTHORIZED_ACCESS',
+            userId: user.id,
+            metadata: {
+              path: request.nextUrl.pathname,
+              method: request.method,
+              requiredPermission,
+              userRole: user.role
+            }
           }
-        }
-      });
+        });
+      } catch (auditError) {
+        console.error('Failed to log audit entry:', auditError);
+      }
 
       return NextResponse.json(
         { error: 'Insufficient permissions' },

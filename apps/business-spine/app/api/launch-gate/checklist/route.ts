@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { LaunchGateValidator, LAUNCH_GATE_CHECKLIST } from '@/src/launch-gate/checklist';
-import { withRBAC } from '@/src/rbac/middleware';
+import { withRBAC } from '../../../../../packages/enterprise/rbac/middleware';
 import { prisma } from '@/lib/prisma';
 
 async function getChecklist(request: NextRequest) {

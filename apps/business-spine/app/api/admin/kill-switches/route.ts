@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { KillSwitchManager } from '@/src/ops/kill-switches';
-import { withRBAC } from '@/src/rbac/middleware';
+import { withRBAC } from '../../../../../packages/enterprise/rbac/middleware';
 
 async function getKillSwitches(request: NextRequest) {
   try {

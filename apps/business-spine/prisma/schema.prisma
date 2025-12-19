@@ -9,9 +9,11 @@ datasource db {
 
 enum Role {
   owner
-  staff
-  client
   admin
+  manager
+  staff
+  readonly
+  client
   system
 }
 

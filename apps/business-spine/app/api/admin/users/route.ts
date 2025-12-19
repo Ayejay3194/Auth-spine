@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withRBAC } from '@/src/rbac/middleware';
+import { withRBAC } from '../../../../../packages/enterprise/rbac/middleware';
 import { z } from 'zod';
 
 const createUserSchema = z.object({
