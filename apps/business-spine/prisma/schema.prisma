@@ -462,5 +462,3 @@ model AuditLog {
   @@index([eventType, createdAt])
   @@index([userId, createdAt])
 }
-
- @@map("auth_ops_logs")
