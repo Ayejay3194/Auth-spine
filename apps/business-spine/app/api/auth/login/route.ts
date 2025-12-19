@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { AuthError, ErrorCode } from '../../../../../packages/auth/src/index'
-import { verifyPassword, generateToken, createAuthResponse } from '../../../../../packages/auth/src/next'
+import { AuthError, ErrorCode } from '../../../../../packages/auth/index'
+import { verifyPassword, generateToken, createAuthResponse } from '../../../../../packages/auth/next'
 import { prisma } from '@/lib/prisma'
 
 const loginSchema = z.object({
