@@ -57,6 +57,7 @@ model User {
   client    Client?
   passwordHash String?
   sessions     Session[]
+  auditLogs    AuditLog[]
 }
 
 model Provider {
@@ -447,5 +448,19 @@ model AuthOpsLog {
 
   @@index([occurredAt(sort: Desc)])
   @@index([type])
-  @@map("auth_ops_logs")
 }
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  eventType String   // UNAUTHORIZED_ACCESS, USER_CREATED, etc.
+  userId    String?
+  metadata  Json?    // Store additional context
+  createdAt DateTime @default(now())
+  
+  user      User?    @relation(fields: [userId], references: [id])
+  
+  @@index([eventType, createdAt])
+  @@index([userId, createdAt])
+}
+
+ @@map("auth_ops_logs")

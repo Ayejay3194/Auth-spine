@@ -1,30 +1,11 @@
 /**
- * RBAC Middleware for API Routes
- * Enforces role-based access control on all endpoints
+ * Local RBAC Middleware for API Routes
+ * Simplified version that works within the business-spine app
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, JwtPayload } from '../../../auth/src/index';
-
-// Use a simple prisma client since we can't import from business-spine
-// In production, this would be properly configured
-let prisma: any = null;
-
-// Initialize prisma client (simplified for now)
-try {
-  // This would normally import from the business-spine app
-  // For now, we'll create a mock that doesn't break the middleware
-  prisma = {
-    user: {
-      findUnique: async () => null
-    },
-    auditLog: {
-      create: async () => null
-    }
-  };
-} catch (error) {
-  console.warn('Prisma client not available in enterprise package');
-}
+import { NextRequest, NextResponse } from 'next/server'
+import { verifyToken, JwtPayload } from '../../../../packages/auth/src/index'
+import { prisma } from '@/lib/prisma'
 
 export enum Role {
   OWNER = 'owner',
@@ -35,8 +16,8 @@ export enum Role {
 }
 
 export interface Permission {
-  resource: string;
-  action: 'create' | 'read' | 'update' | 'delete';
+  resource: string
+  action: 'create' | 'read' | 'update' | 'delete'
 }
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
@@ -87,15 +68,15 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { resource: 'reports', action: 'read' },
     { resource: 'analytics', action: 'read' }
   ]
-};
+}
 
 export function hasPermission(role: Role, resource: string, action: string): boolean {
-  const permissions = ROLE_PERMISSIONS[role];
+  const permissions = ROLE_PERMISSIONS[role]
   
   return permissions.some(permission => 
     (permission.resource === '*' || permission.resource === resource) &&
     permission.action === action
-  );
+  )
 }
 
 export async function rbacMiddleware(
@@ -104,33 +85,31 @@ export async function rbacMiddleware(
 ): Promise<NextResponse | null> {
   try {
     // Get token from request
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get('authorization')
     const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : 
-                  request.cookies.get('auth-token')?.value;
+                  request.cookies.get('auth-token')?.value
     
     if (!token) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
-      );
+      )
     }
 
     // Verify JWT token
-    const jwtPayload = await verifyToken(token);
+    const jwtPayload = await verifyToken(token)
     
-    // For now, skip database lookup since prisma is not available
-    // In production, this would fetch user from database
-    const user = {
-      id: jwtPayload.userId,
-      role: jwtPayload.role,
-      email: jwtPayload.email
-    };
+    // Get user with role from database
+    const user = await prisma.user.findUnique({
+      where: { id: jwtPayload.userId },
+      select: { id: true, role: true, email: true }
+    })
 
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 401 }
-      );
+      )
     }
 
     // Check permission
@@ -138,41 +117,46 @@ export async function rbacMiddleware(
       user.role as Role,
       requiredPermission.resource,
       requiredPermission.action
-    );
+    )
 
     if (!hasAccess) {
-      // Log unauthorized access attempt (simplified)
+      // Log unauthorized access attempt
       try {
-        console.warn('Unauthorized access attempt:', {
-          userId: user.id,
-          path: request.nextUrl.pathname,
-          method: request.method,
-          requiredPermission,
-          userRole: user.role
-        });
+        await prisma.auditLog.create({
+          data: {
+            eventType: 'UNAUTHORIZED_ACCESS',
+            userId: user.id,
+            metadata: {
+              path: request.nextUrl.pathname,
+              method: request.method,
+              requiredPermission,
+              userRole: user.role
+            }
+          }
+        })
       } catch (auditError) {
-        console.error('Failed to log audit entry:', auditError);
+        console.error('Failed to log audit entry:', auditError)
       }
 
       return NextResponse.json(
         { error: 'Insufficient permissions' },
         { status: 403 }
-      );
+      )
     }
 
     // Add user context to request headers for downstream use
-    const response = NextResponse.next();
-    response.headers.set('x-user-id', user.id);
-    response.headers.set('x-user-role', user.role);
-    response.headers.set('x-user-email', user.email);
+    const response = NextResponse.next()
+    response.headers.set('x-user-id', user.id)
+    response.headers.set('x-user-role', user.role)
+    response.headers.set('x-user-email', user.email)
 
-    return null; // Continue to next middleware/handler
+    return null // Continue to next middleware/handler
   } catch (error) {
-    console.error('RBAC middleware error:', error);
+    console.error('RBAC middleware error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    );
+    )
   }
 }
 
@@ -182,40 +166,12 @@ export function withRBAC(
   requiredPermission: { resource: string; action: string }
 ) {
   return async (request: NextRequest, context?: any) => {
-    const authResult = await rbacMiddleware(request, requiredPermission);
+    const authResult = await rbacMiddleware(request, requiredPermission)
     
     if (authResult) {
-      return authResult;
+      return authResult
     }
 
-    return handler(request, context);
-  };
-}
-
-// Check if approval is required for an action
-export function requiresApproval(role: Role, action: string, amount?: number): boolean {
-  const approvalRules: Record<string, { [key: string]: boolean | ((amount?: number) => boolean) }> = {
-    [Role.ADMIN]: {
-      refund: amount ? amount > 1000 : false,
-      payroll: true,
-      roleChange: true,
-      dataExport: true,
-      featureFlag: true
-    },
-    [Role.MANAGER]: {
-      refund: amount ? amount > 500 : false,
-      payroll: false,
-      roleChange: false,
-      dataExport: true,
-      featureFlag: false
-    }
-  };
-
-  const rules = approvalRules[role];
-  if (!rules) return false;
-  
-  const rule = rules[action];
-  if (typeof rule === 'boolean') return rule;
-  if (typeof rule === 'function') return rule(amount);
-  return false;
+    return handler(request, context)
+  }
 }

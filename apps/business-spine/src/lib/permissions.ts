@@ -178,24 +178,65 @@ export function getUserPermissions(user: JwtPayload | null): Permission[] {
  * Check if an action requires approval from higher-level users
  */
 export function requiresApproval(role: Role, action: string, amount?: number): boolean {
-  const approvalRules = {
+  const approvalRules: Record<string, { [key: string]: boolean | ((amount?: number) => boolean) }> = {
     admin: {
-      refund: amount && amount > 1000,
+      refund: amount ? amount > 1000 : false,
       payroll: true,
       roleChange: true,
       dataExport: true,
       featureFlag: true
     },
     manager: {
-      refund: amount && amount > 500,
+      refund: amount ? amount > 500 : false,
       payroll: false,
       roleChange: false,
       dataExport: true,
       featureFlag: false
+    },
+    owner: {
+      refund: false, // Owner can do any refund
+      payroll: false, // Owner can do any payroll action
+      roleChange: false, // Owner can change any role
+      dataExport: false, // Owner can export any data
+      featureFlag: false // Owner can change any feature flag
+    },
+    staff: {
+      refund: false, // Staff cannot do refunds
+      payroll: false,
+      roleChange: false,
+      dataExport: false,
+      featureFlag: false
+    },
+    readonly: {
+      refund: false,
+      payroll: false,
+      roleChange: false,
+      dataExport: false,
+      featureFlag: false
+    },
+    client: {
+      refund: false,
+      payroll: false,
+      roleChange: false,
+      dataExport: false,
+      featureFlag: false
+    },
+    system: {
+      refund: false, // System user has no restrictions
+      payroll: false,
+      roleChange: false,
+      dataExport: false,
+      featureFlag: false
     }
-  }
+  };
 
-  return approvalRules[role]?.[action] || false
+  const rules = approvalRules[role];
+  if (!rules) return false;
+  
+  const rule = rules[action];
+  if (typeof rule === 'boolean') return rule;
+  if (typeof rule === 'function') return rule(amount);
+  return false;
 }
 
 /**
