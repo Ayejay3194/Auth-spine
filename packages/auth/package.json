@@ -1,0 +1,55 @@
+{
+  "name": "@auth-spine/auth",
+  "version": "1.0.0",
+  "description": "Enhanced authentication utilities for Auth-Spine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "keywords": [
+    "auth",
+    "jwt",
+    "bcrypt",
+    "nextjs",
+    "typescript"
+  ],
+  "author": "Auth-Spine Team",
+  "license": "Proprietary",
+  "dependencies": {
+    "jose": "^5.1.3",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  },
+  "peerDependencies": {
+    "next": "^14.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./password": {
+      "types": "./dist/password.d.ts",
+      "import": "./dist/password.js",
+      "require": "./dist/password.js"
+    },
+    "./next": {
+      "types": "./dist/next.d.ts",
+      "import": "./dist/next.js",
+      "require": "./dist/next.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
