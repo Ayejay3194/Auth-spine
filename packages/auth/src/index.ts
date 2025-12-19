@@ -7,16 +7,21 @@ export type JwtPayload = {
   role?: string
 }
 
-export type AuthError = {
-  message: string
-  code: string
-}
-
 export enum ErrorCode {
   AUTH_UNAUTHORIZED = 'AUTH_UNAUTHORIZED',
   AUTH_INVALID_TOKEN = 'AUTH_INVALID_TOKEN',
   AUTH_MISSING_TOKEN = 'AUTH_MISSING_TOKEN',
   AUTH_EXPIRED_TOKEN = 'AUTH_EXPIRED_TOKEN'
+}
+
+export class AuthError extends Error {
+  public readonly code: ErrorCode
+
+  constructor(message: string, code: ErrorCode) {
+    super(message)
+    this.code = code
+    this.name = 'AuthError'
+  }
 }
 
 function getKey() {
@@ -48,10 +53,6 @@ export async function hashPassword(password: string, saltRounds: number = 12) {
 
 export async function verifyPassword(password: string, hash: string) {
   return bcrypt.compare(password, hash)
-}
-
-export function createAuthError(message: string, code: ErrorCode): AuthError {
-  return { message, code }
 }
 
 export function validateEnv() {

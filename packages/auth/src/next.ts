@@ -60,7 +60,7 @@ export function withAuth<T extends any[]>(
         return createErrorResponse(error)
       }
       return createErrorResponse(
-        { message: 'Internal server error', code: 'INTERNAL_ERROR' },
+        new AuthError('Internal server error', ErrorCode.AUTH_UNAUTHORIZED),
         500
       )
     }
@@ -74,7 +74,7 @@ export function requireRole(requiredRole: string) {
     return withAuth(async (request: NextRequest, user: JwtPayload, ...args: T) => {
       if (user.role !== requiredRole) {
         return createErrorResponse(
-          { message: 'Insufficient permissions', code: ErrorCode.AUTH_UNAUTHORIZED },
+          new AuthError('Insufficient permissions', ErrorCode.AUTH_UNAUTHORIZED),
           403
         )
       }
@@ -91,7 +91,7 @@ export function requireRoles(roles: string[]) {
     return withAuth(async (request: NextRequest, user: JwtPayload, ...args: T) => {
       if (!user.role || !roles.includes(user.role)) {
         return createErrorResponse(
-          { message: 'Insufficient permissions', code: ErrorCode.AUTH_UNAUTHORIZED },
+          new AuthError('Insufficient permissions', ErrorCode.AUTH_UNAUTHORIZED),
           403
         )
       }
