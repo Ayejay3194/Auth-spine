@@ -1,4 +1,3 @@
-# Security Audit Report: Auth-Spine Authentication & Authorization
 
 **Audit Date**: December 21, 2025  
 **Scope**: Authentication & Authorization  
