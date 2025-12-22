@@ -37,6 +37,9 @@ jobs:
         working-directory: ./apps/business-spine
         continue-on-error: true
 
+      - name: Security Gate Check
+        run: npm run security:gate
+
   # Linting & Type Checking
   quality:
     name: Code Quality

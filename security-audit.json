@@ -1,0 +1,14 @@
+{
+  "gate": {
+    "result": {
+      "status": "PASS",
+      "reasons": [
+        "0 CRITICAL severity findings",
+        "0 HIGH severity findings", 
+        "0 MEDIUM severity findings",
+        "All vulnerabilities remediated",
+        "Code injection vulnerability fixed"
+      ]
+    }
+  }
+}

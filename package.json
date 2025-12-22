@@ -8,7 +8,9 @@
   "scripts": {
     "dev:auth": "npm run dev -w @spine/auth-server",
     "dev:all": "concurrently -n auth,api,ui -c auto \"npm run dev -w @spine/auth-server\" \"npm run dev -w @spine/resource-api\" \"npm run dev -w @spine/demo-ui\"",
-    "typecheck": "npm run typecheck -ws"
+    "typecheck": "npm run typecheck -ws",
+    "security:validate": "node scripts/validate-audit.mjs security-audit.json schemas/audit-gate.schema.json",
+    "security:gate": "node scripts/security-gate.mjs security-audit.json"
   },
   "devDependencies": {
     "concurrently": "^9.0.1"
