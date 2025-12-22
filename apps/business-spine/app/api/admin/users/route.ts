@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRBAC } from '../../../../src/lib/rbac-middleware';
 import { z } from 'zod';
+import { hashPassword } from '@/src/security/password-migration';
 
 const createUserSchema = z.object({
   email: z.string().email(),
@@ -94,13 +95,13 @@ async function createUser(request: NextRequest) {
       );
     }
 
-    // Hash password (you should use bcrypt in production)
+    // Hash password using Argon2 (secure cryptographic hashing)
     const hashedPassword = await hashPassword(validatedData.password);
 
     const user = await prisma.user.create({
       data: {
         ...validatedData,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
         role: validatedData.role as 'owner' | 'admin' | 'manager' | 'staff' | 'readonly'
       },
       select: {
@@ -141,12 +142,6 @@ async function createUser(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// Simple password hash (use bcrypt in production)
-async function hashPassword(password: string): Promise<string> {
-  // In production, use: await bcrypt.hash(password, 12);
-  return `hashed_${password}`;
 }
 
 export const GET = withRBAC(getUsers, { resource: 'users', action: 'read' });

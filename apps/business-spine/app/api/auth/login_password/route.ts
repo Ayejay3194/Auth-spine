@@ -6,6 +6,7 @@ import { newSessionToken, persistSession } from "@/src/auth/session";
 import { setSessionCookie } from "@/src/security/cookies";
 import { verifyMfaToken, useRecoveryCode } from "@/src/security/mfa";
 import { isRateLimited, recordFailedAttempt, recordSuccessfulAttempt, getRateLimitRemainingSeconds } from "@/src/security/rate-limit";
+import { verifyPassword } from "@/src/security/password-migration";
 
 const Q = z.object({
   email: z.string().email(),
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
       throw new Error("unauthorized");
     }
 
-    const ok = await argon2.verify(user.passwordHash, body.password);
+    const ok = await verifyPassword(user.passwordHash, body.password);
     if (!ok) {
       recordFailedAttempt(ip);
       throw new Error("unauthorized");

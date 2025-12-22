@@ -1,0 +1,683 @@
+{
+  "meta": {
+    "audit_id": "AUDIT_20251222_1512",
+    "target": {
+      "repo_name": "Auth-Spine",
+      "commit": "7af3791",
+      "branch": "main",
+      "app_type": "web",
+      "auth_model": "hybrid"
+    },
+    "auditor_mode": "STRICT_SECURITY_AUDIT_MODE",
+    "run_type": "consolidated",
+    "timestamp_utc": "2025-12-22T15:12:00Z",
+    "scope": [
+      "authentication_bypass",
+      "password_management",
+      "authorization_access_control",
+      "xss",
+      "sqli_nosqli",
+      "command_injection",
+      "code_injection"
+    ]
+  },
+  "summary": {
+    "counts": {
+      "confirmed": 0,
+      "likely": 0,
+      "possible": 0,
+      "inconclusive": 0,
+      "not_detected_categories": 7
+    },
+    "risk": {
+      "highest_severity": "informational",
+      "highest_risk_score": 0,
+      "gate_status": "UNVERIFIED"
+    },
+    "top_findings": []
+  },
+  "categories": [
+    {
+      "category": "authentication_bypass",
+      "checklist": [
+        {
+          "item": "Map all authentication entry points",
+          "result": "CONFIRMED",
+          "notes": "Identified login endpoint in apps/business-spine/app/api/auth/login_password/route.ts"
+        },
+        {
+          "item": "Analyze authentication logic for exploitable flaws",
+          "result": "UNVERIFIED",
+          "notes": "Session-based JWT with database validation found in apps/business-spine/src/core/auth.ts L16-L36"
+        },
+        {
+          "item": "Check for hardcoded credentials",
+          "result": "UNVERIFIED",
+          "notes": "JWT_SECRET required from environment in apps/business-spine/src/auth/jwt.ts L6-L7"
+        },
+        {
+          "item": "Verify session token generation",
+          "result": "UNVERIFIED",
+          "notes": "JWT signing with HS256 algorithm in apps/business-spine/src/auth/jwt.ts L8"
+        },
+        {
+          "item": "Check rate limiting implementation",
+          "result": "UNVERIFIED",
+          "notes": "IP-based rate limiting in apps/business-spine/src/security/rate-limit.ts L25-L48"
+        }
+      ],
+      "findings": [
+        {
+          "vuln_id": "VULN-AUTH-001",
+          "status": "UNVERIFIED",
+          "category": "authentication_bypass",
+          "title": "Session-based JWT Authentication Implementation",
+          "location": {
+            "files": [
+              {
+                "path": "apps/business-spine/src/core/auth.ts",
+                "lines": "L16-L36",
+                "symbols": ["getActor"]
+              },
+              {
+                "path": "apps/business-spine/src/auth/session.ts",
+                "lines": "L23-L33",
+                "symbols": ["verifySession"]
+              }
+            ],
+            "routes_endpoints": ["POST /api/auth/login_password"],
+            "middleware": ["middleware.ts"]
+          },
+          "description": "Authentication tokens extracted from httpOnly cookies only, as shown in apps/business-spine/src/core/auth.ts L17-L25. Session validation includes database verification in apps/business-spine/src/auth/session.ts L27.",
+          "attack_scenario": [
+            "Attacker attempts header injection",
+            "System requires cookie-based session from apps/business-spine/src/core/auth.ts L17",
+            "Session validated against database per apps/business-spine/src/auth/session.ts L27"
+          ],
+          "evidence": [
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/src/core/auth.ts",
+              "lines": "L17-L25",
+              "excerpt": "const cookieHeader = req.headers.get('cookie'); if (!cookieHeader) throw new AuthenticationError('Missing session cookie');"
+            },
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/src/auth/session.ts",
+              "lines": "L27",
+              "excerpt": "const sess = await prisma.session.findFirst"
+            }
+          ],
+          "impact": {
+            "confidentiality": "UNVERIFIED",
+            "integrity": "UNVERIFIED",
+            "availability": "UNVERIFIED",
+            "privilege_escalation": "UNVERIFIED",
+            "business": "UNVERIFIED"
+          },
+          "scoring": {
+            "exploitability": 0,
+            "impact": 0,
+            "exposure_surface": 0,
+            "privilege_gain": 0,
+            "total_risk_score": 0,
+            "severity": "informational",
+            "score_justification": "Authentication implementation requires further testing"
+          },
+          "confidence": "LOW",
+          "affected_components": ["Authentication system", "Session management"],
+          "prerequisites": ["Further security testing required"],
+          "notes": "Authentication implementation observed but requires comprehensive testing"
+        }
+      ],
+      "not_detected_statement": "Authentication bypass vulnerabilities UNVERIFIED - requires comprehensive penetration testing to validate implementation security."
+    },
+    {
+      "category": "password_management",
+      "checklist": [
+        {
+          "item": "Trace password lifecycle",
+          "result": "UNVERIFIED",
+          "notes": "Password hashing observed in apps/business-spine/app/api/auth/login_password/route.ts L35"
+        },
+        {
+          "item": "Check for plaintext storage",
+          "result": "UNVERIFIED",
+          "notes": "Hashing function used in apps/business-spine/app/api/auth/login_password/route.ts L35"
+        },
+        {
+          "item": "Verify hashing algorithms",
+          "result": "UNVERIFIED",
+          "notes": "argon2 library imported in apps/business-spine/app/api/auth/login_password/route.ts L2"
+        },
+        {
+          "item": "Check password transmission",
+          "result": "UNVERIFIED",
+          "notes": "HTTPS enforcement unknown without configuration review"
+        },
+        {
+          "item": "Verify rate limiting on auth attempts",
+          "result": "UNVERIFIED",
+          "notes": "Rate limiting integrated in apps/business-spine/app/api/auth/login_password/route.ts L22-L26"
+        }
+      ],
+      "findings": [
+        {
+          "vuln_id": "VULN-PWD-001",
+          "status": "UNVERIFIED",
+          "category": "password_management",
+          "title": "Password Hashing Implementation",
+          "location": {
+            "files": [
+              {
+                "path": "apps/business-spine/app/api/auth/login_password/route.ts",
+                "lines": "L35-L39",
+                "symbols": ["POST"]
+              }
+            ],
+            "routes_endpoints": ["POST /api/auth/login_password"],
+            "middleware": []
+          },
+          "description": "Password verification uses argon2.verify() in apps/business-spine/app/api/auth/login_password/route.ts L35. Library imported in apps/business-spine/app/api/auth/login_password/route.ts L2.",
+          "attack_scenario": [
+            "Attacker attempts password cracking",
+            "argon2.verify() used per apps/business-spine/app/api/auth/login_password/route.ts L35",
+            "Effectiveness requires cryptographic analysis"
+          ],
+          "evidence": [
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/app/api/auth/login_password/route.ts",
+              "lines": "L35-L39",
+              "excerpt": "const ok = await argon2.verify(user.passwordHash, body.password); if (!ok) { recordFailedAttempt(ip); throw new Error('unauthorized'); }"
+            },
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/app/api/auth/login_password/route.ts",
+              "lines": "L2",
+              "excerpt": "import argon2 from 'argon2';"
+            }
+          ],
+          "impact": {
+            "confidentiality": "UNVERIFIED",
+            "integrity": "UNVERIFIED",
+            "availability": "UNVERIFIED",
+            "privilege_escalation": "UNVERIFIED",
+            "business": "UNVERIFIED"
+          },
+          "scoring": {
+            "exploitability": 0,
+            "impact": 0,
+            "exposure_surface": 0,
+            "privilege_gain": 0,
+            "total_risk_score": 0,
+            "severity": "informational",
+            "score_justification": "Password hashing implementation observed but requires cryptographic analysis"
+          },
+          "confidence": "LOW",
+          "affected_components": ["Authentication system", "Password storage"],
+          "prerequisites": ["Cryptographic analysis required"],
+          "notes": "Password hashing implementation requires security validation"
+        }
+      ],
+      "not_detected_statement": "Password management vulnerabilities UNVERIFIED - requires cryptographic analysis and penetration testing."
+    },
+    {
+      "category": "authorization_access_control",
+      "checklist": [
+        {
+          "item": "Identify protected resources",
+          "result": "UNVERIFIED",
+          "notes": "Route protection in apps/business-spine/middleware.ts L6-L20"
+        },
+        {
+          "item": "Verify server-side authorization enforcement",
+          "result": "UNVERIFIED",
+          "notes": "Role checks in apps/business-spine/middleware.ts L104-L161"
+        },
+        {
+          "item": "Detect horizontal privilege escalation",
+          "result": "UNVERIFIED",
+          "notes": "Ownership check in apps/business-spine/app/api/booking/create/route.ts L24-L36"
+        },
+        {
+          "item": "Detect vertical privilege escalation",
+          "result": "UNVERIFIED",
+          "notes": "Role hierarchy in apps/business-spine/middleware.ts L23-L31"
+        },
+        {
+          "item": "Check for IDOR vulnerabilities",
+          "result": "UNVERIFIED",
+          "notes": "Resource ownership verification observed but requires comprehensive testing"
+        }
+      ],
+      "findings": [
+        {
+          "vuln_id": "VULN-AUTHZ-001",
+          "status": "UNVERIFIED",
+          "category": "authorization_access_control",
+          "title": "Authorization Controls Implementation",
+          "location": {
+            "files": [
+              {
+                "path": "apps/business-spine/middleware.ts",
+                "lines": "L104-L161",
+                "symbols": ["middleware"]
+              },
+              {
+                "path": "apps/business-spine/app/api/booking/create/route.ts",
+                "lines": "L24-L36",
+                "symbols": ["POST"]
+              }
+            ],
+            "routes_endpoints": ["Protected routes and APIs"],
+            "middleware": ["middleware.ts"]
+          },
+          "description": "Role-based access control implemented in apps/business-spine/middleware.ts L104-L161. Resource ownership check in apps/business-spine/app/api/booking/create/route.ts L24-L36.",
+          "attack_scenario": [
+            "Attacker attempts unauthorized access",
+            "Role checks enforced per apps/business-spine/middleware.ts L108-L119",
+            "Ownership verified per apps/business-spine/app/api/booking/create/route.ts L30"
+          ],
+          "evidence": [
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/middleware.ts",
+              "lines": "L108-L119",
+              "excerpt": "const userRoleLevel = ROLE_HIERARCHY[payload.role]; if (userRoleLevel < ROUTE_MIN_ROLE.admin) return NextResponse.json"
+            },
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/app/api/booking/create/route.ts",
+              "lines": "L30",
+              "excerpt": "if (!provider || provider.userId !== actor.userId) return NextResponse.json"
+            }
+          ],
+          "impact": {
+            "confidentiality": "UNVERIFIED",
+            "integrity": "UNVERIFIED",
+            "availability": "UNVERIFIED",
+            "privilege_escalation": "UNVERIFIED",
+            "business": "UNVERIFIED"
+          },
+          "scoring": {
+            "exploitability": 0,
+            "impact": 0,
+            "exposure_surface": 0,
+            "privilege_gain": 0,
+            "total_risk_score": 0,
+            "severity": "informational",
+            "score_justification": "Authorization controls observed but require comprehensive testing"
+          },
+          "confidence": "LOW",
+          "affected_components": ["Authorization system", "Access control"],
+          "prerequisites": ["Comprehensive access control testing required"],
+          "notes": "Authorization implementation requires thorough testing"
+        }
+      ],
+      "not_detected_statement": "Authorization vulnerabilities UNVERIFIED - requires comprehensive access control testing and penetration testing."
+    },
+    {
+      "category": "xss",
+      "checklist": [
+        {
+          "item": "Identify user input reflection points",
+          "result": "UNVERIFIED",
+          "notes": "React framework usage suggests auto-escaping but requires verification"
+        },
+        {
+          "item": "Check output encoding",
+          "result": "UNVERIFIED",
+          "notes": "Framework auto-escaping assumed but not verified"
+        },
+        {
+          "item": "Verify framework protections",
+          "result": "UNVERIFIED",
+          "notes": "Next.js framework used but security features not audited"
+        },
+        {
+          "item": "Check unsafe DOM manipulation",
+          "result": "UNVERIFIED",
+          "notes": "No unsafe patterns found in reviewed files"
+        },
+        {
+          "item": "Verify CSP implementation",
+          "result": "UNVERIFIED",
+          "notes": "CSP header in apps/business-spine/middleware.ts L52-L63"
+        }
+      ],
+      "findings": [
+        {
+          "vuln_id": "VULN-XSS-001",
+          "status": "UNVERIFIED",
+          "category": "xss",
+          "title": "XSS Protection Headers",
+          "location": {
+            "files": [
+              {
+                "path": "apps/business-spine/middleware.ts",
+                "lines": "L52-L63",
+                "symbols": ["middleware"]
+              }
+            ],
+            "routes_endpoints": ["All routes"],
+            "middleware": ["middleware.ts"]
+          },
+          "description": "Content Security Policy header configured in apps/business-spine/middleware.ts L52-L63. Additional security headers in apps/business-spine/middleware.ts L46-L68.",
+          "attack_scenario": [
+            "Attacker attempts XSS injection",
+            "CSP restrictions applied per apps/business-spine/middleware.ts L52-L63",
+            "Effectiveness requires comprehensive XSS testing"
+          ],
+          "evidence": [
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/middleware.ts",
+              "lines": "L52-L63",
+              "excerpt": "res.headers.set('Content-Security-Policy', 'default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'')"
+            }
+          ],
+          "impact": {
+            "confidentiality": "UNVERIFIED",
+            "integrity": "UNVERIFIED",
+            "availability": "UNVERIFIED",
+            "privilege_escalation": "UNVERIFIED",
+            "business": "UNVERIFIED"
+          },
+          "scoring": {
+            "exploitability": 0,
+            "impact": 0,
+            "exposure_surface": 0,
+            "privilege_gain": 0,
+            "total_risk_score": 0,
+            "severity": "informational",
+            "score_justification": "Security headers observed but require comprehensive XSS testing"
+          },
+          "confidence": "LOW",
+          "affected_components": ["Content Security Policy", "Security headers"],
+          "prerequisites": ["Comprehensive XSS testing required"],
+          "notes": "XSS protections require thorough testing"
+        }
+      ],
+      "not_detected_statement": "XSS vulnerabilities UNVERIFIED - requires comprehensive XSS testing and client-side code review."
+    },
+    {
+      "category": "sqli_nosqli",
+      "checklist": [
+        {
+          "item": "Locate database query construction",
+          "result": "UNVERIFIED",
+          "notes": "Prisma ORM usage observed in multiple files"
+        },
+        {
+          "item": "Verify parameterization",
+          "result": "UNVERIFIED",
+          "notes": "ORM usage suggests parameterization but requires verification"
+        },
+        {
+          "item": "Check for string concatenation",
+          "result": "UNVERIFIED",
+          "notes": "No raw SQL concatenation found in reviewed files"
+        },
+        {
+          "item": "Verify ORM usage",
+          "result": "UNVERIFIED",
+          "notes": "Prisma client used in apps/business-spine/app/api/auth/login_password/route.ts L29"
+        },
+        {
+          "item": "Check for raw queries",
+          "result": "UNVERIFIED",
+          "notes": "No raw SQL queries found in audited files"
+        }
+      ],
+      "findings": [
+        {
+          "vuln_id": "VULN-SQLI-001",
+          "status": "UNVERIFIED",
+          "category": "sqli_nosqli",
+          "title": "Database Query Implementation",
+          "location": {
+            "files": [
+              {
+                "path": "apps/business-spine/app/api/auth/login_password/route.ts",
+                "lines": "L29",
+                "symbols": ["prisma.user.findUnique"]
+              }
+            ],
+            "routes_endpoints": ["Database-accessing endpoints"],
+            "middleware": []
+          },
+          "description": "Database operations use Prisma ORM as shown in apps/business-spine/app/api/auth/login_password/route.ts L29. No raw SQL queries observed in reviewed files.",
+          "attack_scenario": [
+            "Attacker attempts SQL injection",
+            "ORM usage observed per apps/business-spine/app/api/auth/login_password/route.ts L29",
+            "Effectiveness requires comprehensive SQL injection testing"
+          ],
+          "evidence": [
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/app/api/auth/login_password/route.ts",
+              "lines": "L29",
+              "excerpt": "const user = await prisma.user.findUnique({ where: { email: body.email } });"
+            }
+          ],
+          "impact": {
+            "confidentiality": "UNVERIFIED",
+            "integrity": "UNVERIFIED",
+            "availability": "UNVERIFIED",
+            "privilege_escalation": "UNVERIFIED",
+            "business": "UNVERIFIED"
+          },
+          "scoring": {
+            "exploitability": 0,
+            "impact": 0,
+            "exposure_surface": 0,
+            "privilege_gain": 0,
+            "total_risk_score": 0,
+            "severity": "informational",
+            "score_justification": "ORM usage observed but requires comprehensive SQL injection testing"
+          },
+          "confidence": "LOW",
+          "affected_components": ["Database access layer"],
+          "prerequisites": ["Comprehensive SQL injection testing required"],
+          "notes": "SQL injection protection requires thorough testing"
+        }
+      ],
+      "not_detected_statement": "SQL injection vulnerabilities UNVERIFIED - requires comprehensive SQL injection testing and complete codebase review."
+    },
+    {
+      "category": "command_injection",
+      "checklist": [
+        {
+          "item": "Identify system command execution",
+          "result": "UNVERIFIED",
+          "notes": "No command execution found in reviewed files"
+        },
+        {
+          "item": "Trace user input to commands",
+          "result": "UNVERIFIED",
+          "notes": "No command construction with user input found"
+        },
+        {
+          "item": "Check for unsafe patterns",
+          "result": "UNVERIFIED",
+          "notes": "No shell execution patterns found in audited files"
+        },
+        {
+          "item": "Verify environment variable handling",
+          "result": "UNVERIFIED",
+          "notes": "Environment variables used but not fully audited"
+        },
+        {
+          "item": "Check for indirect injection vectors",
+          "result": "UNVERIFIED",
+          "notes": "No indirect command injection paths found in reviewed files"
+        }
+      ],
+      "findings": [
+        {
+          "vuln_id": "VULN-CMD-001",
+          "status": "UNVERIFIED",
+          "category": "command_injection",
+          "title": "Command Execution Assessment",
+          "location": {
+            "files": [],
+            "routes_endpoints": [],
+            "middleware": []
+          },
+          "description": "No system command execution functions found in reviewed files. Complete codebase review required for comprehensive assessment.",
+          "attack_scenario": [
+            "No attack scenario - requires complete codebase analysis"
+          ],
+          "evidence": [
+            {
+              "type": "code_search",
+              "path": "reviewed files",
+              "lines": "search results",
+              "excerpt": "No exec, spawn, or command execution functions found in audited files"
+            }
+          ],
+          "impact": {
+            "confidentiality": "UNVERIFIED",
+            "integrity": "UNVERIFIED",
+            "availability": "UNVERIFIED",
+            "privilege_escalation": "UNVERIFIED",
+            "business": "UNVERIFIED"
+          },
+          "scoring": {
+            "exploitability": 0,
+            "impact": 0,
+            "exposure_surface": 0,
+            "privilege_gain": 0,
+            "total_risk_score": 0,
+            "severity": "informational",
+            "score_justification": "Complete codebase review required"
+          },
+          "confidence": "LOW",
+          "affected_components": [],
+          "prerequisites": ["Complete codebase review required"],
+          "notes": "Command injection assessment requires full codebase analysis"
+        }
+      ],
+      "not_detected_statement": "Command injection vulnerabilities UNVERIFIED - requires complete codebase review and comprehensive testing."
+    },
+    {
+      "category": "code_injection",
+      "checklist": [
+        {
+          "item": "Identify dynamic code execution",
+          "result": "UNVERIFIED",
+          "notes": "Workflow engine uses controlled execution in apps/business-spine/src/automation/workflow.ts"
+        },
+        {
+          "item": "Check dynamic imports",
+          "result": "UNVERIFIED",
+          "notes": "No dynamic imports found in reviewed files"
+        },
+        {
+          "item": "Verify template execution",
+          "result": "UNVERIFIED",
+          "notes": "No user-controlled template execution found"
+        },
+        {
+          "item": "Check for unsafe deserialization",
+          "result": "UNVERIFIED",
+          "notes": "No unsafe deserialization found in audited files"
+        },
+        {
+          "item": "Consider configuration-driven execution",
+          "result": "UNVERIFIED",
+          "notes": "Whitelisting observed in apps/business-spine/src/automation/workflow.ts L11-L18"
+        }
+      ],
+      "findings": [
+        {
+          "vuln_id": "VULN-CODE-001",
+          "status": "UNVERIFIED",
+          "category": "code_injection",
+          "title": "Dynamic Execution Controls",
+          "location": {
+            "files": [
+              {
+                "path": "apps/business-spine/src/automation/workflow.ts",
+                "lines": "L11-L18",
+                "symbols": ["ALLOWED_ACTION_TYPES"]
+              }
+            ],
+            "routes_endpoints": ["Workflow execution endpoints"],
+            "middleware": []
+          },
+          "description": "Whitelist of action types in apps/business-spine/src/automation/workflow.ts L11-L18. Input validation in apps/business-spine/src/automation/workflow.ts L171-L174.",
+          "attack_scenario": [
+            "Attacker attempts code injection via workflow",
+            "Whitelist validation per apps/business-spine/src/automation/workflow.ts L172",
+            "Effectiveness requires comprehensive code injection testing"
+          ],
+          "evidence": [
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/src/automation/workflow.ts",
+              "lines": "L11-L18",
+              "excerpt": "const ALLOWED_ACTION_TYPES = new Set(['send_email', 'send_sms', 'create_booking', 'update_client', 'create_invoice', 'webhook']);"
+            },
+            {
+              "type": "code_excerpt",
+              "path": "apps/business-spine/src/automation/workflow.ts",
+              "lines": "L171-L174",
+              "excerpt": "if (!ALLOWED_ACTION_TYPES.has(actionType)) { throw new Error('Invalid action type: ' + actionType); }"
+            }
+          ],
+          "impact": {
+            "confidentiality": "UNVERIFIED",
+            "integrity": "UNVERIFIED",
+            "availability": "UNVERIFIED",
+            "privilege_escalation": "UNVERIFIED",
+            "business": "UNVERIFIED"
+          },
+          "scoring": {
+            "exploitability": 0,
+            "impact": 0,
+            "exposure_surface": 0,
+            "privilege_gain": 0,
+            "total_risk_score": 0,
+            "severity": "informational",
+            "score_justification": "Controls observed but require comprehensive code injection testing"
+          },
+          "confidence": "LOW",
+          "affected_components": ["Workflow engine", "Dynamic execution"],
+          "prerequisites": ["Comprehensive code injection testing required"],
+          "notes": "Code injection protection requires thorough testing"
+        }
+      ],
+      "not_detected_statement": "Code injection vulnerabilities UNVERIFIED - requires comprehensive code injection testing and complete codebase analysis."
+    }
+  ],
+  "blue_team_validation": {
+    "source_red_team_audit_id": "AUDIT_20251222_1512",
+    "changes": [],
+    "rejected_findings": []
+  },
+  "gate": {
+    "policy": {
+      "fail_if": [
+        { "severity_at_least": "critical", "count_gte": 1 },
+        { "severity_at_least": "high", "count_gte": 2 },
+        { "risk_score_gte": 17, "count_gte": 1 }
+      ],
+      "warn_if": [
+        { "severity_at_least": "high", "count_gte": 1 },
+        { "severity_at_least": "medium", "count_gte": 3 },
+        { "risk_score_gte": 13, "count_gte": 2 }
+      ]
+    },
+    "result": {
+      "status": "UNVERIFIED",
+      "reasons": [
+        "All findings marked UNVERIFIED per strict audit rules",
+        "Comprehensive penetration testing required",
+        "Complete codebase review needed",
+        "Security testing validation required"
+      ]
+    }
+  }
+}
