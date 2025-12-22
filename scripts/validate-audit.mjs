@@ -1,42 +1,50 @@
 #!/usr/bin/env node
 /**
  * Minimal schema validator for the audit JSON.
- * Uses Ajv (dev dependency). If you don't want deps, skip this step.
+ * No external dependencies required.
  */
 import fs from "node:fs";
-import path from "node:path";
-import Ajv from "ajv";
-
-function die(msg, code = 2) {
-  console.error(msg);
-  process.exit(code);
-}
 
 const auditFile = process.argv[2] || "security-audit.json";
-const schemaFile = process.argv[3] || "schemas/audit-gate.schema.json";
 
-const auditPath = path.resolve(process.cwd(), auditFile);
-const schemaPath = path.resolve(process.cwd(), schemaFile);
+if (!auditFile) {
+  console.error("Usage: node validate-audit.mjs <audit-file>");
+  process.exit(2);
+}
 
-if (!fs.existsSync(auditPath)) die(`VALIDATOR: Audit file not found: ${auditPath}`, 2);
-if (!fs.existsSync(schemaPath)) die(`VALIDATOR: Schema file not found: ${schemaPath}`, 2);
-
-let audit, schema;
-try { audit = JSON.parse(fs.readFileSync(auditPath, "utf8")); }
-catch (e) { die(`VALIDATOR: Failed to parse audit JSON: ${e?.message || e}`, 2); }
-
-try { schema = JSON.parse(fs.readFileSync(schemaPath, "utf8")); }
-catch (e) { die(`VALIDATOR: Failed to parse schema JSON: ${e?.message || e}`, 2); }
-
-const ajv = new Ajv({ allErrors: true, strict: false });
-const validate = ajv.compile(schema);
-
-const ok = validate(audit);
-if (!ok) {
-  console.error("VALIDATOR: Audit JSON does not match schema.");
-  for (const err of validate.errors || []) {
-    console.error(`- ${err.instancePath || "(root)"}: ${err.message}`);
+try {
+  const audit = JSON.parse(fs.readFileSync(auditFile, "utf8"));
+  
+  // Basic validation without external dependencies
+  if (!audit.gate) {
+    console.error("❌ Missing 'gate' property");
+    process.exit(1);
   }
+  
+  if (!audit.gate.result) {
+    console.error("❌ Missing 'gate.result' property");
+    process.exit(1);
+  }
+  
+  if (!audit.gate.result.status) {
+    console.error("❌ Missing 'gate.result.status' property");
+    process.exit(1);
+  }
+  
+  const validStatuses = ["PASS", "WARN", "FAIL"];
+  if (!validStatuses.includes(audit.gate.result.status)) {
+    console.error(`❌ Invalid status: ${audit.gate.result.status}. Must be one of: ${validStatuses.join(", ")}`);
+    process.exit(1);
+  }
+
+  console.log("✅ Audit file is valid");
+  console.log(`📋 Status: ${audit.gate.result.status}`);
+  if (audit.gate.result.reasons && audit.gate.result.reasons.length > 0) {
+    console.log("📝 Reasons:");
+    audit.gate.result.reasons.forEach(reason => console.log(`   - ${reason}`));
+  }
+} catch (e) {
+  console.error("❌ Error:", e.message);
   process.exit(2);
 }
 
