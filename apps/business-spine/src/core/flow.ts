@@ -13,6 +13,36 @@ export type FlowEnvironment = {
   hashChain?: (evt: AuditEvent) => string;
 };
 
+/**
+ * Validate flow steps before execution to prevent code injection
+ * Ensures all tools referenced in execute steps exist in the environment
+ */
+function validateFlowSteps(steps: FlowStep[], env: FlowEnvironment): void {
+  for (const step of steps) {
+    if (step.kind === "execute") {
+      // Validate tool exists
+      if (!env.tools[step.tool]) {
+        throw new Error(`Invalid tool reference: ${step.tool}. Tool not found in environment.`);
+      }
+      
+      // Validate action is a string (not code)
+      if (typeof step.action !== "string" || step.action.length === 0) {
+        throw new Error(`Invalid action: action must be a non-empty string.`);
+      }
+      
+      // Validate sensitivity is one of allowed values
+      if (!["low", "medium", "high"].includes(step.sensitivity)) {
+        throw new Error(`Invalid sensitivity: ${step.sensitivity}. Must be 'low', 'medium', or 'high'.`);
+      }
+      
+      // Validate input is an object
+      if (typeof step.input !== "object" || step.input === null) {
+        throw new Error(`Invalid input: input must be an object.`);
+      }
+    }
+  }
+}
+
 export async function runFlow(
   steps: FlowStep[], 
   flowCtx: FlowContext, 
@@ -20,6 +50,9 @@ export async function runFlow(
 ): Promise<{ steps: FlowStep[], final?: { ok: boolean; message: string; payload?: unknown } }> {
   const executedSteps: FlowStep[] = [];
   let finalResult: { ok: boolean; message: string; payload?: unknown } | undefined;
+
+  // Validate all steps before execution to prevent code injection
+  validateFlowSteps(steps, env);
 
   for (const step of steps) {
     executedSteps.push(step);
@@ -35,6 +68,12 @@ export async function runFlow(
 
       case "execute":
         try {
+          // Validate tool exists before execution
+          const tool = env.tools[step.tool];
+          if (!tool) {
+            throw new Error(`Tool not found: ${step.tool}`);
+          }
+
           // Check policy
           const policyResult = env.policy({
             ctx: flowCtx.ctx,
@@ -62,17 +101,7 @@ export async function runFlow(
             return { steps: executedSteps };
           }
 
-          // Execute tool
-          const tool = env.tools[step.tool];
-          if (!tool) {
-            executedSteps.push({
-              kind: "respond",
-              message: `Tool not found: ${step.tool}`
-            });
-            finalResult = { ok: false, message: `Tool not found: ${step.tool}` };
-            continue;
-          }
-
+          // Execute tool with validated input
           const result = await tool({ ctx: flowCtx.ctx, input: step.input });
 
           // Audit the execution

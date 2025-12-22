@@ -7,6 +7,26 @@ export interface WorkflowStep {
   conditionBranches?: { condition: string; stepId: string }[];
 }
 
+// Whitelist of allowed action types to prevent code injection
+const ALLOWED_ACTION_TYPES = new Set([
+  'send_email',
+  'send_sms',
+  'create_booking',
+  'update_client',
+  'create_invoice',
+  'webhook'
+]);
+
+// Whitelist of allowed condition operators to prevent code injection
+const ALLOWED_OPERATORS = new Set([
+  'equals',
+  'not_equals',
+  'greater_than',
+  'less_than',
+  'contains',
+  'in'
+]);
+
 export interface Workflow {
   id: string;
   name: string;
@@ -148,6 +168,11 @@ function executeSteps(
 function executeAction(step: WorkflowStep, input: Record<string, any>): Record<string, any> {
   const { actionType, ...params } = step.config;
 
+  // Validate action type against whitelist to prevent code injection
+  if (!ALLOWED_ACTION_TYPES.has(actionType)) {
+    throw new Error(`Invalid action type: ${actionType}. Allowed types: ${Array.from(ALLOWED_ACTION_TYPES).join(', ')}`);
+  }
+
   switch (actionType) {
     case 'send_email':
       return { emailSent: true, messageId: `msg_${Date.now()}` };
@@ -162,13 +187,18 @@ function executeAction(step: WorkflowStep, input: Record<string, any>): Record<s
     case 'webhook':
       return { webhookCalled: true };
     default:
-      return { actionExecuted: true };
+      throw new Error(`Unhandled action type: ${actionType}`);
   }
 }
 
 function evaluateCondition(step: WorkflowStep, input: Record<string, any>): boolean {
   const { field, operator, value } = step.config;
   const fieldValue = input[field];
+
+  // Validate operator against whitelist to prevent code injection
+  if (!ALLOWED_OPERATORS.has(operator)) {
+    throw new Error(`Invalid operator: ${operator}. Allowed operators: ${Array.from(ALLOWED_OPERATORS).join(', ')}`);
+  }
 
   switch (operator) {
     case 'equals':
@@ -184,7 +214,7 @@ function evaluateCondition(step: WorkflowStep, input: Record<string, any>): bool
     case 'in':
       return Array.isArray(value) && value.includes(fieldValue);
     default:
-      return false;
+      throw new Error(`Unhandled operator: ${operator}`);
   }
 }
 
