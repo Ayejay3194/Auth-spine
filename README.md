@@ -11,6 +11,14 @@ A comprehensive, production-ready authentication and role-based access control (
 ### Installation & Running
 
 ```bash
+# Clone the repository (if not already done)
+git clone https://github.com/Ayejay3194/Auth-spine.git
+cd Auth-spine
+
+# Initialize submodules (includes nlp.js for NLU enhancement)
+git submodule update --init --recursive
+# Or use: ./scripts/setup-nlp.sh
+
 # Install dependencies
 pnpm install
 
@@ -76,6 +84,17 @@ apps/
 ├── business-spine/          # Main web application (Next.js)
 └── demo-ui/                 # Demo UI for testing
 ```
+
+### External Dependencies
+
+```
+external/
+└── nlp.js/                  # NLP.js library (git submodule)
+                            # Natural language processing toolkit
+                            # Used for enhanced NLU capabilities
+```
+
+See [external/README.md](external/README.md) for more information about external dependencies.
 
 ## 🔐 Authentication Flow
 
