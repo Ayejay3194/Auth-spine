@@ -4,6 +4,9 @@
  */
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
+const kv = await Deno.openKv();
+const REPLAY_TTL_MS = 5 * 60 * 1000;
+
 function timingSafeEqual(a: Uint8Array, b: Uint8Array) {
   if (a.length !== b.length) return false;
   let out = 0;
@@ -23,13 +26,16 @@ async function hmacSHA256(secret: string, data: string) {
   return new Uint8Array(sig);
 }
 
-async function getWebhookSecret(tenantId: string): Promise<string> {
-  // TODO: fetch from DB or secrets store
-  return Deno.env.get("WEBHOOK_SECRET") ?? "dev_secret_change_me";
+async function getWebhookSecret(tenantId: string): Promise<string | null> {
+  const result = await kv.get<{ secret: string }>(["webhook-secrets", tenantId]);
+  return result.value?.secret ?? null;
 }
 
-async function isReplay(_tenantId: string, _id: string): Promise<boolean> {
-  // TODO: store seen webhook ids with TTL (Redis/KV)
+async function isReplay(tenantId: string, id: string): Promise<boolean> {
+  const key = ["webhook-replay", tenantId, id] as const;
+  const existing = await kv.get(key);
+  if (existing.value) return true;
+  await kv.set(key, true, { expireIn: REPLAY_TTL_MS });
   return false;
 }
 
@@ -52,6 +58,9 @@ serve(async (req) => {
   // Common pattern: sign "{timestamp}.{body}"
   const signedPayload = `${tsHeader}.${bodyText}`;
   const secret = await getWebhookSecret(tenantId);
+  if (!secret) {
+    return new Response("missing webhook secret", { status: 500 });
+  }
   const expected = await hmacSHA256(secret, signedPayload);
 
   // Assume sigHeader is hex
