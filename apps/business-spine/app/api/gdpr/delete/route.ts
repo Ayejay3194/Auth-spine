@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteUserData } from '@/src/compliance/gdpr';
 import { api } from '@/src/core/api';
+import { AuthenticationError, getActor } from '@/src/core/auth';
 
 /**
  * GDPR Data Deletion Endpoint
@@ -8,14 +9,17 @@ import { api } from '@/src/core/api';
  */
 export async function POST(req: NextRequest) {
   return api(async () => {
-    // TODO: Get user ID from authentication
-    const userId = req.headers.get('x-user-id');
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    let actor;
+    try {
+      actor = await getActor(req);
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 401 }
+        );
+      }
+      throw error;
     }
 
     const body = await req.json().catch(() => ({}));
@@ -31,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     try {
       // Delete user data (retains audit logs)
-      await deleteUserData(userId, true);
+      await deleteUserData(actor.userId, true);
       
       return NextResponse.json({
         success: true,
@@ -45,4 +49,3 @@ export async function POST(req: NextRequest) {
     }
   });
 }
-

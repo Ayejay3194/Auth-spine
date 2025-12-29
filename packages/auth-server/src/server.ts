@@ -6,7 +6,17 @@ import { loadClients, loadUsers } from './config'
 import { issueAccessToken } from './token'
 
 const PORT = Number(process.env.PORT ?? 4000)
-const ISSUER = String(process.env.ISSUER ?? `http://localhost:${PORT}`)
+const ISSUER = process.env.ISSUER?.trim()
+if (!ISSUER) {
+  console.error('ERROR: ISSUER environment variable is required')
+  process.exit(1)
+}
+try {
+  new URL(ISSUER)
+} catch {
+  console.error('ERROR: ISSUER must be a valid URL')
+  process.exit(1)
+}
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET) {
   console.error('ERROR: JWT_SECRET environment variable is required')

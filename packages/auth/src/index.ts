@@ -44,7 +44,10 @@ export class AuthError extends Error {
 }
 
 function getKey() {
-  const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+  const secret = process.env.JWT_SECRET?.trim()
+  if (!secret) {
+    throw new AuthError('JWT_SECRET environment variable is required', ErrorCode.AUTH_UNAUTHORIZED)
+  }
   return new TextEncoder().encode(secret)
 }
 

@@ -1,5 +1,5 @@
 import { OpsActionRequest, OpsActionResult } from "../types/opsRuntime";
-import { assertAllowed, validateStepUpToken } from "./policy";
+import { assertAllowed } from "./policy";
 import { getFlag, setFlag } from "./flagStore";
 import { appendAudit, newAuditId } from "./auditLog";
 
@@ -9,12 +9,7 @@ export async function runOpsActions(req: OpsActionRequest, request_id?: string):
   const blocked: OpsActionResult["blocked"] = [];
 
   try {
-    assertAllowed(req);
-
-    if (req.step_up_token) {
-      const ok = await validateStepUpToken(req.step_up_token);
-      if (!ok) throw new Error("Invalid step-up token.");
-    }
+    await assertAllowed(req);
 
     for (const a of req.actions) {
       if (a.key === "auth.oauth.disableProvider") {

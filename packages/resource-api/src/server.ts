@@ -4,8 +4,23 @@ import { z } from 'zod'
 import { verifyHs256Bearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared-auth'
 
 const PORT = Number(process.env.PORT ?? 4100)
-const AUTH_ISSUER = String(process.env.AUTH_ISSUER ?? 'http://localhost:4000')
-const JWT_SECRET = String(process.env.JWT_SECRET ?? 'dev_secret_change_me')
+const AUTH_ISSUER = process.env.AUTH_ISSUER?.trim()
+if (!AUTH_ISSUER) {
+  console.error('ERROR: AUTH_ISSUER environment variable is required')
+  process.exit(1)
+}
+try {
+  new URL(AUTH_ISSUER)
+} catch {
+  console.error('ERROR: AUTH_ISSUER must be a valid URL')
+  process.exit(1)
+}
+
+const JWT_SECRET = process.env.JWT_SECRET?.trim()
+if (!JWT_SECRET) {
+  console.error('ERROR: JWT_SECRET environment variable is required')
+  process.exit(1)
+}
 const REQUIRED_AUD = String(process.env.REQUIRED_AUD ?? 'app_one')
 const REQUIRED_SCOPES = String(process.env.REQUIRED_SCOPES ?? 'read').split(',').map(s=>s.trim()).filter(Boolean)
 

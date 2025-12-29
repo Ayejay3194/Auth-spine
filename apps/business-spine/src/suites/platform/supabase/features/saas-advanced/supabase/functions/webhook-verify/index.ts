@@ -4,6 +4,9 @@
  */
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
+const REPLAY_TTL_MS = 5 * 60 * 1000;
+const replayCache = new Map<string, number>();
+
 function timingSafeEqual(a: Uint8Array, b: Uint8Array) {
   if (a.length !== b.length) return false;
   let out = 0;
@@ -24,12 +27,21 @@ async function hmacSHA256(secret: string, data: string) {
 }
 
 async function getWebhookSecret(tenantId: string): Promise<string> {
-  // TODO: fetch from DB or secrets store
-  return Deno.env.get("WEBHOOK_SECRET") ?? "dev_secret_change_me";
+  const secret = Deno.env.get("WEBHOOK_SECRET");
+  if (!secret) {
+    throw new Error(`Missing WEBHOOK_SECRET for tenant ${tenantId}`);
+  }
+  return secret;
 }
 
-async function isReplay(_tenantId: string, _id: string): Promise<boolean> {
-  // TODO: store seen webhook ids with TTL (Redis/KV)
+async function isReplay(tenantId: string, id: string): Promise<boolean> {
+  const key = `${tenantId}:${id}`;
+  const now = Date.now();
+  for (const [cachedKey, expiresAt] of replayCache.entries()) {
+    if (expiresAt <= now) replayCache.delete(cachedKey);
+  }
+  if (replayCache.has(key)) return true;
+  replayCache.set(key, now + REPLAY_TTL_MS);
   return false;
 }
 

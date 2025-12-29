@@ -1,4 +1,6 @@
 import { OpsActionRequest } from "../types/opsRuntime";
+import { createSecretKey } from "crypto";
+import { jwtVerify } from "jose";
 
 /**
  * Minimal policy:
@@ -12,7 +14,7 @@ const STEP_UP_REQUIRED = new Set<string>([
   "auth.oauth.disableProvider",
 ]);
 
-export function assertAllowed(req: OpsActionRequest) {
+export async function assertAllowed(req: OpsActionRequest) {
   if (!["admin", "ops", "system"].includes(req.actor.role)) {
     throw new Error("Actor role not permitted.");
   }
@@ -22,13 +24,27 @@ export function assertAllowed(req: OpsActionRequest) {
       if (!req.step_up_token) {
         throw new Error(`Step-up required for ${a.key}`);
       }
+      const valid = await validateStepUpToken(req.step_up_token, req.actor.actor_id);
+      if (!valid) {
+        throw new Error(`Invalid step-up token for ${a.key}`);
+      }
     }
   }
 }
 
 /** Placeholder validation */
-export async function validateStepUpToken(token: string | undefined): Promise<boolean> {
+export async function validateStepUpToken(token: string | undefined, actorId?: string): Promise<boolean> {
   if (!token) return false;
-  // TODO: verify token with your auth provider or session.
-  return token.length >= 12;
+  const secret = process.env.JWT_SECRET?.trim();
+  if (!secret) {
+    throw new Error("JWT_SECRET missing for step-up validation.");
+  }
+
+  try {
+    const { payload } = await jwtVerify(token, createSecretKey(Buffer.from(secret, "utf-8")));
+    if (actorId && payload.sub && String(payload.sub) !== actorId) return false;
+    return true;
+  } catch {
+    return false;
+  }
 }

@@ -1,4 +1,5 @@
 import { OpsActionRequest } from "../types/opsRuntime";
+import { verifySession } from "@/src/auth/session";
 
 /**
  * Minimal policy:
@@ -12,7 +13,7 @@ const STEP_UP_REQUIRED = new Set<string>([
   "auth.oauth.disableProvider",
 ]);
 
-export function assertAllowed(req: OpsActionRequest) {
+export async function assertAllowed(req: OpsActionRequest) {
   if (!["admin", "ops", "system"].includes(req.actor.role)) {
     throw new Error("Actor role not permitted.");
   }
@@ -22,13 +23,19 @@ export function assertAllowed(req: OpsActionRequest) {
       if (!req.step_up_token) {
         throw new Error(`Step-up required for ${a.key}`);
       }
+      const valid = await validateStepUpToken(req.step_up_token, req.actor.actor_id);
+      if (!valid) {
+        throw new Error(`Invalid step-up token for ${a.key}`);
+      }
     }
   }
 }
 
 /** Placeholder validation */
-export async function validateStepUpToken(token: string | undefined): Promise<boolean> {
+export async function validateStepUpToken(token: string | undefined, actorId?: string): Promise<boolean> {
   if (!token) return false;
-  // TODO: verify token with your auth provider or session.
-  return token.length >= 12;
+  const claims = await verifySession(token);
+  if (!claims) return false;
+  if (actorId && claims.sub !== actorId) return false;
+  return true;
 }
