@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exportUserData } from '@/src/compliance/gdpr';
 import { api } from '@/src/core/api';
+import { verifySession } from '@/src/auth/session';
 
 /**
  * GDPR Data Export Endpoint
@@ -8,15 +9,23 @@ import { api } from '@/src/core/api';
  */
 export async function GET(req: NextRequest) {
   return api(async () => {
-    // TODO: Get user ID from authentication
-    const userId = req.headers.get('x-user-id');
-    
-    if (!userId) {
+    const sessionToken = req.cookies.get('session')?.value;
+    if (!sessionToken) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
+
+    const claims = await verifySession(sessionToken);
+    if (!claims?.sub) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userId = claims.sub;
 
     try {
       const data = await exportUserData(userId);
@@ -35,4 +44,3 @@ export async function GET(req: NextRequest) {
     }
   });
 }
-
