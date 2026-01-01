@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken, JwtPayload, verifyHs256Bearer, SpineJwtClaims, requireAudience, requireScopes, denyIfBanned } from '../../../../packages/auth/src/index'
+import { verifyToken, JwtPayload, verifyBearer, SpineJwtClaims, requireAudience, requireScopes, denyIfBanned } from '../../../../packages/auth/src/index'
 import { prisma } from '@/lib/prisma'
 
 export enum Role {
@@ -108,7 +108,11 @@ export async function rbacMiddleware(
     // Try multiclient verification first if config provided
     if (multiclientConfig?.clientId && multiclientConfig?.issuer && multiclientConfig?.secret) {
       try {
-        claims = await verifyHs256Bearer(authHeader, multiclientConfig.issuer, multiclientConfig.secret)
+        claims = await verifyBearer(authHeader, multiclientConfig.issuer, {
+          secret: multiclientConfig.secret,
+          publicKey: process.env.JWT_PUBLIC_KEY,
+          alg: (process.env.JWT_ALG as 'HS256' | 'RS256') ?? 'HS256'
+        })
         
         // Validate audience
         requireAudience(multiclientConfig.clientId)(claims)

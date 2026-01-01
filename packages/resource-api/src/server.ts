@@ -1,11 +1,13 @@
 import express from 'express'
 import cors from 'cors'
 import { z } from 'zod'
-import { verifyHs256Bearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared-auth'
+import { verifyBearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared-auth'
 
 const PORT = Number(process.env.PORT ?? 4100)
 const AUTH_ISSUER = String(process.env.AUTH_ISSUER ?? 'http://localhost:4000')
 const JWT_SECRET = String(process.env.JWT_SECRET ?? 'dev_secret_change_me')
+const JWT_ALG = (process.env.JWT_ALG as 'HS256' | 'RS256') ?? 'HS256'
+const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY
 const REQUIRED_AUD = String(process.env.REQUIRED_AUD ?? 'app_one')
 const REQUIRED_SCOPES = String(process.env.REQUIRED_SCOPES ?? 'read').split(',').map(s=>s.trim()).filter(Boolean)
 
@@ -17,7 +19,11 @@ app.get('/health', (_req, res) => res.json({ ok:true, required: { aud: REQUIRED_
 
 app.get('/me', async (req, res) => {
   try {
-    const c = await verifyHs256Bearer(req.header('authorization'), AUTH_ISSUER, JWT_SECRET)
+    const c = await verifyBearer(req.header('authorization'), AUTH_ISSUER, {
+      alg: JWT_ALG,
+      secret: JWT_SECRET,
+      publicKey: JWT_PUBLIC_KEY
+    })
     requireAudience(REQUIRED_AUD)(c)
     denyIfBanned()(c)
     requireScopes(REQUIRED_SCOPES)(c)
@@ -31,7 +37,11 @@ app.post('/resource', async (req, res) => {
   const body = z.object({ name: z.string().min(1) }).safeParse(req.body)
   if (!body.success) return res.status(400).json({ error: 'bad_request' })
   try {
-    const c = await verifyHs256Bearer(req.header('authorization'), AUTH_ISSUER, JWT_SECRET)
+    const c = await verifyBearer(req.header('authorization'), AUTH_ISSUER, {
+      alg: JWT_ALG,
+      secret: JWT_SECRET,
+      publicKey: JWT_PUBLIC_KEY
+    })
     requireAudience(REQUIRED_AUD)(c)
     denyIfBanned()(c)
     requireScopes(REQUIRED_SCOPES)(c)

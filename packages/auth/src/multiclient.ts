@@ -4,6 +4,7 @@
  */
 
 import { jwtVerify } from 'jose'
+import { createPublicKey, createSecretKey } from 'crypto'
 import { AuthError, ErrorCode } from './index'
 
 export type RiskState = 'ok' | 'restricted' | 'banned'
@@ -16,6 +17,8 @@ export type SpineJwtClaims = {
   risk: RiskState
   entitlements: Record<string, boolean>
 }
+
+export type JwtAlgorithm = 'HS256' | 'RS256'
 
 /**
  * Verify HS256 Bearer token and extract claims
@@ -30,12 +33,51 @@ export async function verifyHs256Bearer(
   }
   
   const token = authorization.slice('Bearer '.length)
-  const key = new TextEncoder().encode(secret)
+  const key = createSecretKey(Buffer.from(secret, 'utf-8'))
   
   try {
     const { payload } = await jwtVerify(token, key, { issuer })
     const p = payload as any
     
+    return {
+      iss: String(p.iss),
+      sub: String(p.sub),
+      aud: String(p.aud),
+      scp: Array.isArray(p.scp) ? p.scp.map(String) : [],
+      risk: (p.risk ?? 'ok') as RiskState,
+      entitlements: (p.entitlements ?? {}) as Record<string, boolean>
+    }
+  } catch (error: any) {
+    throw new AuthError(error?.message || 'Token verification failed', ErrorCode.AUTH_INVALID_TOKEN)
+  }
+}
+
+/**
+ * Verify Bearer token (HS256 or RS256) and extract claims
+ */
+export async function verifyBearer(
+  authorization: string | undefined,
+  issuer: string,
+  options: { alg?: JwtAlgorithm; secret?: string; publicKey?: string } = {}
+): Promise<SpineJwtClaims> {
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    throw new AuthError('missing_bearer', ErrorCode.AUTH_MISSING_TOKEN)
+  }
+
+  const token = authorization.slice('Bearer '.length)
+  const alg = options.alg ?? (process.env.JWT_ALG as JwtAlgorithm) ?? 'HS256'
+  const key = alg === 'HS256'
+    ? createSecretKey(Buffer.from(options.secret ?? process.env.JWT_SECRET ?? 'dev_secret_change_me', 'utf-8'))
+    : (() => {
+        const publicKey = options.publicKey ?? process.env.JWT_PUBLIC_KEY
+        if (!publicKey) throw new AuthError('missing_public_key', ErrorCode.AUTH_INVALID_TOKEN)
+        return createPublicKey(publicKey)
+      })()
+
+  try {
+    const { payload } = await jwtVerify(token, key, { issuer, algorithms: [alg] })
+    const p = payload as any
+
     return {
       iss: String(p.iss),
       sub: String(p.sub),

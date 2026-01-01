@@ -11,9 +11,14 @@ export type UserConfig = {
   id: string
   email: string
   password: string
+  role?: string
   scopes: string[]
   risk?: 'ok' | 'restricted' | 'banned'
   entitlements?: Record<string, boolean>
+  mfa?: {
+    enabled: boolean
+    code: string
+  }
 }
 
 function readJson<T>(rel: string): T {

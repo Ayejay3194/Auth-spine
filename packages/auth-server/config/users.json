@@ -3,7 +3,7 @@
     {
       "id": "u1",
       "email": "admin@demo.com",
-      "password": "password",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "admin",
       "scopes": [
         "users:read",
@@ -22,12 +22,16 @@
       "entitlements": {
         "premium": true,
         "admin_access": true
+      },
+      "mfa": {
+        "enabled": true,
+        "code": "123456"
       }
     },
     {
       "id": "u2",
       "email": "manager@demo.com",
-      "password": "password",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "manager",
       "scopes": [
         "users:read",
@@ -49,7 +53,7 @@
     {
       "id": "u3",
       "email": "staff@demo.com",
-      "password": "password",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "staff",
       "scopes": [
         "bookings:read",
@@ -66,7 +70,7 @@
     {
       "id": "u4",
       "email": "client@demo.com",
-      "password": "password",
+      "password": "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy",
       "role": "client",
       "scopes": [
         "profile:read",
