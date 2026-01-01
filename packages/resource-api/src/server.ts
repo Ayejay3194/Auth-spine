@@ -4,8 +4,28 @@ import { z } from 'zod'
 import { verifyBearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared-auth'
 
 const PORT = Number(process.env.PORT ?? 4100)
-const AUTH_ISSUER = String(process.env.AUTH_ISSUER ?? 'http://localhost:4000')
-const JWT_SECRET = String(process.env.JWT_SECRET ?? 'dev_secret_change_me')
+const authIssuerEnv = process.env.AUTH_ISSUER?.trim()
+if (!authIssuerEnv) {
+  console.error('ERROR: AUTH_ISSUER environment variable is required')
+  process.exit(1)
+}
+let authIssuerUrl: URL
+try {
+  authIssuerUrl = new URL(authIssuerEnv)
+} catch {
+  console.error('ERROR: AUTH_ISSUER environment variable must be a valid URL')
+  process.exit(1)
+}
+if (!['http:', 'https:'].includes(authIssuerUrl.protocol)) {
+  console.error('ERROR: AUTH_ISSUER environment variable must use http or https')
+  process.exit(1)
+}
+const AUTH_ISSUER = authIssuerEnv
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET) {
+  console.error('ERROR: JWT_SECRET environment variable is required')
+  process.exit(1)
+}
 const JWT_ALG = (process.env.JWT_ALG as 'HS256' | 'RS256') ?? 'HS256'
 const JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY
 const REQUIRED_AUD = String(process.env.REQUIRED_AUD ?? 'app_one')
@@ -15,7 +35,7 @@ const app = express()
 app.use(cors({ origin: true }))
 app.use(express.json())
 
-app.get('/health', (_req, res) => res.json({ ok:true, required: { aud: REQUIRED_AUD, scopes: REQUIRED_SCOPES } }))
+app.get('/health', (_req, res) => res.json({ ok:true, issuer: AUTH_ISSUER, required: { aud: REQUIRED_AUD, scopes: REQUIRED_SCOPES } }))
 
 app.get('/me', async (req, res) => {
   try {
@@ -51,4 +71,4 @@ app.post('/resource', async (req, res) => {
   }
 })
 
-app.listen(PORT, () => console.log('resource-api on', `http://localhost:${PORT}`))
+app.listen(PORT, () => console.log('resource-api on', `http://localhost:${PORT}`, 'issuer', AUTH_ISSUER))
