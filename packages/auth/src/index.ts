@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose'
+import { createPrivateKey, createPublicKey, createSecretKey } from 'crypto'
 import bcrypt from 'bcryptjs'
 
 export type RiskState = 'ok' | 'restricted' | 'banned'
@@ -43,23 +44,48 @@ export class AuthError extends Error {
   }
 }
 
-function getKey() {
-  const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
-  return new TextEncoder().encode(secret)
+type JwtAlgorithm = 'HS256' | 'RS256'
+
+function getAlgorithm(): JwtAlgorithm {
+  return (process.env.JWT_ALG ?? 'HS256') as JwtAlgorithm
+}
+
+function getSigningKey() {
+  const alg = getAlgorithm()
+  if (alg === 'HS256') {
+    const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+    return { key: createSecretKey(Buffer.from(secret, 'utf-8')), alg }
+  }
+  const privateKey = process.env.JWT_PRIVATE_KEY
+  if (!privateKey) throw new AuthError('Missing JWT_PRIVATE_KEY', ErrorCode.AUTH_UNAUTHORIZED)
+  return { key: createPrivateKey(privateKey), alg }
+}
+
+function getVerifyKey() {
+  const alg = getAlgorithm()
+  if (alg === 'HS256') {
+    const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+    return { key: createSecretKey(Buffer.from(secret, 'utf-8')), alg }
+  }
+  const publicKey = process.env.JWT_PUBLIC_KEY
+  if (!publicKey) throw new AuthError('Missing JWT_PUBLIC_KEY', ErrorCode.AUTH_UNAUTHORIZED)
+  return { key: createPublicKey(publicKey), alg }
 }
 
 export async function generateToken(payload: JwtPayload, opts?: { expiresIn?: string }) {
   const exp = opts?.expiresIn || '24h'
+  const { key, alg } = getSigningKey()
   return new SignJWT(payload as any)
-    .setProtectedHeader({ alg: 'HS256' })
+    .setProtectedHeader({ alg })
     .setIssuedAt()
     .setExpirationTime(exp)
-    .sign(getKey())
+    .sign(key)
 }
 
 export async function verifyToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, getKey(), { algorithms: ['HS256'] })
+    const { key, alg } = getVerifyKey()
+    const { payload } = await jwtVerify(token, key, { algorithms: [alg] })
     return payload as any as JwtPayload
   } catch (e: any) {
     throw new AuthError(e?.message || 'Invalid token', ErrorCode.AUTH_UNAUTHORIZED)
@@ -67,11 +93,18 @@ export async function verifyToken(token: string) {
 }
 
 // Multiclient verification functions
-export async function verifyHs256Bearer(authorization: string | undefined, issuer: string, secret: string): Promise<SpineJwtClaims> {
+export async function verifyBearer(authorization: string | undefined, issuer: string, options: { alg?: JwtAlgorithm; secret?: string; publicKey?: string } = {}): Promise<SpineJwtClaims> {
   if (!authorization || !authorization.startsWith('Bearer ')) throw new AuthError('missing_bearer', ErrorCode.AUTH_MISSING_TOKEN)
   const token = authorization.slice('Bearer '.length)
-  const key = new TextEncoder().encode(secret)
-  const { payload } = await jwtVerify(token, key, { issuer })
+  const alg = options.alg ?? getAlgorithm()
+  const key = alg === 'HS256'
+    ? createSecretKey(Buffer.from(options.secret ?? process.env.JWT_SECRET ?? 'your-secret-key-change-in-production', 'utf-8'))
+    : (() => {
+        const publicKey = options.publicKey ?? process.env.JWT_PUBLIC_KEY
+        if (!publicKey) throw new AuthError('Missing JWT_PUBLIC_KEY', ErrorCode.AUTH_UNAUTHORIZED)
+        return createPublicKey(publicKey)
+      })()
+  const { payload } = await jwtVerify(token, key, { issuer, algorithms: [alg] })
   const p = payload as any
   return {
     iss: String(p.iss),
@@ -81,6 +114,10 @@ export async function verifyHs256Bearer(authorization: string | undefined, issue
     risk: (p.risk ?? 'ok'),
     entitlements: (p.entitlements ?? {}) as Record<string, boolean>
   }
+}
+
+export async function verifyHs256Bearer(authorization: string | undefined, issuer: string, secret: string): Promise<SpineJwtClaims> {
+  return verifyBearer(authorization, issuer, { alg: 'HS256', secret })
 }
 
 export function requireAudience(aud: string) {
