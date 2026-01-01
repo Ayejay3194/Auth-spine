@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, JwtPayload, verifyBearer, SpineJwtClaims, requireAudience, requireScopes, denyIfBanned } from '../../../../packages/auth/src/index'
 import { prisma } from '@/lib/prisma'
+import { isValidUrl } from '@/suites/shared/utils'
 
 export enum Role {
   OWNER = 'owner',
@@ -252,10 +253,23 @@ export function withMulticlientRBAC(
   issuer?: string,
   secret?: string
 ) {
+  const resolvedIssuer = issuer ?? process.env.ISSUER
+  if (!resolvedIssuer) {
+    throw new Error('withMulticlientRBAC requires an issuer or process.env.ISSUER to be set')
+  }
+  if (!isValidUrl(resolvedIssuer)) {
+    throw new Error('withMulticlientRBAC requires ISSUER to be a valid URL')
+  }
+
+  const resolvedSecret = secret ?? process.env.JWT_SECRET
+  if (!resolvedSecret) {
+    throw new Error('withMulticlientRBAC requires a secret or process.env.JWT_SECRET to be set')
+  }
+
   return withRBAC(handler, requiredPermission, {
     clientId,
     requiredScopes,
-    issuer: issuer || process.env.ISSUER || `http://localhost:4000`,
-    secret: secret || process.env.JWT_SECRET || 'dev_secret_change_me'
+    issuer: resolvedIssuer,
+    secret: resolvedSecret
   })
 }
