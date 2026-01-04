@@ -1,0 +1,163 @@
+DECANS OPERATIONS MANUAL
+=======================
+
+This document defines how Decans is RUN, not just how it thinks.
+It governs releases, incidents, data, moderation, pricing discipline,
+and long-term integrity.
+
+------------------------------------------------------------
+I. OPERATIONAL PHILOSOPHY
+------------------------------------------------------------
+
+1. Stability beats novelty.
+2. Accuracy beats engagement.
+3. Trust beats growth.
+4. Silence is preferable to noise.
+5. Every feature must be reversible.
+
+------------------------------------------------------------
+II. RELEASE MANAGEMENT
+------------------------------------------------------------
+
+A. Release Types
+- Patch: math fixes, copy clarity, bug fixes
+- Minor: new modules behind flags
+- Major: new surfaces or tier changes (rare)
+
+B. Rules
+- No Friday releases
+- One major release per quarter max
+- Every release must be feature-flagged
+- Rollout in stages (internal → beta → public)
+
+C. Pre-Release Checklist
+- Math validated
+- Word-count checks pass
+- Forbidden language lint passes
+- Feature flags verified
+- Rollback tested
+
+------------------------------------------------------------
+III. INCIDENT RESPONSE
+------------------------------------------------------------
+
+A. What Counts as an Incident
+- Incorrect chart math
+- Contradictory interpretations
+- Prophecy/therapy language leak
+- Privacy or memory misuse
+- Unintended Solari behavior
+
+B. Response Protocol
+1. Disable affected feature (kill switch)
+2. Log incident with timestamp + version
+3. Patch quietly
+4. No public drama
+
+Rule:
+Fix > explain > move on
+
+------------------------------------------------------------
+IV. DATA & MEMORY GOVERNANCE
+------------------------------------------------------------
+
+A. Memory Principles
+- Observational only
+- No emotional labeling
+- No inferred intent
+- User can view/delete memory
+
+B. Retention
+- Default retention visible
+- No hidden shadow profiles
+- No cross-user inference
+
+C. Privacy
+- No selling data
+- No training external models on user data
+- No behavioral targeting
+
+------------------------------------------------------------
+V. SOLARI OPERATIONS
+------------------------------------------------------------
+
+- Solari is opt-in
+- Default: off or minimal
+- Every Solari output must reference system content
+- If Solari misbehaves, disable instantly
+
+Never:
+- Argue with users
+- Diagnose
+- Escalate emotionally
+
+------------------------------------------------------------
+VI. TIER & PRICING DISCIPLINE
+------------------------------------------------------------
+
+- Free tier must feel whole
+- Paid tiers unlock depth, not basic understanding
+- No dark patterns
+- No artificial scarcity
+
+Upgrades should feel like:
+“I’m ready,” not “I’m blocked.”
+
+------------------------------------------------------------
+VII. MARKETPLACE OPERATIONS
+------------------------------------------------------------
+
+- Contributors must accept Decans guidelines
+- Content reviewed for compliance
+- No guru branding
+- No medical or therapeutic claims
+
+Violations result in removal, not negotiation.
+
+------------------------------------------------------------
+VIII. SUPPORT & MODERATION
+------------------------------------------------------------
+
+Support Tone:
+- Calm
+- Neutral
+- Non-defensive
+
+Moderation Rules:
+- Do not debate belief
+- Do not validate delusions
+- Redirect to pattern language
+
+------------------------------------------------------------
+IX. METRICS THAT MATTER
+------------------------------------------------------------
+
+Track:
+- Return usage (30/90/180 days)
+- Feature disable rates
+- Time-to-silence (less noise is good)
+- Longitudinal engagement
+
+Do NOT optimize for:
+- Daily opens
+- Notification clicks
+- Virality
+
+------------------------------------------------------------
+X. FIVE-YEAR SAFETY CHECK
+------------------------------------------------------------
+
+Every quarter ask:
+- Are we still a reference?
+- Are we still defensible?
+- Are we quieter than the market?
+- Are users calmer, not addicted?
+
+If no, course-correct.
+
+------------------------------------------------------------
+MISSION LOCK
+------------------------------------------------------------
+
+Decans is infrastructure for self-understanding.
+If it ever behaves like entertainment, stop and fix it.

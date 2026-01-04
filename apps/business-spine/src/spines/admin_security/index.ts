@@ -1,1 +1,1 @@
-export { spine as admin_securitySpineSpine } from './spine.js';
+export { spine as admin_securitySpine } from './spine.js';

@@ -1,24 +1,21 @@
-import type { Metadata } from 'next';
-import { AppProvider, Shell } from '@/suites/core';
-import './globals.css';
+import type { Metadata } from 'next'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Auth-Spine Platform',
-  description: 'Universal business automation platform',
-};
+  title: 'Business Spine - Service Business Assistant',
+  description: 'Deterministic assistant for service businesses - booking, CRM, payments, and more',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <AppProvider>
-          <Shell>{children}</Shell>
-        </AppProvider>
+    <html lang="en">
+      <body className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        {children}
       </body>
     </html>
-  );
+  )
 }

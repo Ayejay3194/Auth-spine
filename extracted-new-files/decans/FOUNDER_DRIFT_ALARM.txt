@@ -1,0 +1,21 @@
+DECANS FOUNDER DRIFT ALARM
+=========================
+
+Review quarterly.
+
+Ask honestly:
+
+- Are we quieter than the market?
+- Are we adding depth instead of surfaces?
+- Did we ship anything because it was cool?
+- Does the system still allow silence?
+- Are users calmer, not more anxious?
+- Would Cafe Astrology feel embarrassed by anything we shipped?
+- Could every feature be turned off tomorrow without collapse?
+
+If two or more answers cause discomfort:
+Pause.
+Audit.
+Cut before adding.
+
+Decans survives by restraint.
