@@ -1,0 +1,22 @@
+{
+  "name": "spine-testing-suite-selfseed",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "node tools/seed/seed.mjs",
+    "cleanup": "node tools/seed/cleanup.mjs",
+    "checklist": "node tools/checklist/print-checklist.mjs",
+    "test:api": "vitest run",
+    "test:e2e": "playwright test",
+    "test:load": "k6 run tools/load/k6-scenarios/core.js",
+    "security:audit": "node tools/security/security-audit.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "vitest": "^2.1.2",
+    "prisma": "^5.20.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0"
+  }
+}

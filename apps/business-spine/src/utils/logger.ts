@@ -1,45 +1,118 @@
-import winston from 'winston';
-import * as winstonFormat from 'winston/lib/winston/config/index.js';
+/**
+ * Business Spine Logger
+ * 
+ * Provides structured logging for the business spine system.
+ */
 
-export type LoggerConfig = {
-  level: 'error' | 'warn' | 'info' | 'debug';
-  format: 'json' | 'simple';
+export type LogLevel = "debug" | "info" | "warn" | "error";
+
+export type LogEntry = {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  context?: Record<string, unknown>;
+  error?: Error;
 };
 
 export class Logger {
-  private logger: winston.Logger;
+  constructor(
+    private namespace: string = "spine",
+    private minLevel: LogLevel = "info"
+  ) {}
 
-  constructor(config: LoggerConfig) {
-    const formats = [
-      winston.format.timestamp(),
-      winston.format.errors({ stack: true }),
-      config.format === 'json' ? winston.format.json() : winston.format.simple()
+  private shouldLog(level: LogLevel): boolean {
+    const levels: LogLevel[] = ["debug", "info", "warn", "error"];
+    return levels.indexOf(level) >= levels.indexOf(this.minLevel);
+  }
+
+  private formatEntry(entry: LogEntry): string {
+    const { timestamp, level, message, context, error } = entry;
+    const parts = [
+      `[${timestamp}]`,
+      `[${level.toUpperCase()}]`,
+      `[${this.namespace}]`,
+      message,
     ];
 
-    this.logger = winston.createLogger({
-      level: config.level,
-      format: winston.format.combine(...formats),
-      transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'logs/combined.log' })
-      ]
-    });
+    if (context) {
+      parts.push(JSON.stringify(context));
+    }
+
+    if (error) {
+      parts.push(`\n${error.stack || error.message}`);
+    }
+
+    return parts.join(" ");
   }
 
-  error(message: string, error?: any): void {
-    this.logger.error(message, error);
+  private log(level: LogLevel, message: string, context?: Record<string, unknown>, error?: Error): void {
+    if (!this.shouldLog(level)) return;
+
+    const entry: LogEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      context,
+      error,
+    };
+
+    const formatted = this.formatEntry(entry);
+
+    switch (level) {
+      case "debug":
+      case "info":
+        console.log(formatted);
+        break;
+      case "warn":
+        console.warn(formatted);
+        break;
+      case "error":
+        console.error(formatted);
+        break;
+    }
   }
 
-  warn(message: string, meta?: any): void {
-    this.logger.warn(message, meta);
+  debug(message: string, context?: Record<string, unknown>): void {
+    this.log("debug", message, context);
   }
 
-  info(message: string, meta?: any): void {
-    this.logger.info(message, meta);
+  info(message: string, context?: Record<string, unknown>): void {
+    this.log("info", message, context);
   }
 
-  debug(message: string, meta?: any): void {
-    this.logger.debug(message, meta);
+  warn(message: string, context?: Record<string, unknown>): void {
+    this.log("warn", message, context);
+  }
+
+  error(message: string, error?: Error, context?: Record<string, unknown>): void {
+    this.log("error", message, context, error);
+  }
+
+  child(namespace: string): Logger {
+    return new Logger(`${this.namespace}:${namespace}`, this.minLevel);
+  }
+}
+
+// Default logger instance
+let defaultLogger: Logger | null = null;
+
+export function getLogger(namespace?: string, minLevel?: LogLevel): Logger {
+  if (!defaultLogger) {
+    defaultLogger = new Logger(
+      "spine",
+      (process.env.LOG_LEVEL as LogLevel) || "info"
+    );
+  }
+
+  if (namespace) {
+    return defaultLogger.child(namespace);
+  }
+
+  return defaultLogger;
+}
+
+export function setLogLevel(level: LogLevel): void {
+  if (defaultLogger) {
+    defaultLogger = new Logger("spine", level);
   }
 }

@@ -1,0 +1,34 @@
+import { runFlow } from "./flow.js";
+import { defaultPolicy } from "./policy.js";
+import { memoryAuditWriter, memoryHashChain } from "../adapters/memory.js";
+export class Orchestrator {
+    opts;
+    constructor(opts) {
+        this.opts = opts;
+    }
+    detect(text, ctx) {
+        const intents = this.opts.spines.flatMap(s => s.detectIntent(text, ctx));
+        intents.sort((a, b) => b.confidence - a.confidence);
+        return intents.slice(0, 5);
+    }
+    handle = async (text, ctx, args) => {
+        const intents = this.detect(text, ctx);
+        const top = intents[0];
+        if (!top) {
+            return { steps: [{ kind: "respond", message: "I didn’t recognize that command. Try: book, cancel, invoice, refund, report." }],
+                final: { ok: false, message: "Unknown intent" } };
+        }
+        const spine = this.opts.spines.find(s => s.name === top.spine);
+        if (!spine) {
+            return { steps: [{ kind: "respond", message: `Spine missing: ${top.spine}` }], final: { ok: false, message: "Missing spine" } };
+        }
+        const extraction = spine.extractEntities(top, text, ctx);
+        const steps = spine.buildFlow(top, extraction, ctx);
+        return runFlow(steps, { ctx, confirmationToken: args?.confirmToken }, {
+            tools: this.opts.tools,
+            policy: defaultPolicy,
+            audit: memoryAuditWriter,
+            hashChain: memoryHashChain,
+        });
+    };
+}

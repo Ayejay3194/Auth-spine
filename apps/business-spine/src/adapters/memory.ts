@@ -1,5 +1,6 @@
 import { AuditEvent, ToolRegistry, ToolResult } from "../core/types.js";
 import { uid } from "../core/util.js";
+import { diagnosticsTool } from "./diagnostics.js";
 
 type Booking = { id: string; clientId: string; service: string; startISO: string; endISO: string; status: "booked"|"cancelled" };
 type Client = { id: string; name: string; email?: string; phone?: string; tags: string[]; notes: string[]; doNotBook?: boolean };
@@ -157,5 +158,40 @@ export const tools: ToolRegistry = {
 
   // Admin/Security
   "admin.showAudit": async () => ok(db.audit.slice(-25)),
+
+  // Diagnostics
+  "runDiagnostics": diagnosticsTool,
+  "checkDatabase": async ({ ctx }) => {
+    // Simple DB check
+    try {
+      const clientCount = db.clients.size;
+      const bookingCount = db.bookings.size;
+      return ok({
+        status: "ok",
+        details: {
+          clients: clientCount,
+          bookings: bookingCount,
+          invoices: db.invoices.size,
+          promos: db.promos.size,
+        }
+      });
+    } catch (error) {
+      return fail("DB_CHECK_FAILED", error instanceof Error ? error.message : "Unknown error");
+    }
+  },
+  "checkRedis": async () => {
+    // Mock Redis check
+    return ok({
+      status: "ok",
+      details: { connected: true, mode: "standalone" }
+    });
+  },
+  "checkQueue": async () => {
+    // Mock Queue check
+    return ok({
+      status: "ok",
+      details: { active: 0, waiting: 0, completed: 0, failed: 0 }
+    });
+  },
 };
 
