@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import DOMPurify from 'dompurify';
 import { AdvancedAssistantUI, type ChatMessage, type ConversationState, type AdvancedUIConfig } from '../packages/enterprise/platform/ui/AdvancedAssistantUI';
 
 interface AdvancedAssistantChatProps {
@@ -262,7 +263,15 @@ export const AdvancedAssistantChat: React.FC<AdvancedAssistantChatProps> = ({
             <div className="message-content">
               <div className="message-text">
                 {ui.getConfig().features.enableMarkdown ? (
-                  <div dangerouslySetInnerHTML={{ __html: message.content }} />
+                  <div 
+                    dangerouslySetInnerHTML={{ 
+                      __html: DOMPurify.sanitize(message.content, {
+                        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'code', 'pre', 'ul', 'ol', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                        ALLOWED_ATTR: ['class'],
+                        ALLOWED_DATA_ATTR: false
+                      })
+                    }} 
+                  />
                 ) : (
                   message.content
                 )}

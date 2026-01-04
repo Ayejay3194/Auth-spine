@@ -7,6 +7,7 @@
 
 import { prisma } from '@/lib/prisma';
 import argon2 from 'argon2';
+import { randomBytes } from 'crypto';
 
 // Argon2 configuration for secure password hashing
 const ARGON2_OPTIONS = {
@@ -19,6 +20,7 @@ const ARGON2_OPTIONS = {
 
 /**
  * Check if a password is using the old insecure format
+ * @deprecated This function should only be used for migration, then removed
  */
 export function isInsecurePasswordHash(hash: string): boolean {
   return hash.startsWith('hashed_');
@@ -26,11 +28,15 @@ export function isInsecurePasswordHash(hash: string): boolean {
 
 /**
  * Extract original password from insecure hash (for migration only)
+ * @deprecated This function should only be used for one-time migration, then removed
+ * @warning This function exposes plaintext passwords and should be used with extreme caution
  */
 export function extractInsecurePassword(hash: string): string {
   if (!isInsecurePasswordHash(hash)) {
     throw new Error('Password is not in insecure format');
   }
+  // Log security event for audit trail
+  console.warn('SECURITY WARNING: Extracting insecure password hash - this should only happen during migration');
   return hash.slice(7); // Remove 'hashed_' prefix
 }
 
@@ -97,9 +103,12 @@ export async function migrateUserPassword(userId: string, newPassword?: string):
     // Update user record
     await prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         passwordHash: secureHash,
-        password: null // Clear old insecure password field
+        password: null, // Clear old insecure password field
+        passwordResetRequired: true, // Force password reset for migrated users
+        passwordResetToken: generateResetToken(),
+        passwordResetExpires: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
       }
     });
 
@@ -172,15 +181,10 @@ export async function forcePasswordResetForMigratedUsers(): Promise<number> {
 }
 
 /**
- * Generate password reset token
+ * Generate cryptographically secure password reset token
  */
-function generateResetToken(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let token = '';
-  for (let i = 0; i < 32; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return token;
+export function generateResetToken(): string {
+  return randomBytes(32).toString('hex');
 }
 
 /**

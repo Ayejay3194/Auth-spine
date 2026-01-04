@@ -9,6 +9,7 @@ import csrf from 'csurf'
 import helmet from 'helmet'
 import { loadClients, loadUsers, UserConfig } from './config'
 import { issueAccessToken, loadSigningKey, JwtAlgorithm, TokenKey } from './token'
+import { sessionStore } from './session-store';
 import { SpineJwtClaims, Session, RefreshToken, AuditEvent, AuthError, validateScopes, AllowedScope } from './types'
 
 const PORT = Number(process.env.PORT ?? 4000)
@@ -59,8 +60,9 @@ const clientById = new Map(clients.map(c => [c.client_id, c]))
 const userByEmail = new Map(users.map(u => [u.email.toLowerCase(), u]))
 const userById = new Map(users.map(u => [u.id, u]))
 
-const sessions = new Map<string, Session>()
-const refreshTokens = new Map<string, RefreshToken>()
+// Replaced in-memory storage with persistent session store
+// const sessions = new Map<string, Session>()
+// const refreshTokens = new Map<string, RefreshToken>()
 const permissionStreams = new Set<express.Response>()
 const auditEvents: AuditEvent[] = []
 
@@ -88,40 +90,31 @@ function createSession(user: UserConfig | null, clientId: string, scopes: Allowe
   if (!user) {
     throw new AuthError('User is required to create session', 'INVALID_USER', 400)
   }
-  const now = Date.now()
-  const sessionId = randomBytes(16).toString('hex')
-  const session: Session = {
-    id: sessionId,
+  
+  // Use persistent session store instead of in-memory Map
+  return sessionStore.createSession({
     userId: user.id,
     clientId,
     scopes,
     risk: user.risk ?? 'ok',
-    entitlements: user.entitlements ?? {},
-    createdAt: now,
-    expiresAt: now + REFRESH_TTL_SECONDS * 1000
-  }
-  sessions.set(sessionId, session)
-  return session
+    entitlements: user.entitlements ?? {}
+  })
 }
 
 function createRefreshToken(sessionId: string, userId: string): RefreshToken {
-  const refreshId = randomBytes(32).toString('hex')
-  const refresh: RefreshToken = {
-    id: refreshId,
+  // Use persistent session store instead of in-memory Map
+  return sessionStore.createRefreshToken({
     sessionId,
-    userId,
-    expiresAt: Date.now() + REFRESH_TTL_SECONDS * 1000
-  }
-  refreshTokens.set(refreshId, refresh)
-  return refresh
+    userId
+  })
 }
 
-function revokeSession(sessionId: string): void {
-  sessions.delete(sessionId)
-  for (const [tokenId, token] of refreshTokens.entries()) {
-    if (token.sessionId === sessionId) refreshTokens.delete(tokenId)
-  }
-  // TODO: Use atomic database transaction for consistency
+async function revokeSession(sessionId: string): Promise<void> {
+  // Use persistent session store for atomic operations
+  await Promise.all([
+    sessionStore.deleteSession(sessionId),
+    sessionStore.deleteRefreshTokensForSession(sessionId)
+  ])
 }
 
 async function verifyBearerToken(authorization: string | undefined): Promise<SpineJwtClaims> {

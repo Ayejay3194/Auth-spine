@@ -9,6 +9,7 @@ import { prisma } from '@/lib/prisma';
 import { withRBAC } from '../../../../src/lib/rbac-middleware';
 import { z } from 'zod';
 import { hashPassword } from '@/src/security/password-migration';
+import { getActor } from '@/src/core/auth';
 
 const createUserSchema = z.object({
   email: z.string().email(),
@@ -19,14 +20,28 @@ const createUserSchema = z.object({
 
 async function getUsers(request: NextRequest) {
   try {
+    const actor = await getActor(request);
+    if (!actor) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Additional authorization: Only admins can list all users
+    if (!['admin', 'owner'].includes(actor.role)) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 100); // Cap at 100
     const role = searchParams.get('role');
     const search = searchParams.get('search');
 
+    // Validate role parameter
+    const validRoles = ['owner', 'admin', 'manager', 'staff', 'readonly'];
+    const filterRole = role && validRoles.includes(role) ? role as typeof validRoles[number] : undefined;
+
     const where = {
-      ...(role && { role: role as 'owner' | 'admin' | 'manager' | 'staff' | 'readonly' }),
+      ...(filterRole && { role: filterRole }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' as const } },
@@ -80,8 +95,27 @@ async function getUsers(request: NextRequest) {
 
 async function createUser(request: NextRequest) {
   try {
+    const actor = await getActor(request);
+    if (!actor) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Additional authorization: Only admins and owners can create users
+    if (!['admin', 'owner'].includes(actor.role)) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+    }
+
     const body = await request.json();
     const validatedData = createUserSchema.parse(body);
+
+    // Restrict role creation based on actor's role
+    if (actor.role === 'admin' && validatedData.role === 'owner') {
+      return NextResponse.json({ error: 'Admins cannot create owner accounts' }, { status: 403 });
+    }
+
+    if (actor.role === 'manager' && !['staff', 'readonly'].includes(validatedData.role)) {
+      return NextResponse.json({ error: 'Managers can only create staff or readonly accounts' }, { status: 403 });
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
