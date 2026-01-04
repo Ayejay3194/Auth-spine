@@ -1,0 +1,13 @@
+node_modules
+.next
+dist
+build
+coverage
+.git
+.husky
+*.lock
+pnpm-lock.yaml
+package-lock.json
+.env
+.env.local
+.env.*.local

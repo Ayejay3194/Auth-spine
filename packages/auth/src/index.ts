@@ -53,7 +53,10 @@ function getAlgorithm(): JwtAlgorithm {
 function getSigningKey() {
   const alg = getAlgorithm()
   if (alg === 'HS256') {
-    const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+    const secret = process.env.JWT_SECRET?.trim()
+    if (!secret) {
+      throw new AuthError('JWT_SECRET environment variable is required', ErrorCode.AUTH_UNAUTHORIZED)
+    }
     return { key: createSecretKey(Buffer.from(secret, 'utf-8')), alg }
   }
   const privateKey = process.env.JWT_PRIVATE_KEY
@@ -64,7 +67,10 @@ function getSigningKey() {
 function getVerifyKey() {
   const alg = getAlgorithm()
   if (alg === 'HS256') {
-    const secret = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+    const secret = process.env.JWT_SECRET?.trim()
+    if (!secret) {
+      throw new AuthError('JWT_SECRET environment variable is required', ErrorCode.AUTH_UNAUTHORIZED)
+    }
     return { key: createSecretKey(Buffer.from(secret, 'utf-8')), alg }
   }
   const publicKey = process.env.JWT_PUBLIC_KEY

@@ -66,6 +66,9 @@ export * from './launch-gate/index.js';
 export * from './nlu/index.js';
 export * from './vibe-coding-disasters/index.js';
 
+// New Platform Modules
+export * from './platform/index.js';
+
 // Enterprise Orchestrator
 import { EnterpriseOrchestrator } from './orchestrator.js';
 

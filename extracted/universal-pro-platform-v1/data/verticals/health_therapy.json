@@ -1,0 +1,38 @@
+{
+  "vertical": "health_therapy",
+  "serviceTemplates": [
+    {
+      "name": "Therapy Session",
+      "defaultDurationMin": 50,
+      "defaultPriceCents": 15000,
+      "locationType": "virtual",
+      "metadata": {
+        "hipaa": true
+      }
+    },
+    {
+      "name": "Nutrition Consultation",
+      "defaultDurationMin": 60,
+      "defaultPriceCents": 12000,
+      "locationType": "virtual",
+      "metadata": {
+        "plan": "included"
+      }
+    }
+  ],
+  "requiredFields": [
+    "license_number"
+  ],
+  "bookingCadenceHint": "weekly/bi-weekly",
+  "complianceRules": [
+    "hipaa_notes_encrypted"
+  ],
+  "conversationHints": [
+    "therapy",
+    "session",
+    "intake",
+    "nutrition",
+    "plan",
+    "hipaa"
+  ]
+}

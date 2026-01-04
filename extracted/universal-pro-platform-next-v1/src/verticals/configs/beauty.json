@@ -1,0 +1,93 @@
+{
+  "vertical": "beauty",
+  "label": "Beauty & Wellness",
+  "serviceTemplates": [
+    {
+      "code": "haircut",
+      "name": "Haircut",
+      "defaultDurationMin": 60,
+      "defaultPriceMinor": 5000,
+      "locationTypes": [
+        "in_person"
+      ]
+    },
+    {
+      "code": "color",
+      "name": "Color",
+      "defaultDurationMin": 180,
+      "defaultPriceMinor": 15000,
+      "locationTypes": [
+        "in_person"
+      ]
+    },
+    {
+      "code": "deep_tissue",
+      "name": "Deep Tissue Massage",
+      "defaultDurationMin": 60,
+      "defaultPriceMinor": 12000,
+      "locationTypes": [
+        "in_person",
+        "mobile"
+      ]
+    }
+  ],
+  "requiredProfessionalFields": [
+    "businessName",
+    "region.state",
+    "license.number",
+    "license.expiresAt"
+  ],
+  "cadenceHints": [
+    {
+      "kind": "followup_rebook",
+      "afterDays": 42
+    }
+  ],
+  "conversation": {
+    "intentModel": "beauty_terms_v1",
+    "intakeQuestions": [
+      {
+        "id": "preferred_style",
+        "prompt": "What style are you going for?",
+        "type": "text"
+      },
+      {
+        "id": "reference_photo",
+        "prompt": "Got a reference photo?",
+        "type": "image_optional"
+      }
+    ]
+  },
+  "compliance": {
+    "consentsRequired": [
+      "photo_use_public"
+    ],
+    "rules": [
+      {
+        "id": "no_unconsented_before_after",
+        "when": "media.publish",
+        "blockIfMissingConsent": "photo_use_public"
+      },
+      {
+        "id": "license_required_for_services",
+        "when": "professional.activate",
+        "requireFields": [
+          "license.number",
+          "license.expiresAt"
+        ]
+      }
+    ]
+  },
+  "pricingGuidance": {
+    "recommendedRangesMinor": {
+      "haircut": {
+        "min": 3000,
+        "max": 12000
+      },
+      "color": {
+        "min": 9000,
+        "max": 40000
+      }
+    }
+  }
+}

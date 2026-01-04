@@ -57,7 +57,9 @@ export function deriveAuthIncidents(
 
 function cryptoId(): string {
   // Works in Node 18+ and modern runtimes
-  // @ts-ignore
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    const cryptoWithUUID = crypto as { randomUUID: () => string };
+    return cryptoWithUUID.randomUUID();
+  }
   return "evt_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
 }

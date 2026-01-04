@@ -1,0 +1,66 @@
+{
+  "vertical": "fitness",
+  "label": "Fitness & Training",
+  "serviceTemplates": [
+    {
+      "code": "training_1on1",
+      "name": "1-on-1 Training",
+      "defaultDurationMin": 60,
+      "defaultPriceMinor": 8000,
+      "locationTypes": [
+        "in_person",
+        "mobile",
+        "virtual"
+      ]
+    },
+    {
+      "code": "group_class",
+      "name": "Group Class",
+      "defaultDurationMin": 60,
+      "defaultPriceMinor": 2500,
+      "locationTypes": [
+        "in_person",
+        "virtual"
+      ],
+      "capacity": {
+        "min": 2,
+        "max": 30
+      }
+    }
+  ],
+  "requiredProfessionalFields": [
+    "businessName",
+    "region.city"
+  ],
+  "cadenceHints": [
+    {
+      "kind": "recurring_suggest",
+      "pattern": "weekly"
+    }
+  ],
+  "conversation": {
+    "intentModel": "fitness_terms_v1",
+    "intakeQuestions": [
+      {
+        "id": "goal",
+        "prompt": "What\u2019s your main goal?",
+        "type": "enum",
+        "options": [
+          "strength",
+          "weight_loss",
+          "mobility",
+          "conditioning"
+        ]
+      },
+      {
+        "id": "injuries",
+        "prompt": "Any injuries or limitations?",
+        "type": "text_optional"
+      }
+    ]
+  },
+  "compliance": {
+    "consentsRequired": [],
+    "rules": []
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "vertical": "beauty",
+  "serviceTemplates": [
+    {
+      "name": "Haircut",
+      "defaultDurationMin": 60,
+      "defaultPriceCents": 5000,
+      "locationType": "in_person",
+      "metadata": {
+        "photoConsentRequired": true
+      }
+    },
+    {
+      "name": "Color",
+      "defaultDurationMin": 180,
+      "defaultPriceCents": 15000,
+      "locationType": "in_person",
+      "metadata": {
+        "complexity": "medium"
+      }
+    }
+  ],
+  "requiredFields": [
+    "license_number"
+  ],
+  "bookingCadenceHint": "4-8 weeks",
+  "complianceRules": [
+    "photo_consent_required"
+  ],
+  "conversationHints": [
+    "balayage",
+    "toner",
+    "roots",
+    "silk press",
+    "highlights",
+    "fade",
+    "blowout",
+    "nails"
+  ]
+}

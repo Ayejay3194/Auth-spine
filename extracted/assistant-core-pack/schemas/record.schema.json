@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AssistantRecord",
+  "type": "object",
+  "required": [
+    "type"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "system",
+        "policy",
+        "style",
+        "behavior",
+        "router",
+        "example",
+        "template",
+        "fallback"
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "intents": {
+      "type": "array"
+    },
+    "messages": {
+      "type": "array"
+    },
+    "intent": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assistant_response": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

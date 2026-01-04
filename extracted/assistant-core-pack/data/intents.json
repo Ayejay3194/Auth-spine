@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "intents": [
+    {
+      "name": "greeting",
+      "tags": [
+        "hello",
+        "hi",
+        "hey",
+        "yo"
+      ]
+    },
+    {
+      "name": "how_to",
+      "tags": [
+        "how do i",
+        "how to",
+        "steps",
+        "guide"
+      ]
+    },
+    {
+      "name": "debug",
+      "tags": [
+        "error",
+        "bug",
+        "crash",
+        "stack trace",
+        "failed"
+      ]
+    },
+    {
+      "name": "design_feedback",
+      "tags": [
+        "ui",
+        "layout",
+        "figma",
+        "design",
+        "button"
+      ]
+    },
+    {
+      "name": "code_request",
+      "tags": [
+        "code",
+        "typescript",
+        "react",
+        "next",
+        "ts",
+        "component"
+      ]
+    },
+    {
+      "name": "booking",
+      "tags": [
+        "book",
+        "appointment",
+        "schedule",
+        "availability"
+      ]
+    },
+    {
+      "name": "account_auth",
+      "tags": [
+        "login",
+        "password",
+        "2fa",
+        "session",
+        "token",
+        "cookie"
+      ]
+    },
+    {
+      "name": "pricing",
+      "tags": [
+        "price",
+        "plan",
+        "tier",
+        "billing"
+      ]
+    },
+    {
+      "name": "refusal",
+      "tags": [
+        "bypass",
+        "hack",
+        "exploit",
+        "steal",
+        "pirate"
+      ]
+    },
+    {
+      "name": "unknown",
+      "tags": []
+    }
+  ],
+  "routing": {
+    "default": "unknown",
+    "max_examples_per_intent": 3
+  }
+}

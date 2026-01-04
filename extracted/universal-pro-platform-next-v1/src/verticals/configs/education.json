@@ -1,0 +1,55 @@
+{
+  "vertical": "education",
+  "label": "Education & Tutoring",
+  "serviceTemplates": [
+    {
+      "code": "tutoring_90",
+      "name": "Tutoring (90m)",
+      "defaultDurationMin": 90,
+      "defaultPriceMinor": 10000,
+      "locationTypes": [
+        "virtual",
+        "in_person"
+      ]
+    },
+    {
+      "code": "sat_prep",
+      "name": "SAT Prep",
+      "defaultDurationMin": 90,
+      "defaultPriceMinor": 12000,
+      "locationTypes": [
+        "virtual"
+      ]
+    }
+  ],
+  "requiredProfessionalFields": [
+    "businessName",
+    "region.city"
+  ],
+  "conversation": {
+    "intentModel": "education_terms_v1",
+    "intakeQuestions": [
+      {
+        "id": "subject",
+        "prompt": "What subject?",
+        "type": "text"
+      },
+      {
+        "id": "level",
+        "prompt": "Student level?",
+        "type": "enum",
+        "options": [
+          "elementary",
+          "middle",
+          "high_school",
+          "college",
+          "adult"
+        ]
+      }
+    ]
+  },
+  "compliance": {
+    "consentsRequired": [],
+    "rules": []
+  }
+}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exportUserData } from '@/src/compliance/gdpr';
 import { api } from '@/src/core/api';
-import { verifySession } from '@/src/auth/session';
+import { AuthenticationError, getActor } from '@/src/core/auth';
 
 /**
  * GDPR Data Export Endpoint
@@ -9,31 +9,28 @@ import { verifySession } from '@/src/auth/session';
  */
 export async function GET(req: NextRequest) {
   return api(async () => {
-    const sessionToken = req.cookies.get('session')?.value;
-    if (!sessionToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    let actor;
+    try {
+      actor = await getActor(req);
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 401 }
+        );
+      }
+      throw error;
     }
 
-    const claims = await verifySession(sessionToken);
-    if (!claims?.sub) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const userId = claims.sub;
+    const userId = actor.userId;
 
     try {
-      const data = await exportUserData(userId);
+      const data = await exportUserData(actor.userId);
       
       return NextResponse.json(data, {
         status: 200,
         headers: {
-          'Content-Disposition': `attachment; filename="user-data-${userId}.json"`,
+          'Content-Disposition': `attachment; filename="user-data-${actor.userId}.json"`,
         },
       });
     } catch (error: any) {

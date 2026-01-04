@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
 enum Role {
@@ -461,4 +461,18 @@ model AuditLog {
   
   @@index([eventType, createdAt])
   @@index([userId, createdAt])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String
+  timestamp DateTime
+  userId    String?
+  sessionId String?
+  data      Json
+  createdAt DateTime @default(now())
+  
+  @@index([type, timestamp])
+  @@index([userId, timestamp])
+  @@index([sessionId, timestamp])
 }

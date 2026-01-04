@@ -1,0 +1,46 @@
+{
+  "vertical": "beauty",
+  "service_templates": [
+    {
+      "name": "Haircut",
+      "default_duration_min": 60,
+      "default_price_cents": 5000,
+      "location_type": "in_person"
+    },
+    {
+      "name": "Color",
+      "default_duration_min": 180,
+      "default_price_cents": 15000,
+      "location_type": "in_person"
+    },
+    {
+      "name": "Gel Manicure",
+      "default_duration_min": 60,
+      "default_price_cents": 6000,
+      "location_type": "in_person"
+    }
+  ],
+  "required_fields": [
+    "license_number"
+  ],
+  "booking_cadence_hint": "4-8 weeks",
+  "conversation_context": {
+    "keywords": [
+      "hair",
+      "nails",
+      "balayage",
+      "manicure",
+      "massage",
+      "wax"
+    ],
+    "intake_questions": [
+      {
+        "key": "desired_service",
+        "prompt": "What service do you want? (Haircut, Color, Nails, etc.)"
+      }
+    ]
+  },
+  "compliance_rules": [
+    "photo_consent_required"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IntentConfig",
+  "type": "object",
+  "required": [
+    "version",
+    "intents",
+    "routing"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "intents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "tags"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "routing": {
+      "type": "object",
+      "required": [
+        "default",
+        "max_examples_per_intent"
+      ],
+      "properties": {
+        "default": {
+          "type": "string"
+        },
+        "max_examples_per_intent": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

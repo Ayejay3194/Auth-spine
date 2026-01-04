@@ -4,24 +4,19 @@ import { z } from 'zod'
 import { verifyBearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared-auth'
 
 const PORT = Number(process.env.PORT ?? 4100)
-const authIssuerEnv = process.env.AUTH_ISSUER?.trim()
-if (!authIssuerEnv) {
+const AUTH_ISSUER = process.env.AUTH_ISSUER?.trim()
+if (!AUTH_ISSUER) {
   console.error('ERROR: AUTH_ISSUER environment variable is required')
   process.exit(1)
 }
-let authIssuerUrl: URL
 try {
-  authIssuerUrl = new URL(authIssuerEnv)
+  new URL(AUTH_ISSUER)
 } catch {
-  console.error('ERROR: AUTH_ISSUER environment variable must be a valid URL')
+  console.error('ERROR: AUTH_ISSUER must be a valid URL')
   process.exit(1)
 }
-if (!['http:', 'https:'].includes(authIssuerUrl.protocol)) {
-  console.error('ERROR: AUTH_ISSUER environment variable must use http or https')
-  process.exit(1)
-}
-const AUTH_ISSUER = authIssuerEnv
-const JWT_SECRET = process.env.JWT_SECRET
+
+const JWT_SECRET = process.env.JWT_SECRET?.trim()
 if (!JWT_SECRET) {
   console.error('ERROR: JWT_SECRET environment variable is required')
   process.exit(1)

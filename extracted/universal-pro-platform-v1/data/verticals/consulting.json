@@ -1,0 +1,37 @@
+{
+  "vertical": "consulting",
+  "serviceTemplates": [
+    {
+      "name": "Strategy Session",
+      "defaultDurationMin": 60,
+      "defaultPriceCents": 15000,
+      "locationType": "virtual",
+      "metadata": {
+        "deliverable": "notes"
+      }
+    },
+    {
+      "name": "Project Retainer",
+      "defaultDurationMin": 0,
+      "defaultPriceCents": 50000,
+      "locationType": "virtual",
+      "metadata": {
+        "billing": "monthly"
+      }
+    }
+  ],
+  "requiredFields": [],
+  "bookingCadenceHint": "as-needed",
+  "complianceRules": [
+    "nda_optional"
+  ],
+  "conversationHints": [
+    "taxes",
+    "legal",
+    "strategy",
+    "consultation",
+    "proposal",
+    "invoice",
+    "retainer"
+  ]
+}

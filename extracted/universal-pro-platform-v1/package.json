@@ -1,0 +1,13 @@
+{
+  "name": "universal-pro-platform-v1",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "demo": "node dist/demo.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

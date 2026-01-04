@@ -13,7 +13,9 @@ export function withRequestId(req: NextRequest) {
 }
 
 function cryptoId(): string {
-  // @ts-ignore
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    const cryptoWithUUID = crypto as { randomUUID: () => string };
+    return cryptoWithUUID.randomUUID();
+  }
   return "req_" + Math.random().toString(16).slice(2) + "_" + Date.now().toString(16);
 }

@@ -253,23 +253,33 @@ export function withMulticlientRBAC(
   issuer?: string,
   secret?: string
 ) {
-  const resolvedIssuer = issuer ?? process.env.ISSUER
-  if (!resolvedIssuer) {
-    throw new Error('withMulticlientRBAC requires an issuer or process.env.ISSUER to be set')
-  }
-  if (!isValidUrl(resolvedIssuer)) {
-    throw new Error('withMulticlientRBAC requires ISSUER to be a valid URL')
-  }
-
-  const resolvedSecret = secret ?? process.env.JWT_SECRET
-  if (!resolvedSecret) {
-    throw new Error('withMulticlientRBAC requires a secret or process.env.JWT_SECRET to be set')
-  }
-
+  const resolvedIssuer = resolveIssuer(issuer)
+  const resolvedSecret = resolveSecret(secret)
   return withRBAC(handler, requiredPermission, {
     clientId,
     requiredScopes,
     issuer: resolvedIssuer,
     secret: resolvedSecret
   })
+}
+
+function resolveIssuer(override?: string): string {
+  const value = override?.trim() ?? process.env.ISSUER?.trim()
+  if (!value) {
+    throw new Error('ISSUER environment variable is required for multiclient RBAC')
+  }
+  try {
+    new URL(value)
+  } catch {
+    throw new Error('ISSUER must be a valid URL for multiclient RBAC')
+  }
+  return value
+}
+
+function resolveSecret(override?: string): string {
+  const value = override?.trim() ?? process.env.JWT_SECRET?.trim()
+  if (!value) {
+    throw new Error('JWT_SECRET environment variable is required for multiclient RBAC')
+  }
+  return value
 }

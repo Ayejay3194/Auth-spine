@@ -1,0 +1,39 @@
+{
+  "vertical": "fitness",
+  "serviceTemplates": [
+    {
+      "name": "1-on-1 Session",
+      "defaultDurationMin": 60,
+      "defaultPriceCents": 8000,
+      "locationType": "in_person",
+      "metadata": {
+        "goals": [
+          "strength",
+          "fat_loss",
+          "mobility"
+        ]
+      }
+    },
+    {
+      "name": "Virtual Coaching",
+      "defaultDurationMin": 45,
+      "defaultPriceCents": 6000,
+      "locationType": "virtual",
+      "metadata": {
+        "platform": "zoom"
+      }
+    }
+  ],
+  "requiredFields": [],
+  "bookingCadenceHint": "1-2x per week",
+  "complianceRules": [],
+  "conversationHints": [
+    "training",
+    "workout",
+    "program",
+    "nutrition",
+    "macro",
+    "mobility",
+    "session"
+  ]
+}

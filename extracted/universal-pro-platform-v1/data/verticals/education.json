@@ -1,0 +1,35 @@
+{
+  "vertical": "education",
+  "serviceTemplates": [
+    {
+      "name": "Tutoring Session",
+      "defaultDurationMin": 60,
+      "defaultPriceCents": 7000,
+      "locationType": "virtual",
+      "metadata": {
+        "subject": "math"
+      }
+    },
+    {
+      "name": "SAT Prep",
+      "defaultDurationMin": 90,
+      "defaultPriceCents": 10000,
+      "locationType": "virtual",
+      "metadata": {
+        "materialsIncluded": true
+      }
+    }
+  ],
+  "requiredFields": [],
+  "bookingCadenceHint": "1-2x per week",
+  "complianceRules": [],
+  "conversationHints": [
+    "homework",
+    "lesson",
+    "test",
+    "SAT",
+    "study",
+    "tutor",
+    "practice"
+  ]
+}

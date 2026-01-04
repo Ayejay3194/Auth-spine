@@ -1,0 +1,63 @@
+{
+  "vertical": "consulting",
+  "label": "Professional Services (Consulting/Legal/Accounting)",
+  "serviceTemplates": [
+    {
+      "code": "consult_60",
+      "name": "Consultation (60m)",
+      "defaultDurationMin": 60,
+      "defaultPriceMinor": 15000,
+      "locationTypes": [
+        "virtual",
+        "in_person"
+      ]
+    },
+    {
+      "code": "project_retainer",
+      "name": "Project Retainer",
+      "defaultDurationMin": 60,
+      "defaultPriceMinor": 50000,
+      "locationTypes": [
+        "virtual"
+      ],
+      "metadata": {
+        "billing": "retainer"
+      }
+    }
+  ],
+  "requiredProfessionalFields": [
+    "businessName",
+    "region.state"
+  ],
+  "conversation": {
+    "intentModel": "consulting_terms_v1",
+    "intakeQuestions": [
+      {
+        "id": "scope",
+        "prompt": "What do you need help with?",
+        "type": "text"
+      },
+      {
+        "id": "files",
+        "prompt": "Any documents to share?",
+        "type": "text_optional"
+      }
+    ]
+  },
+  "compliance": {
+    "consentsRequired": [],
+    "rules": [
+      {
+        "id": "nda_prompt",
+        "when": "booking.create",
+        "blockIfTermsMatch": [
+          "confidential",
+          "nda"
+        ],
+        "requireFields": [
+          "policies.ndaOffered"
+        ]
+      }
+    ]
+  }
+}

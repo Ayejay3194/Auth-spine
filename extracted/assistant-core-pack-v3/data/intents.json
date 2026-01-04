@@ -1,0 +1,137 @@
+{
+  "version": 3,
+  "intents": [
+    {
+      "name": "greeting",
+      "tags": [
+        "hello",
+        "hi",
+        "hey",
+        "yo",
+        "sup",
+        "good morning",
+        "good evening"
+      ]
+    },
+    {
+      "name": "thanks",
+      "tags": [
+        "thanks",
+        "thank you",
+        "thx",
+        "appreciate"
+      ]
+    },
+    {
+      "name": "how_to",
+      "tags": [
+        "how do i",
+        "how to",
+        "steps",
+        "guide",
+        "best way"
+      ]
+    },
+    {
+      "name": "design_feedback",
+      "tags": [
+        "ui",
+        "layout",
+        "figma",
+        "design",
+        "button",
+        "spacing",
+        "theme",
+        "header"
+      ]
+    },
+    {
+      "name": "code_request",
+      "tags": [
+        "code",
+        "typescript",
+        "react",
+        "next",
+        "ts",
+        "component",
+        "api route"
+      ]
+    },
+    {
+      "name": "debug",
+      "tags": [
+        "error",
+        "bug",
+        "crash",
+        "failed",
+        "not working",
+        "blank",
+        "500",
+        "stack trace"
+      ]
+    },
+    {
+      "name": "booking",
+      "tags": [
+        "book",
+        "booking",
+        "appointment",
+        "schedule",
+        "availability",
+        "calendar",
+        "reschedule",
+        "cancel"
+      ]
+    },
+    {
+      "name": "account_auth",
+      "tags": [
+        "login",
+        "password",
+        "2fa",
+        "session",
+        "token",
+        "cookie",
+        "logout"
+      ]
+    },
+    {
+      "name": "messaging",
+      "tags": [
+        "message",
+        "chat",
+        "dm",
+        "inbox",
+        "thread"
+      ]
+    },
+    {
+      "name": "payments",
+      "tags": [
+        "stripe",
+        "payment",
+        "checkout",
+        "refund",
+        "deposit"
+      ]
+    },
+    {
+      "name": "refusal",
+      "tags": [
+        "bypass",
+        "hack",
+        "exploit",
+        "steal",
+        "pirate"
+      ]
+    },
+    {
+      "name": "unknown",
+      "tags": []
+    }
+  ],
+  "routing": {
+    "default": "unknown",
+    "max_examples_per_intent": 8
+  }
+}

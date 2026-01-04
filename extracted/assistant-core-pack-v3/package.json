@@ -1,0 +1,13 @@
+{
+  "name": "assistant-core-pack-v3",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node ./scripts/validate-jsonl.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "vertical": "home_services",
+  "serviceTemplates": [
+    {
+      "name": "House Cleaning",
+      "defaultDurationMin": 180,
+      "defaultPriceCents": 16000,
+      "locationType": "mobile",
+      "metadata": {
+        "supplies": "included"
+      }
+    },
+    {
+      "name": "Handyman Visit",
+      "defaultDurationMin": 120,
+      "defaultPriceCents": 14000,
+      "locationType": "mobile",
+      "metadata": {
+        "travelFee": true
+      }
+    }
+  ],
+  "requiredFields": [
+    "service_area_zip"
+  ],
+  "bookingCadenceHint": "weekly/bi-weekly/as-needed",
+  "complianceRules": [
+    "before_after_photos_optional"
+  ],
+  "conversationHints": [
+    "cleaning",
+    "repair",
+    "plumbing",
+    "handyman",
+    "install",
+    "quote",
+    "travel time"
+  ]
+}

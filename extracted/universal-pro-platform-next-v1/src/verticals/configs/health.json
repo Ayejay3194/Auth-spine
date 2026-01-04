@@ -1,0 +1,64 @@
+{
+  "vertical": "health",
+  "label": "Health & Therapy",
+  "serviceTemplates": [
+    {
+      "code": "therapy_50",
+      "name": "Therapy Session (50m)",
+      "defaultDurationMin": 50,
+      "defaultPriceMinor": 15000,
+      "locationTypes": [
+        "virtual",
+        "in_person"
+      ]
+    },
+    {
+      "code": "nutrition_consult",
+      "name": "Nutrition Consultation",
+      "defaultDurationMin": 60,
+      "defaultPriceMinor": 14000,
+      "locationTypes": [
+        "virtual",
+        "in_person"
+      ]
+    }
+  ],
+  "requiredProfessionalFields": [
+    "businessName",
+    "region.state",
+    "policies.hipaaAcknowledged"
+  ],
+  "conversation": {
+    "intentModel": "health_terms_v1",
+    "intakeQuestions": [
+      {
+        "id": "goal",
+        "prompt": "What are you hoping to work on?",
+        "type": "text"
+      },
+      {
+        "id": "insurance",
+        "prompt": "Using insurance?",
+        "type": "enum",
+        "options": [
+          "yes",
+          "no"
+        ]
+      }
+    ]
+  },
+  "compliance": {
+    "consentsRequired": [
+      "message_analysis"
+    ],
+    "rules": [
+      {
+        "id": "hipaa_ack_required",
+        "when": "professional.activate",
+        "requireFields": [
+          "policies.hipaaAcknowledged"
+        ]
+      }
+    ]
+  }
+}

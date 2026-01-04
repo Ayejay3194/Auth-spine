@@ -1,5 +1,6 @@
 import { jwtVerify } from "jose";
 import { OpsActionRequest } from "../types/opsRuntime";
+import { verifySession } from "@/src/auth/session";
 
 /**
  * Minimal policy:
@@ -22,25 +23,20 @@ export async function assertAllowed(req: OpsActionRequest) {
   for (const a of req.actions) {
     if (STEP_UP_REQUIRED.has(a.key)) {
       if (stepUpValid === null) {
-        stepUpValid = await validateStepUpToken(req.step_up_token);
+        stepUpValid = await validateStepUpToken(req.step_up_token, req.actor.actor_id);
       }
-      if (!stepUpValid) throw new Error(`Step-up required for ${a.key}`);
+      if (!stepUpValid) {
+        throw new Error(`Invalid step-up token for ${a.key}`);
+      }
     }
   }
 }
 
-/** Step-up JWT validation */
-export async function validateStepUpToken(token: string | undefined): Promise<boolean> {
+/** Step-up token validation */
+export async function validateStepUpToken(token: string | undefined, actorId?: string): Promise<boolean> {
   if (!token) return false;
-  const issuer = process.env.STEP_UP_ISSUER ?? process.env.ISSUER ?? "http://localhost:4000";
-  const audience = process.env.STEP_UP_AUDIENCE ?? process.env.JWT_AUDIENCE ?? "ops";
-  const secret = process.env.STEP_UP_JWT_SECRET ?? process.env.JWT_SECRET ?? "dev_secret_change_me";
-
-  try {
-    const key = new TextEncoder().encode(secret);
-    await jwtVerify(token, key, { issuer, audience, algorithms: ["HS256"] });
-    return true;
-  } catch {
-    return false;
-  }
+  const claims = await verifySession(token);
+  if (!claims) return false;
+  if (actorId && claims.sub !== actorId) return false;
+  return true;
 }

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced AI Assistant Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .chat-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .session-info {
+            font-size: 0.875rem;
+            color: #666;
+        }
+        
+        .clear-btn {
+            padding: 5px 10px;
+            font-size: 0.875rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .clear-btn:hover {
+            background: #f8f9fa;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message.assistant {
+            justify-content: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-bubble {
+            background: #007bff;
+            color: white;
+        }
+        
+        .message.assistant .message-bubble {
+            background: #e9ecef;
+            color: black;
+        }
+        
+        .message-content {
+            margin: 0 0 5px 0;
+        }
+        
+        .message-meta {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+        }
+        
+        .intent-badge, .confidence-badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .security-warning {
+            font-size: 0.75rem;
+            color: #dc3545;
+            margin-top: 5px;
+            padding: 4px 6px;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 4px;
+        }
+        
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .chat-input button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+        .chat-input button:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        
+        .chat-input button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .panel {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .panel-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .panel-content {
+            padding: 15px;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #0056b3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            background: #1e7e34;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .stats-grid {
+            display: grid;
+            gap: 5px;
+            font-size: 0.875rem;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+        }
+        
+        .stat-divider {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 10px 0;
+        }
+        
+        .security-test-area {
+            margin-top: 15px;
+        }
+        
+        .security-test-area label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .security-test-area textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .security-results {
+            margin-top: 15px;
+        }
+        
+        .security-result {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .security-result.allowed {
+            background: #f8f9fa;
+        }
+        
+        .security-result.blocked {
+            background: #f8d7da;
+        }
+        
+        .security-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .security-result-input {
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+        
+        .security-result-status {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .security-result-status.allowed {
+            background: #28a745;
+        }
+        
+        .security-result-status.blocked {
+            background: #dc3545;
+        }
+        
+        .security-violations {
+            font-size: 0.75rem;
+            color: #dc3545;
+            margin-bottom: 5px;
+        }
+        
+        .security-response {
+            font-size: 0.875rem;
+            margin-top: 5px;
+            padding: 5px;
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .thinking {
+            font-style: italic;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Enhanced AI Assistant Demo</h1>
+            <p>Test the AI assistant with NLU, security firewall, and natural language comprehension</p>
+        </div>
+        
+        <div class="content">
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <div class="chat-header">
+                    <h2>AI Assistant Chat</h2>
+                    <div>
+                        <span class="session-info" id="sessionId">Session: demo_initial</span>
+                        <button class="clear-btn" onclick="clearConversation()">Clear</button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="empty-state">Start a conversation with the AI assistant...</div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                    <button id="sendButton" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Training Control -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Training Control</h3>
+                    </div>
+                    <div class="panel-content">
+                        <button class="btn btn-success" id="trainButton" onclick="trainAssistant()">Train Assistant</button>
+                        <button class="btn btn-primary" onclick="testConversation()">Test Conversation Flow</button>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Statistics</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div id="statsContainer">
+                            <div class="empty-state">Loading statistics...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Testing -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Security Testing</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div class="security-test-area">
+                            <label>Test Security Input</label>
+                            <textarea id="securityInput" placeholder="Enter potentially harmful input to test security..."></textarea>
+                            <button class="btn btn-danger" id="securityTestButton" onclick="testSecurity()">Test Security</button>
+                        </div>
+                        <div id="securityResults" class="security-results"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let sessionId = `demo_${Date.now()}`;
+        let isLoading = false;
+        let currentStats = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSessionId();
+            loadStats();
+        });
+
+        function updateSessionId() {
+            document.getElementById('sessionId').textContent = `Session: ${sessionId}`;
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/platform/assistant/train?type=stats');
+                const data = await response.json();
+                if (data.success) {
+                    currentStats = data.data;
+                    updateStatsDisplay();
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        function updateStatsDisplay() {
+            const container = document.getElementById('statsContainer');
+            if (!currentStats) {
+                container.innerHTML = '<div class="empty-state">Loading statistics...</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-row">
+                        <span>Active Sessions:</span>
+                        <span>${currentStats.activeSessions}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Total Messages:</span>
+                        <span>${currentStats.totalMessages}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Avg Session Length:</span>
+                        <span>${currentStats.averageSessionLength.toFixed(1)}</span>
+                    </div>
+                    <hr class="stat-divider">
+                    <div class="stat-row">
+                        <span>Security Violations:</span>
+                        <span>${currentStats.securityStats.totalViolations}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Blocked IPs:</span>
+                        <span>${currentStats.securityStats.blockedIPs}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Avg Risk Score:</span>
+                        <span>${currentStats.securityStats.averageRiskScore.toFixed(1)}</span>
+                    </div>
+                    <hr class="stat-divider">
+                    <div class="stat-row">
+                        <span>Training Examples:</span>
+                        <span>${currentStats.nluStats.totalTrainingExamples}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Vocabulary Size:</span>
+                        <span>${currentStats.nluStats.vocabularySize}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isLoading) return;
+
+            // Add user message to chat
+            addMessage('user', message);
+            input.value = '';
+            
+            // Show loading state
+            setLoading(true);
+            addMessage('assistant', 'Thinking...', true);
+
+            try {
+                const response = await fetch('/api/platform/assistant/enhanced-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        sessionId: sessionId,
+                        userId: 'demo-user'
+                    }),
+                });
+
+                const data = await response.json();
+                
+                // Remove thinking message
+                removeLastMessage();
+                
+                if (data.success) {
+                    addMessage('assistant', data.data.message, false, {
+                        intent: data.data.intent.intent,
+                        confidence: data.data.intent.confidence,
+                        securityViolations: data.data.securityViolations
+                    });
+                } else {
+                    addMessage('assistant', 'Sorry, I encountered an error processing your message.');
+                }
+            } catch (error) {
+                console.error('Failed to send message:', error);
+                removeLastMessage();
+                addMessage('assistant', 'Sorry, I encountered an error processing your message.');
+            } finally {
+                setLoading(false);
+                loadStats();
+            }
+        }
+
+        function addMessage(role, content, isThinking = false, metadata = {}) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Remove empty state if this is the first message
+            const emptyState = messagesContainer.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            let metaHtml = '';
+            if (!isThinking && metadata.intent) {
+                metaHtml = `
+                    <div class="message-meta">
+                        <span class="intent-badge">${metadata.intent}</span>
+                        <span class="confidence-badge">${Math.round(metadata.confidence * 100)}%</span>
+                    </div>
+                `;
+            }
+            
+            if (!isThinking && metadata.securityViolations && metadata.securityViolations.length > 0) {
+                metaHtml += `
+                    <div class="security-warning">
+                        Security violations detected: ${metadata.securityViolations.length}
+                    </div>
+                `;
+            }
+
+            messageDiv.innerHTML = `
+                <div class="message-bubble ${isThinking ? 'thinking' : ''}">
+                    <p class="message-content">${content}</p>
+                    ${metaHtml}
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeLastMessage() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const lastMessage = messagesContainer.lastElementChild;
+            if (lastMessage) {
+                lastMessage.remove();
+            }
+        }
+
+        function setLoading(loading) {
+            isLoading = loading;
+            const sendButton = document.getElementById('sendButton');
+            const messageInput = document.getElementById('messageInput');
+            
+            sendButton.disabled = loading;
+            messageInput.disabled = loading;
+            sendButton.textContent = loading ? 'Sending...' : 'Send';
+        }
+
+        function clearConversation() {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = '<div class="empty-state">Start a conversation with the AI assistant...</div>';
+            sessionId = `demo_${Date.now()}`;
+            updateSessionId();
+        }
+
+        async function trainAssistant() {
+            setLoading(true);
+            const trainButton = document.getElementById('trainButton');
+            const originalText = trainButton.textContent;
+            trainButton.textContent = 'Training...';
+            
+            try {
+                const response = await fetch('/api/platform/assistant/train', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'train'
+                    }),
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Assistant trained successfully!');
+                    loadStats();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('Failed to train assistant:', error);
+                alert('Failed to train assistant');
+            } finally {
+                setLoading(false);
+                trainButton.textContent = originalText;
+            }
+        }
+
+        async function testConversation() {
+            setLoading(true);
+            
+            try {
+                const response = await fetch('/api/platform/assistant/train', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'test_conversation',
+                        messages: [
+                            "Hi, I'd like to book a haircut",
+                            "I'm free on Friday afternoon",
+                            "Around 3pm would be perfect",
+                            "Yes, that works for me!"
+                        ]
+                    }),
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('Conversation flow test results:', data.data.conversation);
+                    alert('Conversation flow test completed! Check console for results.');
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('Failed to test conversation flow:', error);
+                alert('Failed to test conversation flow');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function testSecurity() {
+            const input = document.getElementById('securityInput');
+            const testInput = input.value.trim();
+            
+            if (!testInput || isLoading) return;
+
+            setLoading(true);
+            const securityTestButton = document.getElementById('securityTestButton');
+            const originalText = securityTestButton.textContent;
+            securityTestButton.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/platform/assistant/train', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'test_security',
+                        testInputs: [testInput]
+                    }),
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    displaySecurityResults(data.data.securityTests);
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('Failed to test security:', error);
+                alert('Failed to test security');
+            } finally {
+                setLoading(false);
+                securityTestButton.textContent = originalText;
+            }
+        }
+
+        function displaySecurityResults(results) {
+            const container = document.getElementById('securityResults');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<div class="empty-state">No security test results</div>';
+                return;
+            }
+
+            const resultsHtml = results.map(result => `
+                <div class="security-result ${result.allowed ? 'allowed' : 'blocked'}">
+                    <div class="security-result-header">
+                        <span class="security-result-input">Input: ${result.input}</span>
+                        <span class="security-result-status ${result.allowed ? 'allowed' : 'blocked'}">
+                            ${result.allowed ? 'Allowed' : 'Blocked'}
+                        </span>
+                    </div>
+                    ${result.violations.length > 0 ? `
+                        <div class="security-violations">
+                            Violations: ${result.violations.map(v => v.type).join(', ')}
+                        </div>
+                    ` : ''}
+                    ${result.response ? `
+                        <div class="security-response">
+                            Response: ${result.response}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            container.innerHTML = `
+                <h4 style="margin-bottom: 10px; font-size: 0.875rem; font-weight: bold;">
+                    Security Test Results:
+                </h4>
+                ${resultsHtml}
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "vertical": "fitness",
+  "service_templates": [
+    {
+      "name": "1-on-1 Training",
+      "default_duration_min": 60,
+      "default_price_cents": 8000,
+      "location_type": "mobile"
+    },
+    {
+      "name": "Group Class",
+      "default_duration_min": 60,
+      "default_price_cents": 2500,
+      "location_type": "in_person"
+    },
+    {
+      "name": "Nutrition Consult",
+      "default_duration_min": 45,
+      "default_price_cents": 9000,
+      "location_type": "virtual"
+    }
+  ],
+  "required_fields": [],
+  "booking_cadence_hint": "1-2x per week",
+  "conversation_context": {
+    "keywords": [
+      "trainer",
+      "training",
+      "workout",
+      "yoga",
+      "nutrition"
+    ],
+    "intake_questions": [
+      {
+        "key": "goal",
+        "prompt": "What\u2019s your main goal right now? (Strength, weight loss, mobility, etc.)"
+      }
+    ]
+  },
+  "compliance_rules": []
+}

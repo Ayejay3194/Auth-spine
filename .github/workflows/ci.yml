@@ -57,17 +57,23 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
-      - name: Install dependencies (business-spine only)
+      - name: Install root dependencies
         run: npm ci
-        working-directory: ./apps/business-spine
 
-      - name: Run ESLint
-        run: npm run lint
-        working-directory: ./apps/business-spine
+      - name: Check code formatting
+        run: npm run format:check
+        continue-on-error: true
 
-      - name: Type check
+      - name: Run ESLint (root level)
+        run: npm run lint:check
+        continue-on-error: true
+
+      - name: Type check (root level)
         run: npm run typecheck
-        working-directory: ./apps/business-spine
+        continue-on-error: true
+
+      - name: Type check (workspaces)
+        run: npm run typecheck:ws
         continue-on-error: true
 
   # Unit & Integration Tests

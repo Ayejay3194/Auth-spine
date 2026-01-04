@@ -1,0 +1,48 @@
+{
+  "vertical": "home_services",
+  "label": "Home Services (Cleaning/Handyman/Pet Care)",
+  "serviceTemplates": [
+    {
+      "code": "house_cleaning",
+      "name": "House Cleaning",
+      "defaultDurationMin": 120,
+      "defaultPriceMinor": 16000,
+      "locationTypes": [
+        "mobile"
+      ]
+    },
+    {
+      "code": "handyman",
+      "name": "Handyman Visit",
+      "defaultDurationMin": 90,
+      "defaultPriceMinor": 14000,
+      "locationTypes": [
+        "mobile"
+      ]
+    }
+  ],
+  "requiredProfessionalFields": [
+    "businessName",
+    "region.city",
+    "region.zip"
+  ],
+  "conversation": {
+    "intentModel": "home_services_terms_v1",
+    "intakeQuestions": [
+      {
+        "id": "address",
+        "prompt": "What\u2019s the service address?",
+        "type": "text"
+      },
+      {
+        "id": "details",
+        "prompt": "Any details/photos of the issue?",
+        "type": "text_optional"
+      }
+    ]
+  },
+  "compliance": {
+    "consentsRequired": [],
+    "rules": []
+  }
+}

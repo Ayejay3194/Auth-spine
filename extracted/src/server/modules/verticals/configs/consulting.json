@@ -1,0 +1,36 @@
+{
+  "vertical": "consulting",
+  "service_templates": [
+    {
+      "name": "Strategy Session",
+      "default_duration_min": 60,
+      "default_price_cents": 20000,
+      "location_type": "virtual"
+    },
+    {
+      "name": "Audit & Review",
+      "default_duration_min": 90,
+      "default_price_cents": 35000,
+      "location_type": "virtual"
+    }
+  ],
+  "required_fields": [],
+  "booking_cadence_hint": "as-needed",
+  "conversation_context": {
+    "keywords": [
+      "tax",
+      "cpa",
+      "consult",
+      "strategy",
+      "legal",
+      "accounting"
+    ],
+    "intake_questions": [
+      {
+        "key": "topic",
+        "prompt": "What\u2019s the topic? (Taxes, strategy, legal consult, etc.)"
+      }
+    ]
+  },
+  "compliance_rules": []
+}
