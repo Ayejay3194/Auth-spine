@@ -26,11 +26,11 @@ git pull origin main
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-npm ci
-npm ci --workspace=packages/auth-server
-npm ci --workspace=packages/auth
-npm ci --workspace=packages/resource-api
-npm ci --workspace=apps/business-spine
+npm install
+npm install --workspace=packages/auth-server
+npm install --workspace=packages/auth
+npm install --workspace=packages/resource-api
+npm install --workspace=apps/business-spine
 
 # Run type checking
 echo "🔍 Running type checking..."
