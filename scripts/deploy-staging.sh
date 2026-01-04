@@ -26,11 +26,7 @@ git pull origin main
 
 # Install dependencies
 echo "📦 Installing dependencies..."
-npm install --legacy-peer-deps
-npm install --workspace=packages/auth-server --legacy-peer-deps
-npm install --workspace=packages/auth --legacy-peer-deps
-npm install --workspace=packages/resource-api --legacy-peer-deps
-npm install --workspace=apps/business-spine --legacy-peer-deps
+npm install --legacy-peer-deps --workspaces
 
 # Run type checking
 echo "🔍 Running type checking..."
