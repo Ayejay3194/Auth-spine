@@ -2,10 +2,14 @@ import express from 'express'
 import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { exportJWK, jwtVerify } from 'jose'
-import { createPublicKey, randomBytes } from 'crypto'
+import { jwtVerify } from 'jose'
+import { createPublicKey, randomBytes, timingSafeEqual } from 'crypto'
+import rateLimit from 'express-rate-limit'
+import csrf from 'csurf'
+import helmet from 'helmet'
 import { loadClients, loadUsers, UserConfig } from './config'
 import { issueAccessToken, loadSigningKey, JwtAlgorithm, TokenKey } from './token'
+import { SpineJwtClaims, Session, RefreshToken, AuditEvent, AuthError, validateScopes, AllowedScope } from './types'
 
 const PORT = Number(process.env.PORT ?? 4000)
 const ISSUER = process.env.ISSUER?.trim()
@@ -55,37 +59,19 @@ const clientById = new Map(clients.map(c => [c.client_id, c]))
 const userByEmail = new Map(users.map(u => [u.email.toLowerCase(), u]))
 const userById = new Map(users.map(u => [u.id, u]))
 
-const sessions = new Map<string, {
-  id: string
-  userId: string
-  clientId: string
-  scopes: string[]
-  risk: 'ok' | 'restricted' | 'banned'
-  entitlements: Record<string, boolean>
-  createdAt: number
-  expiresAt: number
-}>()
-
-const refreshTokens = new Map<string, {
-  id: string
-  sessionId: string
-  userId: string
-  expiresAt: number
-}>()
-
+const sessions = new Map<string, Session>()
+const refreshTokens = new Map<string, RefreshToken>()
 const permissionStreams = new Set<express.Response>()
+const auditEvents: AuditEvent[] = []
 
-const auditEvents: Array<{
-  id: string
-  eventType: string
-  userId?: string
-  clientId?: string
-  createdAt: number
-  metadata?: Record<string, any>
-}> = []
+// Stream cleanup to prevent memory leaks
+function cleanupStream(res: express.Response) {
+  res.on('close', () => permissionStreams.delete(res))
+  res.on('error', () => permissionStreams.delete(res))
+}
 
-function recordAudit(eventType: string, data?: { userId?: string; clientId?: string; metadata?: Record<string, any> }) {
-  const event = {
+function recordAudit(eventType: string, data?: { userId?: string; clientId?: string; metadata?: Record<string, unknown> }): void {
+  const event: AuditEvent = {
     id: randomBytes(12).toString('hex'),
     eventType,
     userId: data?.userId,
@@ -94,13 +80,17 @@ function recordAudit(eventType: string, data?: { userId?: string; clientId?: str
     metadata: data?.metadata
   }
   auditEvents.push(event)
+  // TODO: Persist to database instead of keeping in memory
   if (auditEvents.length > 1000) auditEvents.shift()
 }
 
-function createSession(user: UserConfig, clientId: string, scopes: string[]) {
+function createSession(user: UserConfig | null, clientId: string, scopes: AllowedScope[]): Session {
+  if (!user) {
+    throw new AuthError('User is required to create session', 'INVALID_USER', 400)
+  }
   const now = Date.now()
   const sessionId = randomBytes(16).toString('hex')
-  const session = {
+  const session: Session = {
     id: sessionId,
     userId: user.id,
     clientId,
@@ -114,9 +104,9 @@ function createSession(user: UserConfig, clientId: string, scopes: string[]) {
   return session
 }
 
-function createRefreshToken(sessionId: string, userId: string) {
+function createRefreshToken(sessionId: string, userId: string): RefreshToken {
   const refreshId = randomBytes(32).toString('hex')
-  const refresh = {
+  const refresh: RefreshToken = {
     id: refreshId,
     sessionId,
     userId,
@@ -126,24 +116,29 @@ function createRefreshToken(sessionId: string, userId: string) {
   return refresh
 }
 
-function revokeSession(sessionId: string) {
+function revokeSession(sessionId: string): void {
   sessions.delete(sessionId)
   for (const [tokenId, token] of refreshTokens.entries()) {
     if (token.sessionId === sessionId) refreshTokens.delete(tokenId)
   }
+  // TODO: Use atomic database transaction for consistency
 }
 
-async function verifyBearerToken(authorization: string | undefined) {
+async function verifyBearerToken(authorization: string | undefined): Promise<SpineJwtClaims> {
   if (!authorization?.startsWith('Bearer ')) {
-    throw new Error('missing_bearer')
+    throw new AuthError('Missing or invalid Bearer token', 'MISSING_BEARER', 401)
   }
   const token = authorization.slice('Bearer '.length)
-  const { payload } = await jwtVerify(token, verifyKey, { issuer: ISSUER, algorithms: [JWT_ALG] })
-  return payload as any
+  try {
+    const { payload } = await jwtVerify(token, verifyKey, { issuer: ISSUER, algorithms: [JWT_ALG] })
+    return payload as SpineJwtClaims
+  } catch (error) {
+    throw new AuthError('Invalid or expired token', 'INVALID_TOKEN', 401)
+  }
 }
 
-function extractScopes(payload: any): string[] {
-  return Array.isArray(payload?.scp) ? payload.scp.map(String) : []
+function extractScopes(payload: SpineJwtClaims): AllowedScope[] {
+  return validateScopes(payload?.scp || [])
 }
 
 async function requireScopeOrRespond(
