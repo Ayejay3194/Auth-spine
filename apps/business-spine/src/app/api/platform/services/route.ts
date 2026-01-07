@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DatabasePlatformOrchestrator, DEFAULT_VERTICALS } from "@spine/enterprise/platform/index";
-import { prisma } from '../../../../lib/prisma-fallback.js';
+import { prisma } from '@/lib/prisma';
 
 // Initialize the database platform orchestrator
 const platform = new DatabasePlatformOrchestrator(prisma);
