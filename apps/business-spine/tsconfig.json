@@ -33,7 +33,13 @@
     ],
     "paths": {
       "@/*": [
-        "./*"
+        "./src/*"
+      ],
+      "@spine/shared-db": [
+        "../../packages/shared-db/index.ts"
+      ],
+      "@spine/enterprise": [
+        "../../packages/enterprise/index.ts"
       ],
       "@/suites/*": [
         "./src/suites/*"

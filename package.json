@@ -3,19 +3,16 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/*",
-    "business-spine"
+    "apps/*"
   ],
   "scripts": {
-    "dev": "concurrently -n auth,api,ui -c auto \"npm run dev -w @spine/auth-server\" \"npm run dev -w @spine/resource-api\" \"npm run dev -w @spine/business-spine\"",
+    "dev": "concurrently -n auth,ui -c auto \"npm run dev -w @spine/auth-server\" \"npm run dev -w @spine/business-spine\"",
     "dev:auth": "npm run dev -w @spine/auth-server",
-    "dev:api": "npm run dev -w @spine/resource-api",
     "dev:ui": "npm run dev -w @spine/business-spine",
     "build": "npm run build -ws",
     "build:auth": "npm run build -w @spine/auth-server",
-    "build:api": "npm run build -w @spine/resource-api",
     "build:ui": "npm run build -w @spine/business-spine",
-    "start": "concurrently -n auth,api,ui -c auto \"npm run start -w @spine/auth-server\" \"npm run start -w @spine/resource-api\" \"npm run start -w @spine/business-spine\"",
+    "start": "concurrently -n auth,ui -c auto \"npm run start -w @spine/auth-server\" \"npm run start -w @spine/business-spine\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

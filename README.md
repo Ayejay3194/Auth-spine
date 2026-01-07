@@ -1,376 +1,320 @@
-# Auth-Spine: Enterprise Authentication & RBAC Platform
+# Auth-Spine 🔐
 
-A comprehensive, production-ready authentication and role-based access control (RBAC) system with multiclient support, featuring JWT-based authentication, granular permission management, and intelligent ML-powered assistance.
+> Enterprise-grade TypeScript authentication and authorization system with multi-tenant RBAC, JWT, MFA, and 60+ enterprise features.
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/Node-18.0+-green.svg)](https://nodejs.org/)
+
+## 🎯 What is Auth-Spine?
+
+Auth-Spine is a **unified TypeScript monorepo** providing production-ready authentication, authorization, and business platform features. Perfect for SaaS applications, multi-tenant systems, and enterprise platforms.
+
+### Key Features
+
+✅ **100% TypeScript** - Type-safe from end to end  
+✅ **Unified Repository** - All packages work together seamlessly  
+✅ **Database-Backed Sessions** - No data loss on restart  
+✅ **7-Tier RBAC** - Granular role-based access control  
+✅ **JWT Authentication** - HS256 & RS256 support  
+✅ **MFA Ready** - TOTP with recovery codes  
+✅ **Rate Limiting** - Brute force protection  
+✅ **Audit Logging** - Complete compliance trail  
+✅ **60+ Enterprise Features** - AI/ML, booking, payments, and more  
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+
-- pnpm (or npm)
-
-### Installation & Running
 
 ```bash
-# Clone the repository (if not already done)
-git clone https://github.com/Ayejay3194/Auth-spine.git
-cd Auth-spine
-
-# Initialize submodules (includes nlp.js for NLU enhancement)
-git submodule update --init --recursive
-# Or use: ./scripts/setup-nlp.sh
-
-# Install dependencies
-pnpm install
-
-# Start Auth Server (port 4000)
-cd packages/auth-server
-pnpm dev
-
-# Start Business Spine (port 3000) - in another terminal
-cd apps/business-spine
-pnpm dev
+Node.js >= 18.0.0
+PostgreSQL >= 14.0
+npm >= 9.0.0
 ```
 
-**URLs:**
-- Auth Server: http://localhost:4000
-- Business Spine: http://localhost:3000
+### Installation
 
-## 📋 Core Features
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/auth-spine.git
+cd auth-spine
 
-### 1. **Multiclient Authentication**
-- One auth server powering multiple applications
-- Hard separation via `client_id`, `aud` (audience), `scp` (scopes)
-- Risk state management (ok/restricted/banned)
-- Feature entitlements system
+# 2. Run the setup script
+chmod +x setup.sh
+./setup.sh
 
-### 2. **Role-Based Access Control (RBAC)**
-- 7-tier role hierarchy: owner, admin, manager, staff, readonly, client, system
-- Resource-action permission model (e.g., `users:read`, `bookings:create`)
-- Database-backed role management
-- Audit logging for all access attempts
+# 3. Start development servers
+npm run dev
+```
 
-### 3. **Smart Assistant & ML**
-- 17 specialized ML engines for business intelligence
-- Natural Language Understanding (NLU) with LLM fallback
-- Predictive scheduling, dynamic pricing, customer segmentation
-- Context-aware suggestions and recommendations
+Services will be available at:
+- 🌐 **Business App**: http://localhost:3000
+- 🔐 **Auth Server**: http://localhost:4000
+- 📊 **Health Check**: http://localhost:4000/health
 
-### 4. **Security & Compliance**
-- JWT-based authentication with HS256/RS256 support
-- Scope-based authorization
-- Comprehensive audit logging
-- Risk state validation
-- Password hashing with bcrypt
+## 📁 Project Structure
+
+```
+auth-spine/
+├── packages/
+│   ├── auth-server/          # JWT authentication server (Port 4000)
+│   ├── shared-auth/          # Shared auth utilities
+│   ├── shared-db/            # Shared Prisma client ⭐ NEW
+│   └── enterprise/           # 60+ business packages
+├── apps/
+│   └── business-spine/       # Main Next.js application (Port 3000)
+├── .env.example              # Environment template
+├── setup.sh                  # Automated setup script
+└── README.md                 # You are here
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+```bash
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/authspine
+
+# Auth Server
+JWT_SECRET=your-super-secret-key-32-characters-minimum
+ISSUER=http://localhost:4000
+
+# Optional Services
+STRIPE_SECRET_KEY=sk_test_...
+SENDGRID_API_KEY=SG...
+```
+
+See `.env.example` for all available options.
+
+## 💻 Development
+
+### Available Commands
+
+```bash
+# Development
+npm run dev              # Start all services
+npm run dev:auth         # Start auth server only
+npm run dev:ui           # Start business app only
+
+# Building
+npm run build            # Build all packages
+npm run build:auth       # Build auth server
+npm run build:ui         # Build business app
+
+# Testing
+npm test                 # Run all tests
+npm run typecheck        # Type check all packages
+
+# Database
+cd apps/business-spine
+npx prisma migrate dev   # Run migrations
+npx prisma studio        # Open Prisma Studio
+npx prisma db seed       # Seed database
+```
 
 ## 🏗️ Architecture
 
-### Packages
+### Unified TypeScript Monorepo
 
-```
-packages/
-├── auth/                    # Core authentication library
-├── auth-server/             # JWT token generation server
-├── shared-auth/             # Shared auth utilities
-├── resource-api/            # Example protected API
-└── enterprise/
-    ├── rbac/               # RBAC middleware
-    └── nlu/                # NLU & ML engines
-```
+All packages are written in TypeScript and connected through workspace dependencies:
 
-### Applications
+```typescript
+// packages/auth-server uses shared-db
+import { prisma } from '@spine/shared-db/prisma'
 
-```
-apps/
-├── business-spine/          # Main web application (Next.js)
-└── demo-ui/                 # Demo UI for testing
+// apps/business-spine uses shared-db
+import { prisma } from '@spine/shared-db/prisma'
 ```
 
-### External Dependencies
+### Authentication Flow
 
 ```
-external/
-└── nlp.js/                  # NLP.js library (git submodule)
-                            # Natural language processing toolkit
-                            # Used for enhanced NLU capabilities
+User Login
+  ↓
+POST /token (auth-server:4000)
+  ↓
+Verify credentials → Create session in DB → Issue JWT
+  ↓
+Return access_token + refresh_token
+  ↓
+Frontend stores in httpOnly cookie
+  ↓
+Protected requests → Verify JWT → Check RBAC → Return data
 ```
 
-See [external/README.md](external/README.md) for more information about external dependencies.
+### Database Schema
 
-## 🔐 Authentication Flow
+Single PostgreSQL database shared by all services:
+
+- **Session** - User sessions with tokens
+- **RefreshToken** - Token refresh management
+- **AuditLog** - Security audit trail
+- **User** - User accounts
+- **Provider/Client** - Business entities
+- **Booking, Payment, Review** - Business features
+
+## 🔒 Security Features
+
+- ✅ **Password Complexity** - 8+ chars, uppercase, lowercase, number, special char
+- ✅ **Rate Limiting** - 5 login attempts per 15 minutes
+- ✅ **CSP Headers** - XSS protection
+- ✅ **HSTS Enabled** - Force HTTPS
+- ✅ **Session Cleanup** - Automatic hourly cleanup
+- ✅ **Audit Logging** - All auth events logged to database
+- ✅ **Database-Backed** - Sessions persist across restarts
+
+## 📊 RBAC System
+
+7-tier role hierarchy:
 
 ```
-Client App
-    ↓
-POST /token (email, password, client_id, scopes)
-    ↓
-Auth Server
-    ├─ Verify credentials
-    ├─ Validate client_id
-    ├─ Check allowed_scopes
-    └─ Generate JWT with claims
-    ↓
-Return access_token
-    ↓
-Protected API Route
-    ├─ Extract token
-    ├─ Verify signature
-    ├─ Validate audience & scopes
-    ├─ Check risk state
-    ├─ Fetch user role from DB
-    ├─ Check RBAC permission
-    └─ Log to audit trail
-    ↓
-Return protected resource
+system → admin → dev-admin → owner → practitioner → client → guest
 ```
 
-## 📊 Configuration
+Permissions format: `resource:action`
 
-### Clients Configuration
-**File:** `packages/auth-server/config/clients.json`
-
-Define which applications can authenticate and their allowed scopes:
-
-```json
-{
-  "clients": [
-    {
-      "client_id": "business_spine",
-      "allowed_scopes": ["users:read", "bookings:create", ...],
-      "default_scopes": ["bookings:read"]
-    }
-  ]
-}
-```
-
-### Users Configuration
-**File:** `packages/auth-server/config/users.json`
-
-Define demo users with roles and scopes:
-
-```json
-{
-  "users": [
-    {
-      "id": "u1",
-      "email": "admin@demo.com",
-      "password": "password",
-      "role": "admin",
-      "scopes": ["users:read", "admin:update", ...],
-      "risk": "ok",
-      "entitlements": {"premium": true}
-    }
-  ]
-}
-```
-
-## 🎯 Scope Format
-
-Scopes follow the `resource:action` pattern:
-
-**Resources:** users, bookings, payments, analytics, reports, admin, profile, schedule, launch-gate, kill-switches
-
-**Actions:** read, create, update, delete, refund, approve
-
-**Examples:**
-- `users:read` - Read user information
-- `bookings:create` - Create new bookings
+Examples:
+- `users:read` - View users
+- `bookings:create` - Create bookings
 - `payments:refund` - Process refunds
-
-## 👥 Roles & Permissions
-
-| Role | Permissions | Use Case |
-|------|-------------|----------|
-| owner | All (*) | System owner |
-| admin | User management, system config, analytics | Administrators |
-| manager | Team management, reports, scheduling | Team leads |
-| staff | Bookings, profile, schedule | Staff members |
-| readonly | Reports, analytics (read-only) | Analysts |
-| client | Profile, bookings (limited) | End users |
-
-## 🧠 ML Engines
-
-17 specialized engines for business intelligence:
-
-- **PredictiveScheduling** - Gap detection, buffer optimization
-- **ClientBehavior** - Pattern analysis, preference learning
-- **DynamicPricing** - Revenue optimization
-- **Segmentation** - Customer categorization
-- **Marketing** - Campaign optimization
-- **Finance** - Cash flow predictions
-- **Inventory** - Stock management
-- **Notifications** - Smart timing
-- **Onboarding** - User journey optimization
-- **Reviews** - Sentiment analysis
-- **Cancellations** - Churn prediction
-- **Rebooking** - Retention optimization
-- **Waitlist** - Demand forecasting
-- **AppointmentFlow** - Process optimization
-- **Communication** - Message optimization
-- **Benchmarking** - Performance analysis
-
-## 📚 Documentation
-
-- **MULTICLIENT_SETUP_GUIDE.md** - Complete setup instructions
-- **MULTICLIENT_INTEGRATION_TEST.md** - Test scenarios and examples
-- **MULTICLIENT_INTEGRATION_CHECKLIST.md** - Integration verification
-- **FEATURE_AUDIT_REPORT.md** - Feature implementation details
-- **PRODUCTION_READINESS_ASSESSMENT.md** - Production deployment guide
+- `admin:*` - All admin permissions
 
 ## 🧪 Testing
 
-### Test Scenarios
+```bash
+# Run all tests
+npm test
 
-**1. Admin Token Request**
+# Run tests for specific package
+cd packages/auth-server
+npm test
+
+# Integration tests
+npm run test:integration
+
+# E2E tests
+npm run test:e2e
+```
+
+## 🚢 Deployment
+
+### Production Checklist
+
+- [ ] Switch to RS256 for JWT (recommended)
+- [ ] Use environment-specific secrets
+- [ ] Enable HTTPS/TLS
+- [ ] Configure proper CORS origins
+- [ ] Set up database backups
+- [ ] Enable Redis caching
+- [ ] Configure monitoring (Sentry)
+- [ ] Set up log aggregation
+- [ ] Configure secrets management
+- [ ] Enable database encryption at rest
+
+### Docker Deployment
+
+```bash
+# Build and start
+docker-compose up -d
+
+# Check health
+curl http://localhost:4000/health
+curl http://localhost:3000/api/health
+```
+
+## 📚 API Documentation
+
+### Auth Server (Port 4000)
+
+#### POST `/token`
+Authenticate and get access token
+
 ```bash
 curl -X POST http://localhost:4000/token \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@demo.com",
-    "password": "password",
-    "client_id": "business_spine",
-    "requested_scopes": ["users:read", "admin:update"]
+    "email": "user@example.com",
+    "password": "SecurePass123!",
+    "client_id": "business-spine-app"
   }'
 ```
 
-**2. Protected Endpoint**
+#### POST `/token/refresh`
+Refresh an expired token
+
 ```bash
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:3000/api/admin/users
+curl -X POST http://localhost:4000/token/refresh \
+  -H "Content-Type: application/json" \
+  -d '{
+    "refresh_token": "abc123...",
+    "client_id": "business-spine-app"
+  }'
 ```
 
-**3. Health Check**
+#### GET `/oauth/userinfo`
+Get user information
+
 ```bash
-curl http://localhost:4000/health
+curl -H "Authorization: Bearer <access_token>" \
+  http://localhost:4000/oauth/userinfo
 ```
 
-## 🔒 Security Features
-
-- **Client ID Validation** - Prevents token reuse across clients
-- **Scope-Based Authorization** - Granular permission control
-- **Risk State Management** - User risk assessment
-- **Audit Logging** - Complete access trail
-- **Password Hashing** - bcrypt with configurable rounds
-- **JWT Verification** - HS256/RS256 support
-
-## 🚀 Production Deployment
-
-### Recommended Changes
-
-1. **Switch to RS256** - Use public/private key pair instead of shared secret
-2. **Implement Refresh Tokens** - For long-lived sessions
-3. **Enable HTTPS** - Secure token transmission
-4. **Use Strong Secrets** - Generate cryptographically secure keys
-5. **Monitor Audit Logs** - Set up alerting for suspicious activity
-6. **Implement Rate Limiting** - Prevent brute force attacks
-
-### Environment Variables
-
-```env
-# Auth Server
-PORT=4000
-ISSUER=https://auth.yourdomain.com
-JWT_SECRET=<strong-random-secret>
-JWT_EXPIRES_IN=24h
-
-# Business Spine
-NEXT_PUBLIC_AUTH_SERVER=https://auth.yourdomain.com
-JWT_SECRET=<same-secret>
-ISSUER=https://auth.yourdomain.com
-DATABASE_URL=<your-database-url>
-```
-
-## 🛠️ Development
-
-### Project Structure
-
-```
-Auth-Spine/
-├── packages/
-│   ├── auth/                 # Core auth library
-│   ├── auth-server/          # Token generation
-│   ├── shared-auth/          # Shared utilities
-│   └── enterprise/
-│       ├── rbac/            # RBAC middleware
-│       └── nlu/             # ML engines
-├── apps/
-│   ├── business-spine/       # Main app
-│   └── demo-ui/              # Demo
-├── docs/                     # Documentation
-├── tests/                    # Test suites
-└── config/                   # Configuration
-```
-
-### Key Files
-
-- `packages/auth/src/index.ts` - Auth library exports
-- `packages/auth-server/src/server.ts` - Token server
-- `apps/business-spine/src/lib/rbac-middleware.ts` - RBAC enforcement
-- `apps/business-spine/src/hooks/useAuth.ts` - Frontend auth hooks
-
-## 📖 API Reference
-
-### Auth Server Endpoints
-
-**POST /token** - Generate JWT token
-```json
-{
-  "email": "user@example.com",
-  "password": "password",
-  "client_id": "app_name",
-  "requested_scopes": ["scope1", "scope2"]
-}
-```
-
-**GET /health** - Health check
-```json
-{
-  "ok": true,
-  "issuer": "http://localhost:4000",
-  "clients": ["client1", "client2"]
-}
-```
-
-### Protected API Routes
-
-All routes use RBAC middleware:
-```typescript
-export const GET = withRBAC(handler, { resource: 'users', action: 'read' });
-```
+See [API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md) for complete API reference.
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
 
-## 📝 License
+### Development Workflow
 
-See [LEGAL](LEGAL/) directory for license information.
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes (TypeScript only!)
+4. Run `npm run typecheck` and `npm test`
+5. Submit a Pull Request
 
-## 🆘 Support
+## 🐛 Troubleshooting
 
-For issues or questions:
-1. Check documentation files
-2. Review audit logs
-3. Check auth server logs
-4. Verify configuration files
+### Common Issues
 
-## 🎯 Roadmap
+**Database connection failed**
+```bash
+# Check PostgreSQL is running
+psql -U postgres -c "SELECT version();"
 
-- [ ] RS256 token support
-- [ ] Refresh token implementation
-- [ ] OAuth2/OIDC support
-- [ ] MFA/2FA support
-- [ ] Session management
-- [ ] Advanced audit analytics
-- [ ] Real-time permission updates
+# Check DATABASE_URL in .env
+echo $DATABASE_URL
+```
 
-## ✨ Key Achievements
+**Port already in use**
+```bash
+# Find process using port 4000 or 3000
+lsof -ti:4000 | xargs kill -9
+lsof -ti:3000 | xargs kill -9
+```
 
-✅ Complete RBAC system with 7-tier role hierarchy
-✅ Multiclient authentication with scope-based access
-✅ 17 ML engines for business intelligence
-✅ Comprehensive audit logging
-✅ Production-ready security features
-✅ Full documentation and test scenarios
-✅ Backward compatible with legacy tokens
-✅ Enterprise-grade platform ready for deployment
+**Prisma Client not generated**
+```bash
+cd apps/business-spine
+npx prisma generate
+```
 
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file
+
+## 🙏 Acknowledgments
+
+Built with:
+- [TypeScript](https://www.typescriptlang.org/)
+- [Next.js](https://nextjs.org/)
+- [Prisma](https://www.prisma.io/)
+- [Jose](https://github.com/panva/jose)
+- [Zod](https://zod.dev/)
+
+---
+
+**Built with ❤️ in TypeScript**

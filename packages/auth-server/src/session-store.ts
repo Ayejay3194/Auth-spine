@@ -5,7 +5,7 @@
  * the in-memory session storage for better durability and scalability.
  */
 
-import { prisma } from '../business-spine/lib/prisma';
+import { prisma } from '@spine/shared-db/prisma';
 import { Session, RefreshToken } from './types';
 import { randomBytes } from 'crypto';
 

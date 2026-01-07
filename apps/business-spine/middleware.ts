@@ -49,17 +49,19 @@ export async function middleware(req: NextRequest) {
   res.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
   
   // Content Security Policy - Prevents XSS attacks
+  // Note: 'unsafe-inline' for scripts is removed for security. Use nonces in production.
   res.headers.set(
     "Content-Security-Policy",
     "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
+    "script-src 'self'; " + // Removed unsafe-inline and unsafe-eval
+    "style-src 'self' 'unsafe-inline'; " + // Keep for CSS-in-JS libraries
     "img-src 'self' data: https:; " +
     "font-src 'self' data:; " +
     "connect-src 'self' https:; " +
     "frame-ancestors 'none'; " +
     "base-uri 'self'; " +
-    "form-action 'self'"
+    "form-action 'self'; " +
+    "upgrade-insecure-requests" // Force HTTPS
   );
   
   // Additional security headers

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EnhancedAssistantService } from '../../../../../packages/enterprise/platform/assistant/EnhancedAssistantService.js';
-import { comprehensiveTrainingData, conversationalFlows } from '../../../../../packages/enterprise/platform/nlu/training-data.js';
+import { EnhancedAssistantService } from "@spine/enterprise/platform/assistant/EnhancedAssistantService";
+import { comprehensiveTrainingData, conversationalFlows } from "@spine/enterprise/platform/nlu/training-data";
 
 // Initialize the enhanced assistant service
 const assistant = new EnhancedAssistantService();

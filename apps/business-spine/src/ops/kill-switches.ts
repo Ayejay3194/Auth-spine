@@ -95,82 +95,176 @@ export const KILL_SWITCHES: KillSwitch[] = [
 
 export class KillSwitchManager {
   static async getAllSwitches(): Promise<KillSwitch[]> {
-    // For now, return default switches since database models don't exist
-    // In production, this would query the database
-    return KILL_SWITCHES;
+    const switches = await prisma.killSwitch.findMany({
+      orderBy: { category: 'asc' }
+    });
+    return switches.map(sw => ({
+      id: sw.id,
+      name: sw.name,
+      description: sw.description,
+      category: sw.category as any,
+      enabled: sw.enabled,
+      activatedAt: sw.activatedAt || undefined,
+      activatedBy: sw.activatedBy || undefined,
+      reason: sw.reason || undefined,
+      autoDisableAt: sw.autoDisableAt || undefined,
+      impact: sw.impact as any
+    }));
   }
 
   static async getSwitchStatus(switchId: string): Promise<boolean> {
-    // For now, return false since database models don't exist
-    // In production, this would query the database
-    return false;
+    const killSwitch = await prisma.killSwitch.findUnique({
+      where: { name: switchId }
+    });
+    return killSwitch?.enabled || false;
   }
 
   static async activateSwitch(
-    switchId: string, 
-    userId: string, 
+    switchId: string,
+    userId: string,
     reason: string,
     autoDisableHours?: number
   ): Promise<void> {
-    const killSwitch = KILL_SWITCHES.find(sw => sw.id === switchId);
+    const killSwitch = await prisma.killSwitch.findUnique({
+      where: { name: switchId }
+    });
+
     if (!killSwitch) {
       throw new Error('Kill switch not found');
     }
 
-    // Check if already enabled
-    const current = await this.getSwitchStatus(switchId);
-    if (current) {
+    if (killSwitch.enabled) {
       throw new Error('Kill switch is already active');
     }
 
-    // Log the activation using console.log since database models don't exist
-    console.log('KILL SWITCH ACTIVATED:', {
-      switchId,
-      switchName: killSwitch.name,
-      userId,
-      reason,
-      impact: killSwitch.impact,
-      activatedAt: new Date(),
-      autoDisableAt: autoDisableHours ? 
-        new Date(Date.now() + autoDisableHours * 60 * 60 * 1000) : 
-        undefined
+    const autoDisableAt = autoDisableHours ?
+      new Date(Date.now() + autoDisableHours * 60 * 60 * 1000) :
+      null;
+
+    // Update kill switch in database
+    await prisma.killSwitch.update({
+      where: { name: switchId },
+      data: {
+        enabled: true,
+        activatedAt: new Date(),
+        activatedBy: userId,
+        reason,
+        autoDisableAt
+      }
+    });
+
+    // Log to history
+    await prisma.killSwitchHistory.create({
+      data: {
+        switchId: killSwitch.id,
+        switchName: killSwitch.name,
+        action: 'enabled',
+        userId,
+        reason,
+        impact: killSwitch.impact
+      }
     });
 
     // Send critical alert
-    await this.sendCriticalAlert(killSwitch, userId, reason);
+    await this.sendCriticalAlert({
+      id: killSwitch.id,
+      name: killSwitch.name,
+      description: killSwitch.description,
+      category: killSwitch.category as any,
+      enabled: true,
+      impact: killSwitch.impact as any
+    }, userId, reason);
   }
 
   static async deactivateSwitch(switchId: string, userId: string, reason: string): Promise<void> {
-    const killSwitch = KILL_SWITCHES.find(sw => sw.id === switchId);
+    const killSwitch = await prisma.killSwitch.findUnique({
+      where: { name: switchId }
+    });
+
     if (!killSwitch) {
       throw new Error('Kill switch not found');
     }
 
-    // Check if already disabled
-    const current = await this.getSwitchStatus(switchId);
-    if (!current) {
+    if (!killSwitch.enabled) {
       throw new Error('Kill switch is not active');
     }
 
-    // Log the deactivation using console.log since database models don't exist
-    console.log('KILL SWITCH DEACTIVATED:', {
-      switchId,
-      switchName: killSwitch.name,
-      userId,
-      reason,
-      deactivatedAt: new Date()
+    // Update kill switch in database
+    await prisma.killSwitch.update({
+      where: { name: switchId },
+      data: {
+        enabled: false,
+        deactivatedAt: new Date(),
+        deactivatedBy: userId,
+        reason
+      }
+    });
+
+    // Log to history
+    await prisma.killSwitchHistory.create({
+      data: {
+        switchId: killSwitch.id,
+        switchName: killSwitch.name,
+        action: 'disabled',
+        userId,
+        reason,
+        impact: killSwitch.impact
+      }
     });
   }
 
   static async checkActiveSwitches(): Promise<KillSwitch[]> {
-    // For now, return empty array since database models don't exist
-    // In production, this would query active switches from database
-    return [];
+    const switches = await prisma.killSwitch.findMany({
+      where: { enabled: true }
+    });
+
+    return switches.map(sw => ({
+      id: sw.id,
+      name: sw.name,
+      description: sw.description,
+      category: sw.category as any,
+      enabled: sw.enabled,
+      activatedAt: sw.activatedAt || undefined,
+      activatedBy: sw.activatedBy || undefined,
+      reason: sw.reason || undefined,
+      autoDisableAt: sw.autoDisableAt || undefined,
+      impact: sw.impact as any
+    }));
   }
 
   static async autoDisableExpiredSwitches(): Promise<void> {
-    // For now, log the check since database models don't exist
-    console.log('AUTO-DISABLE CHECK: Checking for expired kill switches');
+    const now = new Date();
+    const expiredSwitches = await prisma.killSwitch.findMany({
+      where: {
+        enabled: true,
+        autoDisableAt: {
+          lte: now
+        }
+      }
+    });
+
+    for (const sw of expiredSwitches) {
+      await prisma.killSwitch.update({
+        where: { id: sw.id },
+        data: {
+          enabled: false,
+          deactivatedAt: now,
+          deactivatedBy: 'system',
+          reason: 'Auto-disabled after expiration time'
+        }
+      });
+
+      await prisma.killSwitchHistory.create({
+        data: {
+          switchId: sw.id,
+          switchName: sw.name,
+          action: 'disabled',
+          userId: 'system',
+          reason: 'Auto-disabled after expiration time',
+          impact: sw.impact
+        }
+      });
+    }
   }
 
   static async isSystemFeatureEnabled(feature: string): Promise<boolean> {

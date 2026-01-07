@@ -1,32 +1,30 @@
 /**
  * Auth-spine - Complete Enterprise Authentication and Authorization Platform
- * 
+ *
  * Main entry point for the entire Auth-spine system.
  * This file orchestrates the business-spine and enterprise packages.
  */
 
 import { execSync } from 'child_process';
-import path from 'path';
-import fs from 'fs';
+import * as path from 'path';
+import * as fs from 'fs';
 import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+interface ComponentInfo {
+  name: string;
+  path: string;
+}
 
 interface HealthStatus {
-  healthy: boolean;
-  message: string;
-}
-
-interface ComponentHealth {
   overall: boolean;
   components: {
-    enterprise: HealthStatus | null;
-    businessSpine: HealthStatus;
+    enterprise: any;
+    businessSpine: any;
   };
-}
-
-interface ComponentMetrics {
-  directories: number;
-  files: number;
-  error?: string;
 }
 
 interface Metrics {
@@ -34,9 +32,15 @@ interface Metrics {
   businessSpine: {
     status: string;
     path: string;
-    components: ComponentMetrics;
+    components: ComponentCount;
   };
   timestamp: string;
+}
+
+interface ComponentCount {
+  directories: number;
+  files: number;
+  error?: string;
 }
 
 interface SystemReport {
@@ -47,7 +51,7 @@ interface SystemReport {
     overallHealth: boolean;
     timestamp: string;
   };
-  health: ComponentHealth;
+  health: HealthStatus;
   metrics: Metrics;
   components: {
     enterprise: {
@@ -61,23 +65,18 @@ interface SystemReport {
   };
 }
 
-class AuthSpineOrchestrator {
+export class AuthSpineOrchestrator {
   private businessSpinePath: string;
   private enterprisePath: string;
-  private initialized: boolean = false;
+  private initialized: boolean;
   private enterpriseOrchestrator: any;
 
   constructor() {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    
     this.businessSpinePath = path.join(__dirname, 'apps', 'business-spine');
     this.enterprisePath = path.join(__dirname, 'packages', 'enterprise');
+    this.initialized = false;
   }
 
-  /**
-   * Initialize the entire Auth-spine system
-   */
   async initialize(): Promise<void> {
     if (this.initialized) {
       console.log('🚀 Auth-spine already initialized');
@@ -85,31 +84,21 @@ class AuthSpineOrchestrator {
     }
 
     console.log('🚀 Initializing Auth-spine Complete Enterprise Platform...');
-    
+
     try {
-      // Verify all components exist
       this.verifyComponents();
-      
-      // Initialize enterprise packages
       await this.initializeEnterprise();
-      
-      // Initialize business-spine
       await this.initializeBusinessSpine();
-      
       this.initialized = true;
       console.log('✅ Auth-spine platform successfully initialized');
-      
     } catch (error) {
       console.error('❌ Failed to initialize Auth-spine platform:', error);
       throw error;
     }
   }
 
-  /**
-   * Verify all required components exist
-   */
   private verifyComponents(): void {
-    const components = [
+    const components: ComponentInfo[] = [
       { name: 'business-spine', path: this.businessSpinePath },
       { name: 'enterprise packages', path: this.enterprisePath }
     ];
@@ -123,82 +112,65 @@ class AuthSpineOrchestrator {
     console.log('✅ All required components verified');
   }
 
-  /**
-   * Initialize enterprise packages
-   */
   private async initializeEnterprise(): Promise<void> {
     console.log('🔧 Initializing enterprise packages...');
-    
+
     try {
-      // Import and initialize enterprise orchestrator
-      const orchestratorPath = path.join(this.enterprisePath, 'orchestrator.ts');
-      
+      const orchestratorPath = path.join(this.enterprisePath, 'orchestrator.js');
       if (fs.existsSync(orchestratorPath)) {
         const { EnterpriseOrchestrator } = await import(orchestratorPath);
         this.enterpriseOrchestrator = new EnterpriseOrchestrator();
-        
         await this.enterpriseOrchestrator.initialize();
         console.log('✅ Enterprise packages initialized');
       } else {
-        console.log('⚠️ Enterprise orchestrator not found');
+        console.log('⚠️ Enterprise orchestrator not found, skipping...');
       }
-      
     } catch (error) {
       console.error('❌ Failed to initialize enterprise packages:', error);
       throw error;
     }
   }
 
-  /**
-   * Initialize business-spine
-   */
   private async initializeBusinessSpine(): Promise<void> {
     console.log('🔧 Initializing business-spine...');
-    
+
     try {
-      // Check if business-spine has its own initialization
       const businessSpineIndex = path.join(this.businessSpinePath, 'package.json');
-      
       if (fs.existsSync(businessSpineIndex)) {
         console.log('✅ Business-spine package found');
       }
-      
     } catch (error) {
       console.error('❌ Failed to initialize business-spine:', error);
       throw error;
     }
   }
 
-  /**
-   * Get health status of all components
-   */
-  async getHealthStatus(): Promise<ComponentHealth> {
+  async getHealthStatus(): Promise<HealthStatus> {
     if (!this.initialized) {
       throw new Error('Auth-spine platform not initialized. Call initialize() first.');
     }
 
-    const healthStatus: ComponentHealth = {
+    const healthStatus: HealthStatus = {
       overall: true,
       components: {
         enterprise: null,
-        businessSpine: {
-          healthy: fs.existsSync(this.businessSpinePath),
-          message: fs.existsSync(this.businessSpinePath) ? 'Business-spine directory exists' : 'Business-spine directory missing'
-        }
+        businessSpine: null
       }
     };
 
     try {
-      // Get enterprise health
       if (this.enterpriseOrchestrator) {
         healthStatus.components.enterprise = await this.enterpriseOrchestrator.getHealthStatus();
       }
 
-      // Determine overall health
-      healthStatus.overall = Object.values(healthStatus.components).every(
-        (component: any) => component === null || component.healthy !== false
-      );
+      healthStatus.components.businessSpine = {
+        healthy: fs.existsSync(this.businessSpinePath),
+        message: fs.existsSync(this.businessSpinePath) ? 'Business-spine directory exists' : 'Business-spine directory missing'
+      };
 
+      healthStatus.overall = Object.values(healthStatus.components).every(
+        component => component === null || component.healthy !== false
+      );
     } catch (error) {
       console.error('❌ Failed to get health status:', error);
       healthStatus.overall = false;
@@ -207,9 +179,6 @@ class AuthSpineOrchestrator {
     return healthStatus;
   }
 
-  /**
-   * Get metrics from all components
-   */
   async getMetrics(): Promise<Metrics> {
     if (!this.initialized) {
       throw new Error('Auth-spine platform not initialized. Call initialize() first.');
@@ -220,17 +189,16 @@ class AuthSpineOrchestrator {
       businessSpine: {
         status: 'active',
         path: this.businessSpinePath,
-        components: this.countBusinessSpineComponents()
+        components: { directories: 0, files: 0 }
       },
       timestamp: new Date().toISOString()
     };
 
     try {
-      // Get enterprise metrics
       if (this.enterpriseOrchestrator) {
         metrics.enterprise = await this.enterpriseOrchestrator.getMetrics();
       }
-
+      metrics.businessSpine.components = this.countBusinessSpineComponents();
     } catch (error) {
       console.error('❌ Failed to get metrics:', error);
     }
@@ -238,12 +206,9 @@ class AuthSpineOrchestrator {
     return metrics;
   }
 
-  /**
-   * Count business-spine components
-   */
-  private countBusinessSpineComponents(): ComponentMetrics {
+  private countBusinessSpineComponents(): ComponentCount {
     try {
-      const components: ComponentMetrics = {
+      const components: ComponentCount = {
         directories: 0,
         files: 0
       };
@@ -269,9 +234,6 @@ class AuthSpineOrchestrator {
     }
   }
 
-  /**
-   * Generate comprehensive system report
-   */
   async generateSystemReport(): Promise<SystemReport> {
     if (!this.initialized) {
       throw new Error('Auth-spine platform not initialized. Call initialize() first.');
@@ -303,9 +265,6 @@ class AuthSpineOrchestrator {
     };
   }
 
-  /**
-   * Cleanup all components
-   */
   async cleanup(): Promise<void> {
     if (!this.initialized) {
       return;
@@ -313,39 +272,27 @@ class AuthSpineOrchestrator {
 
     try {
       console.log('🧹 Cleaning up Auth-spine platform...');
-
-      // Cleanup enterprise orchestrator
       if (this.enterpriseOrchestrator) {
         await this.enterpriseOrchestrator.cleanup();
       }
-
       this.initialized = false;
       console.log('✅ Auth-spine platform cleaned up');
-
     } catch (error) {
       console.error('❌ Failed to cleanup Auth-spine platform:', error);
     }
   }
 }
 
-// Export the main orchestrator
-export { AuthSpineOrchestrator };
-
-// Create and export default instance
-const authSpineOrchestrator = new AuthSpineOrchestrator();
+export const authSpineOrchestrator = new AuthSpineOrchestrator();
 export default authSpineOrchestrator;
 
-// Auto-initialize if this is the main module
 if (import.meta.url === `file://${process.argv[1]}`) {
   (async () => {
     try {
       await authSpineOrchestrator.initialize();
-      
-      // Generate and display system report
       const report = await authSpineOrchestrator.generateSystemReport();
       console.log('\n📊 Auth-spine System Report:');
       console.log(JSON.stringify(report, null, 2));
-      
     } catch (error) {
       console.error('❌ Failed to start Auth-spine platform:', error);
       process.exit(1);

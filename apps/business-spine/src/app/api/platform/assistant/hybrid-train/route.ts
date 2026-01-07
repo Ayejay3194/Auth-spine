@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { HybridAssistantService } from '../../../../../packages/enterprise/platform/assistant/HybridAssistantService.js';
+import { HybridAssistantService } from "@spine/enterprise/platform/assistant/HybridAssistantService";
 
 // Initialize the hybrid assistant service
 const assistant = new HybridAssistantService();

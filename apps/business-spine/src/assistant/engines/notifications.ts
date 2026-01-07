@@ -2,6 +2,8 @@ import { Engine } from "../assistant/engine";
 import { AssistantContext, MessageEvent, Suggestion } from "../assistant/types";
 import { makeSuggestion } from "../assistant/suggest";
 import { differenceInHours } from "date-fns";
+import { sendEmail } from "@/notifications/adapters/sendgrid";
+import { sendSms } from "@/notifications/adapters/twilio";
 
 function bestHour(msgs: MessageEvent[]): number | null {
   const buckets=new Map<number,{sent:number;open:number}>();
@@ -17,6 +19,21 @@ function bestHour(msgs: MessageEvent[]): number | null {
 
 export class NotificationEngine implements Engine {
   name="notifications";
+
+  /**
+   * Send notification via email
+   */
+  async sendEmailNotification(to: string, subject: string, message: string): Promise<void> {
+    await sendEmail({ to, subject, text: message });
+  }
+
+  /**
+   * Send notification via SMS
+   */
+  async sendSmsNotification(to: string, message: string): Promise<void> {
+    await sendSms({ to, text: message });
+  }
+
   run(ctx: AssistantContext): Suggestion[] {
     const out: Suggestion[]=[];
     for (const c of ctx.clients){

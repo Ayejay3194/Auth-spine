@@ -397,16 +397,35 @@ model MfaRecoveryCode {
 
 
 model Session {
-  id         String   @id @default(cuid())
-  userId     String
-  tokenHash  String
-  createdAt  DateTime @default(now())
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  user       User     @relation(fields: [userId], references: [id])
+  id           String   @id @default(cuid())
+  userId       String
+  clientId     String
+  tokenHash    String?
+  scopes       Json     @default("[]")
+  risk         String   @default("ok")
+  entitlements Json     @default("{}")
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  user         User     @relation(fields: [userId], references: [id])
+  refreshTokens RefreshToken[]
 
   @@index([userId, createdAt])
   @@index([tokenHash])
+  @@index([clientId])
+}
+
+model RefreshToken {
+  id         String   @id @default(cuid())
+  sessionId  String
+  userId     String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([userId])
 }
 
 
@@ -454,13 +473,15 @@ model AuditLog {
   id        String   @id @default(cuid())
   eventType String   // UNAUTHORIZED_ACCESS, USER_CREATED, etc.
   userId    String?
+  clientId  String?
   metadata  Json?    // Store additional context
   createdAt DateTime @default(now())
-  
+
   user      User?    @relation(fields: [userId], references: [id])
-  
+
   @@index([eventType, createdAt])
   @@index([userId, createdAt])
+  @@index([clientId, createdAt])
 }
 
 model AnalyticsEvent {
@@ -471,8 +492,76 @@ model AnalyticsEvent {
   sessionId String?
   data      Json
   createdAt DateTime @default(now())
-  
+
   @@index([type, timestamp])
   @@index([userId, timestamp])
   @@index([sessionId, timestamp])
+}
+
+model KillSwitch {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  description   String
+  category      String   // bookings, payments, payroll, admin, api
+  enabled       Boolean  @default(false)
+  activatedAt   DateTime?
+  activatedBy   String?
+  deactivatedAt DateTime?
+  deactivatedBy String?
+  reason        String?
+  autoDisableAt DateTime?
+  impact        String   @default("medium") // low, medium, high, critical
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([enabled, category])
+  @@index([activatedAt])
+}
+
+model KillSwitchHistory {
+  id         String   @id @default(cuid())
+  switchId   String
+  switchName String
+  action     String   // enabled, disabled
+  userId     String
+  reason     String?
+  impact     String
+  timestamp  DateTime @default(now())
+
+  @@index([switchId, timestamp])
+  @@index([userId, timestamp])
+}
+
+model LaunchGate {
+  id          String   @id @default(cuid())
+  feature     String   @unique
+  description String
+  status      String   @default("planning") // planning, development, testing, staged, launched, retired
+  gateChecks  Json     // Checklist items for launch readiness
+  assignedTo  String?
+  dueDate     DateTime?
+  launchedAt  DateTime?
+  launchedBy  String?
+  rolloutPct  Int      @default(0) // 0-100 for gradual rollout
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, dueDate])
+  @@index([assignedTo])
+}
+
+model LaunchGateHistory {
+  id          String   @id @default(cuid())
+  gateId      String
+  feature     String
+  action      String   // status_change, check_completed, rollout_increase
+  userId      String
+  fromValue   String?
+  toValue     String?
+  notes       String?
+  timestamp   DateTime @default(now())
+
+  @@index([gateId, timestamp])
+  @@index([feature, timestamp])
 }

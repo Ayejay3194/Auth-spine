@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EnhancedPlatformOrchestrator } from '../../../../../packages/enterprise/platform/EnhancedPlatformOrchestrator.js';
+import { EnhancedPlatformOrchestrator } from "@spine/enterprise/platform/EnhancedPlatformOrchestrator";
 
 // Initialize the enhanced platform orchestrator
 const platform = new EnhancedPlatformOrchestrator({

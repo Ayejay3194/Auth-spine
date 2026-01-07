@@ -21,33 +21,26 @@ export * from './beauty-booking-security/index.js';
 export * from './comprehensive-platform-security/index.js';
 export * from './comprehensive-security/index.js';
 export * from './saas-paas-security/index.js';
-export * from './saas-paas-security-checklist/index.js';
-export * from './saas-paas-security-checklist-2/index.js';
-export * from './saas-security/index.js';
-export * from './saas-security-starter-kit/index.js';
-export * from './security-defense-layer/index.js';
 export * from './security-governance/index.js';
-export * from './security-governance-enforcement/index.js';
-export * from './security-next-level/index.js';
-export * from './security-next-level-suite/index.js';
+// Archived security modules (moved to docs/archive/legacy/enterprise-modules-to-consolidate/security/):
+// - saas-paas-security-checklist, saas-paas-security-checklist-2
+// - saas-security, saas-security-starter-kit
+// - security-defense-layer, security-governance-enforcement
+// - security-next-level, security-next-level-suite
 
 // Supabase Packages
 export * from './supabase-advanced/index.js';
 export * from './supabase-advanced-features/index.js';
-export * from './supabase-advanced-features-pack/index.js';
 export * from './supabase-at-home/index.js';
-export * from './supabase-at-home-pack/index.js';
 export * from './supabase-features-checklist-suite/index.js';
-export * from './supabase-features-checklist-suite-continued/index.js';
-export * from './supabase-features-checklist-suite-continued-advanced-usecases-patterns/index.js';
 export * from './supabase-saas-advanced/index.js';
-export * from './supabase-saas-advanced-2/index.js';
-export * from './supabase-saas-advanced-pack/index.js';
-export * from './supabase-saas-checklist-pack/index.js';
 export * from './supabase-saas-features/index.js';
-export * from './supabase-saas-features-pack/index.js';
 export * from './supabase-security/index.js';
-export * from './supabase-security-pack/index.js';
+// Archived supabase modules (moved to docs/archive/legacy/enterprise-modules-to-consolidate/supabase/):
+// - supabase-advanced-features-pack, supabase-at-home-pack
+// - supabase-features-checklist-suite-continued, supabase-features-checklist-suite-continued-advanced-usecases-patterns
+// - supabase-saas-advanced-2, supabase-saas-advanced-pack
+// - supabase-saas-checklist-pack, supabase-saas-features-pack, supabase-security-pack
 
 // Business Operations
 export * from './customer-crm-system/index.js';

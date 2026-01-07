@@ -46,7 +46,9 @@ const nextConfig: NextConfig = {
       'node:fs': false,
       'node:path': false,
       'node:os': false,
-      '@': './src',
+      '@': config.context + '/src',
+      '@spine/shared-db': config.context + '/../../packages/shared-db',
+      '@spine/enterprise': config.context + '/../../packages/enterprise',
     };
 
     // Optimize chunks for production

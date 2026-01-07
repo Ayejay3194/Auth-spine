@@ -1,5 +1,5 @@
 {
-  "name": "styleseat-full-platform",
+  "name": "@spine/business-spine",
   "private": true,
   "type": "module",
   "scripts": {

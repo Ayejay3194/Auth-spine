@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DatabasePlatformOrchestrator, DEFAULT_VERTICALS } from '../../../../../packages/enterprise/platform/index.js';
+import { DatabasePlatformOrchestrator, DEFAULT_VERTICALS } from "@spine/enterprise/platform/index";
 import { prisma } from '../../../../lib/prisma-fallback.js';
 
 // Initialize the database platform orchestrator

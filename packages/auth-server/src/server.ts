@@ -2,15 +2,13 @@ import express from 'express'
 import cors from 'cors'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { jwtVerify } from 'jose'
+import { jwtVerify, exportJWK } from 'jose'
 import { createPublicKey, randomBytes, timingSafeEqual } from 'crypto'
-import rateLimit from 'express-rate-limit'
-import csrf from 'csurf'
-import helmet from 'helmet'
 import { loadClients, loadUsers, UserConfig } from './config'
 import { issueAccessToken, loadSigningKey, JwtAlgorithm, TokenKey } from './token'
-import { sessionStore } from './session-store';
+import { sessionStore } from './session-store'
 import { SpineJwtClaims, Session, RefreshToken, AuditEvent, AuthError, validateScopes, AllowedScope } from './types'
+import { loginLimiter, refreshLimiter, apiLimiter } from './middleware'
 
 const PORT = Number(process.env.PORT ?? 4000)
 const ISSUER = process.env.ISSUER?.trim()
@@ -61,10 +59,7 @@ const userByEmail = new Map(users.map(u => [u.email.toLowerCase(), u]))
 const userById = new Map(users.map(u => [u.id, u]))
 
 // Replaced in-memory storage with persistent session store
-// const sessions = new Map<string, Session>()
-// const refreshTokens = new Map<string, RefreshToken>()
 const permissionStreams = new Set<express.Response>()
-const auditEvents: AuditEvent[] = []
 
 // Stream cleanup to prevent memory leaks
 function cleanupStream(res: express.Response) {
@@ -72,7 +67,7 @@ function cleanupStream(res: express.Response) {
   res.on('error', () => permissionStreams.delete(res))
 }
 
-function recordAudit(eventType: string, data?: { userId?: string; clientId?: string; metadata?: Record<string, unknown> }): void {
+async function recordAudit(eventType: string, data?: { userId?: string; clientId?: string; metadata?: Record<string, unknown> }): Promise<void> {
   const event: AuditEvent = {
     id: randomBytes(12).toString('hex'),
     eventType,
@@ -81,18 +76,34 @@ function recordAudit(eventType: string, data?: { userId?: string; clientId?: str
     createdAt: Date.now(),
     metadata: data?.metadata
   }
-  auditEvents.push(event)
-  // TODO: Persist to database instead of keeping in memory
-  if (auditEvents.length > 1000) auditEvents.shift()
+
+  // Persist to database instead of keeping in memory
+  try {
+    const { prisma } = await import('@spine/shared-db/prisma')
+    await prisma.auditLog.create({
+      data: {
+        id: event.id,
+        eventType: event.eventType,
+        userId: event.userId,
+        clientId: event.clientId,
+        metadata: event.metadata || {},
+        createdAt: new Date(event.createdAt)
+      }
+    })
+  } catch (error) {
+    console.error('Failed to persist audit event:', error)
+    // Fallback: at least log it
+    console.log('[AUDIT]', JSON.stringify(event))
+  }
 }
 
-function createSession(user: UserConfig | null, clientId: string, scopes: AllowedScope[]): Session {
+async function createSession(user: UserConfig | null, clientId: string, scopes: AllowedScope[]): Promise<Session> {
   if (!user) {
     throw new AuthError('User is required to create session', 'INVALID_USER', 400)
   }
-  
+
   // Use persistent session store instead of in-memory Map
-  return sessionStore.createSession({
+  return await sessionStore.createSession({
     userId: user.id,
     clientId,
     scopes,
@@ -101,9 +112,9 @@ function createSession(user: UserConfig | null, clientId: string, scopes: Allowe
   })
 }
 
-function createRefreshToken(sessionId: string, userId: string): RefreshToken {
+async function createRefreshToken(sessionId: string, userId: string): Promise<RefreshToken> {
   // Use persistent session store instead of in-memory Map
-  return sessionStore.createRefreshToken({
+  return await sessionStore.createRefreshToken({
     sessionId,
     userId
   })
@@ -199,6 +210,7 @@ async function authenticateUser(opts: {
 const app = express()
 app.use(cors({ origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'] }))
 app.use(express.json())
+app.use(apiLimiter) // Apply general API rate limiting to all routes
 
 app.get('/health', (_req, res) => res.json({ ok: true, issuer: ISSUER, clients: clients.map(c => c.client_id) }))
 
@@ -224,7 +236,13 @@ app.get('/oauth/jwks', async (_req, res) => {
 
 const tokenReq = z.object({
   email: z.string().email(),
-  password: z.string().min(1).max(128),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password too long")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   client_id: z.string(),
   requested_scopes: z.array(z.string()).optional(),
   mfa_code: z.string().optional()
@@ -269,8 +287,8 @@ async function respondWithTokens(opts: {
   const scopes = resolveScopes(opts.user, client, opts.requestedScopes)
   if (!scopes) return opts.res.status(403).json({ error: 'no_scopes_for_client' })
 
-  const session = createSession(opts.user, opts.clientId, scopes)
-  const refresh = createRefreshToken(session.id, opts.user.id)
+  const session = await createSession(opts.user, opts.clientId, scopes)
+  const refresh = await createRefreshToken(session.id, opts.user.id)
 
   const access_token = await issueAccessToken({
     issuer: ISSUER,
@@ -284,7 +302,7 @@ async function respondWithTokens(opts: {
     ttlSeconds: ACCESS_TTL_SECONDS
   })
 
-  recordAudit(opts.auditEvent, { userId: opts.user.id, clientId: opts.clientId })
+  await recordAudit(opts.auditEvent, { userId: opts.user.id, clientId: opts.clientId })
 
   return opts.res.json({
     token_type: 'Bearer',
@@ -298,7 +316,7 @@ async function respondWithTokens(opts: {
   })
 }
 
-app.post('/token', async (req, res) => {
+app.post('/token', loginLimiter, async (req, res) => {
   const parsed = tokenReq.safeParse(req.body)
   if (!parsed.success) return res.status(400).json({ error: 'bad_request', details: parsed.error.flatten() })
 
@@ -321,7 +339,7 @@ app.post('/token', async (req, res) => {
   })
 })
 
-app.post('/token/refresh', async (req, res) => {
+app.post('/token/refresh', refreshLimiter, async (req, res) => {
   const parsed = refreshReq.safeParse(req.body)
   if (!parsed.success) return res.status(400).json({ error: 'bad_request', details: parsed.error.flatten() })
 
@@ -329,30 +347,31 @@ app.post('/token/refresh', async (req, res) => {
   const client = clientById.get(client_id)
   if (!client) return res.status(400).json({ error: 'unknown_client' })
 
-  const refresh = refreshTokens.get(refresh_token)
+  const refresh = await sessionStore.getRefreshToken(refresh_token)
   if (!refresh || refresh.expiresAt < Date.now()) {
-    if (refresh) refreshTokens.delete(refresh_token)
-    recordAudit('REFRESH_FAILED', { clientId: client_id })
+    if (refresh) await sessionStore.deleteRefreshToken(refresh_token)
+    await recordAudit('REFRESH_FAILED', { clientId: client_id })
     return res.status(401).json({ error: 'invalid_refresh_token' })
   }
 
-  const session = sessions.get(refresh.sessionId)
+  const session = await sessionStore.getSession(refresh.sessionId)
   const user = session ? userById.get(session.userId) : null
   if (!session || !user || session.clientId !== client_id || session.expiresAt < Date.now()) {
-    recordAudit('REFRESH_FAILED', { clientId: client_id })
+    await recordAudit('REFRESH_FAILED', { clientId: client_id })
     return res.status(401).json({ error: 'invalid_session' })
   }
 
   const scopes = resolveScopes(user, client, requested_scopes)
   if (!scopes) return res.status(403).json({ error: 'no_scopes_for_client' })
 
+  // Update session with new scopes and expiry
   session.scopes = scopes
   session.risk = user.risk ?? 'ok'
   session.entitlements = user.entitlements ?? {}
   session.expiresAt = Date.now() + REFRESH_TTL_SECONDS * 1000
 
-  const newRefresh = createRefreshToken(session.id, user.id)
-  refreshTokens.delete(refresh_token)
+  const newRefresh = await createRefreshToken(session.id, user.id)
+  await sessionStore.deleteRefreshToken(refresh_token)
 
   const access_token = await issueAccessToken({
     issuer: ISSUER,
@@ -366,7 +385,7 @@ app.post('/token/refresh', async (req, res) => {
     ttlSeconds: ACCESS_TTL_SECONDS
   })
 
-  recordAudit('REFRESH_SUCCESS', { userId: user.id, clientId: client_id })
+  await recordAudit('REFRESH_SUCCESS', { userId: user.id, clientId: client_id })
 
   res.json({
     token_type: 'Bearer',
@@ -390,20 +409,35 @@ app.post('/session/revoke', async (req, res) => {
   const { session_id, refresh_token } = parsed.data
   let sessionId = session_id
   if (!sessionId && refresh_token) {
-    const refresh = refreshTokens.get(refresh_token)
+    const refresh = await sessionStore.getRefreshToken(refresh_token)
     sessionId = refresh?.sessionId
   }
 
   if (!sessionId) return res.status(400).json({ error: 'missing_session' })
-  revokeSession(sessionId)
-  recordAudit('SESSION_REVOKED', { metadata: { sessionId, actor: payload.sub } })
+  await revokeSession(sessionId)
+  await recordAudit('SESSION_REVOKED', { metadata: { sessionId, actor: payload.sub } })
   return res.json({ ok: true })
 })
 
 app.get('/sessions', async (req, res) => {
   const payload = await requireScopeOrRespond(req, res, 'admin:read')
   if (!payload) return
-  res.json({ sessions: Array.from(sessions.values()) })
+
+  // Get all active sessions from database
+  try {
+    const { prisma } = await import('@spine/shared-db/prisma')
+    const sessions = await prisma.session.findMany({
+      where: {
+        expiresAt: { gt: new Date() },
+        revokedAt: null
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+    res.json({ sessions })
+  } catch (error) {
+    console.error('Failed to fetch sessions:', error)
+    res.status(500).json({ error: 'internal_server_error' })
+  }
 })
 
 app.get('/permissions/stream', async (req, res) => {
@@ -452,19 +486,33 @@ app.post('/permissions/update', async (req, res) => {
 app.get('/audit/summary', async (req, res) => {
   const payload = await requireScopeOrRespond(req, res, 'admin:read')
   if (!payload) return
-  const counts = auditEvents.reduce<Record<string, number>>((acc, event) => {
-    acc[event.eventType] = (acc[event.eventType] ?? 0) + 1
-    return acc
-  }, {})
 
-  res.json({
-    total: auditEvents.length,
-    counts,
-    recent: auditEvents.slice(-20).reverse()
-  })
+  try {
+    const { prisma } = await import('@spine/shared-db/prisma')
+
+    // Get event counts by type
+    const auditLogs = await prisma.auditLog.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 1000
+    })
+
+    const counts = auditLogs.reduce<Record<string, number>>((acc, event) => {
+      acc[event.eventType] = (acc[event.eventType] ?? 0) + 1
+      return acc
+    }, {})
+
+    res.json({
+      total: auditLogs.length,
+      counts,
+      recent: auditLogs.slice(0, 20)
+    })
+  } catch (error) {
+    console.error('Failed to fetch audit summary:', error)
+    res.status(500).json({ error: 'internal_server_error' })
+  }
 })
 
-app.post('/oauth/token', async (req, res) => {
+app.post('/oauth/token', loginLimiter, async (req, res) => {
   const grantType = req.body?.grant_type
   if (grantType === 'password') {
     const parsed = tokenReq.safeParse({
@@ -507,14 +555,14 @@ app.post('/oauth/token', async (req, res) => {
     const client = clientById.get(client_id)
     if (!client) return res.status(400).json({ error: 'unknown_client' })
 
-    const refresh = refreshTokens.get(refresh_token)
+    const refresh = await sessionStore.getRefreshToken(refresh_token)
     if (!refresh || refresh.expiresAt < Date.now()) {
-      if (refresh) refreshTokens.delete(refresh_token)
-      recordAudit('REFRESH_FAILED', { clientId: client_id })
+      if (refresh) await sessionStore.deleteRefreshToken(refresh_token)
+      await recordAudit('REFRESH_FAILED', { clientId: client_id })
       return res.status(401).json({ error: 'invalid_refresh_token' })
     }
 
-    const session = sessions.get(refresh.sessionId)
+    const session = await sessionStore.getSession(refresh.sessionId)
     const user = session ? userById.get(session.userId) : null
     if (!session || !user || session.clientId !== client_id || session.expiresAt < Date.now()) {
       return res.status(401).json({ error: 'invalid_session' })
@@ -528,8 +576,8 @@ app.post('/oauth/token', async (req, res) => {
     session.entitlements = user.entitlements ?? {}
     session.expiresAt = Date.now() + REFRESH_TTL_SECONDS * 1000
 
-    const newRefresh = createRefreshToken(session.id, user.id)
-    refreshTokens.delete(refresh_token)
+    const newRefresh = await createRefreshToken(session.id, user.id)
+    await sessionStore.deleteRefreshToken(refresh_token)
 
     const access_token = await issueAccessToken({
       issuer: ISSUER,
@@ -543,7 +591,7 @@ app.post('/oauth/token', async (req, res) => {
       ttlSeconds: ACCESS_TTL_SECONDS
     })
 
-    recordAudit('OAUTH_REFRESH_SUCCESS', { userId: user.id, clientId: client_id })
+    await recordAudit('OAUTH_REFRESH_SUCCESS', { userId: user.id, clientId: client_id })
 
     return res.json({
       token_type: 'Bearer',
@@ -576,6 +624,23 @@ app.get('/oauth/userinfo', async (req, res) => {
   } catch (error: any) {
     res.status(401).json({ error: 'invalid_token', details: error?.message })
   }
+})
+
+// Schedule session cleanup every hour
+setInterval(async () => {
+  try {
+    const result = await sessionStore.cleanupExpired()
+    console.log(`[CLEANUP] Removed ${result.sessionsDeleted} expired sessions and ${result.tokensDeleted} expired tokens`)
+  } catch (error) {
+    console.error('[CLEANUP] Failed to cleanup expired sessions:', error)
+  }
+}, 60 * 60 * 1000) // Run every hour
+
+// Run cleanup on startup
+sessionStore.cleanupExpired().then(result => {
+  console.log(`[STARTUP] Cleaned ${result.sessionsDeleted} expired sessions and ${result.tokensDeleted} expired tokens`)
+}).catch(error => {
+  console.error('[STARTUP] Initial cleanup failed:', error)
 })
 
 app.listen(PORT, () => console.log('auth-server on', ISSUER))
