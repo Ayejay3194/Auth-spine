@@ -1,0 +1,3 @@
+Archived on Tue Jan 13 17:18:16 EST 2026
+All functions migrated to src/computing/, src/libs/, and src/utils/
+See ARCHIVE_VERIFICATION.md for complete migration details

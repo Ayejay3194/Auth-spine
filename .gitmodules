@@ -1,3 +1,0 @@
-[submodule "external/nlp.js"]
-	path = external/nlp.js
-	url = https://github.com/axa-group/nlp.js.git

@@ -1,0 +1,30 @@
+{
+  "name": "@spine/audit-reporting",
+  "version": "1.0.0",
+  "description": "Comprehensive audit reporting and analytics for Auth-Spine",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "audit",
+    "reporting",
+    "analytics",
+    "logging",
+    "auth-spine"
+  ],
+  "author": "Auth-Spine Team",
+  "license": "MIT",
+  "dependencies": {
+    "@spine/shared-db": "workspace:*",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

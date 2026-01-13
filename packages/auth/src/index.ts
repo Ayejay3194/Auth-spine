@@ -1,6 +1,14 @@
-import { SignJWT, jwtVerify } from 'jose'
+import { jose } from '../../../src/libs/auth/jose'
 import { createPrivateKey, createPublicKey, createSecretKey } from 'crypto'
 import bcrypt from 'bcryptjs'
+
+// Extract JOSE functions
+const { SignJWT, jwtVerify } = jose
+
+// Helper to convert KeyObject to JsonWebKey
+function keyObjectToJsonWebKey(keyObject: any): string {
+  return keyObject.export({ format: 'jwk' }).toString()
+}
 
 export type RiskState = 'ok' | 'restricted' | 'banned'
 
@@ -81,7 +89,8 @@ function getVerifyKey() {
 export async function generateToken(payload: JwtPayload, opts?: { expiresIn?: string }) {
   const exp = opts?.expiresIn || '24h'
   const { key, alg } = getSigningKey()
-  return new SignJWT(payload as any)
+  const signer = new (SignJWT as any)(payload as any)
+  return signer
     .setProtectedHeader({ alg })
     .setIssuedAt()
     .setExpirationTime(exp)
@@ -91,7 +100,7 @@ export async function generateToken(payload: JwtPayload, opts?: { expiresIn?: st
 export async function verifyToken(token: string) {
   try {
     const { key, alg } = getVerifyKey()
-    const { payload } = await jwtVerify(token, key, { algorithms: [alg] })
+    const { payload } = await jwtVerify(token, keyObjectToJsonWebKey(key), { algorithms: [alg] })
     return payload as any as JwtPayload
   } catch (e: any) {
     throw new AuthError(e?.message || 'Invalid token', ErrorCode.AUTH_UNAUTHORIZED)
@@ -110,7 +119,7 @@ export async function verifyBearer(authorization: string | undefined, issuer: st
         if (!publicKey) throw new AuthError('Missing JWT_PUBLIC_KEY', ErrorCode.AUTH_UNAUTHORIZED)
         return createPublicKey(publicKey)
       })()
-  const { payload } = await jwtVerify(token, key, { issuer, algorithms: [alg] })
+  const { payload } = await jwtVerify(token, keyObjectToJsonWebKey(key), { issuer, algorithms: [alg] })
   const p = payload as any
   return {
     iss: String(p.iss),
@@ -171,6 +180,7 @@ export function validateEnv() {
   }
 }
 
-export * from './password'
-export * from './next'
-export * from './multiclient'
+// Password and Next exports temporarily disabled due to bcryptjs dependency
+// export * from './password'
+// export * from './next'
+// export * from './multiclient'

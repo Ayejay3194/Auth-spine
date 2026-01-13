@@ -1,0 +1,11 @@
+export { preprocessing } from './preprocessing';
+export { model_selection } from './model_selection';
+export { linear_model } from './linear_model';
+export { ensemble } from './ensemble';
+export { metrics } from './metrics';
+export { decomposition } from './decomposition';
+export { cluster } from './cluster';
+export { feature_selection } from './feature_selection';
+export { tree } from './tree';
+export { neighbors } from './neighbors';
+export { svm } from './svm';

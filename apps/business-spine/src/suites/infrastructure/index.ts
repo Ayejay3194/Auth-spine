@@ -2,7 +2,7 @@
 // Exports all infrastructure-related functionality
 
 // Monitoring Suite
-export * from './monitoring';
+export * from "@core/monitoring";
 
 // Deployment Suite
 export * from './deployment';

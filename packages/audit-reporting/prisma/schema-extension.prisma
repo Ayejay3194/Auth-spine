@@ -1,0 +1,27 @@
+// Add this to your main Prisma schema to support audit logging
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  eventType   String
+  category    String
+  severity    String
+  userId      String?
+  clientId    String?
+  sessionId   String?
+  duration    Int?
+  success     Boolean  @default(true)
+  metadata    Json     @default("{}")
+  error       Json?
+  context     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([eventType])
+  @@index([category])
+  @@index([severity])
+  @@index([userId])
+  @@index([clientId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([success])
+  @@map("audit_logs")
+}
