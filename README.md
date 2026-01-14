@@ -58,8 +58,9 @@ Services will be available at:
 auth-spine/
 ├── packages/
 │   ├── auth-server/          # JWT authentication server (Port 4000)
-│   ├── shared-auth/          # Shared auth utilities
-│   ├── shared-db/            # Shared Prisma client ⭐ NEW
+│   ├── shared/               # Unified auth + database exports ⭐ NEW
+│   ├── shared-auth/          # Shared auth utilities (legacy)
+│   ├── shared-db/            # Shared Prisma client (legacy)
 │   └── enterprise/           # 60+ business packages
 ├── apps/
 │   └── business-spine/       # Main Next.js application (Port 3000)
@@ -122,11 +123,11 @@ npx prisma db seed       # Seed database
 All packages are written in TypeScript and connected through workspace dependencies:
 
 ```typescript
-// packages/auth-server uses shared-db
-import { prisma } from '@spine/shared-db/prisma'
+// packages/auth-server uses shared module
+import { prisma } from '@spine/shared/prisma'
 
-// apps/business-spine uses shared-db
-import { prisma } from '@spine/shared-db/prisma'
+// apps/business-spine uses shared module
+import { prisma } from '@spine/shared/prisma'
 ```
 
 ### Authentication Flow

@@ -106,7 +106,7 @@ export class AuditLogger {
 
   private async persistEvent(event: AuditEvent): Promise<void> {
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
       await prisma.auditLog.create({
         data: {
           id: event.id,

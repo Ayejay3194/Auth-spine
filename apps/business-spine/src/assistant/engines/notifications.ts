@@ -2,8 +2,7 @@ import { Engine } from "../assistant/engine";
 import { AssistantContext, MessageEvent, Suggestion } from "../assistant/types";
 import { makeSuggestion } from "../assistant/suggest";
 import { differenceInHours } from "date-fns";
-import { sendEmail } from "@/notifications/adapters/sendgrid";
-import { sendSms } from "@/notifications/adapters/twilio";
+import { sendEmail, sendSms } from "@/notifications";
 
 function bestHour(msgs: MessageEvent[]): number | null {
   const buckets=new Map<number,{sent:number;open:number}>();

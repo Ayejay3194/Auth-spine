@@ -166,10 +166,13 @@ Auth-Spine/
 │   ├── 📁 resource-api/                 # Resource API
 │   │   └── 📁 src/
 │   │
-│   ├── 📁 shared-auth/                  # Shared auth utilities
+│   ├── 📁 shared/                       # Unified auth + database exports
 │   │   └── 📁 src/
 │   │
-│   └── 📁 shared-db/                    # Shared database utilities
+│   ├── 📁 shared-auth/                  # Shared auth utilities (legacy)
+│   │   └── 📁 src/
+│   │
+│   └── 📁 shared-db/                    # Shared database utilities (legacy)
 │       └── 📁 src/
 │
 ├── 📁 schemas/                          # JSON/GraphQL schemas

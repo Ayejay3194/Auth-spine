@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { z } from 'zod'
-import { verifyBearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared-auth'
+import { verifyBearer, requireAudience, requireScopes, denyIfBanned } from '@spine/shared/auth'
 
 const PORT = Number(process.env.PORT ?? 4100)
 const AUTH_ISSUER = process.env.AUTH_ISSUER?.trim()

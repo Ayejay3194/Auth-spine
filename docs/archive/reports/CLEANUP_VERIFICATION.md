@@ -171,7 +171,7 @@ export { DashboardLayout as AnalyticsDashboardLayout }
 **TypeScript Paths (tsconfig.json):**
 ```json
 {
-  "@spine/shared-db": ["../../packages/shared-db/index.ts"],
+  "@spine/shared": ["../../packages/shared/src/index.ts"],
   "@spine/enterprise": ["../../packages/enterprise/index.ts"]
 }
 ```
@@ -179,7 +179,7 @@ export { DashboardLayout as AnalyticsDashboardLayout }
 **Webpack Aliases (next.config.ts):**
 ```javascript
 {
-  '@spine/shared-db': config.context + '/../../packages/shared-db',
+  '@spine/shared': config.context + '/../../packages/shared',
   '@spine/enterprise': config.context + '/../../packages/enterprise'
 }
 ```
@@ -260,7 +260,7 @@ docs/archive/
 ```bash
 # These imports should work:
 import { PlatformOrchestrator } from '@spine/enterprise/platform'
-import { prisma } from '@spine/shared-db/prisma'
+import { prisma } from '@spine/shared/prisma'
 ```
 
 **Result:** ✅ Both patterns resolve correctly

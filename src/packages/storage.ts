@@ -14,7 +14,7 @@ export class AuditStorage {
 
   async query(filter: AuditFilter): Promise<AuditEvent[]> {
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
 
       const where: any = {};
 
@@ -82,7 +82,7 @@ export class AuditStorage {
 
   async count(filter: AuditFilter): Promise<number> {
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
 
       const where: any = {};
 
@@ -118,7 +118,7 @@ export class AuditStorage {
 
   async deleteOlderThan(date: Date): Promise<number> {
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
       const result = await prisma.auditLog.deleteMany({
         where: {
           createdAt: { lt: date },
@@ -133,7 +133,7 @@ export class AuditStorage {
 
   async getById(id: string): Promise<AuditEvent | null> {
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
       const log = await prisma.auditLog.findUnique({
         where: { id },
       });

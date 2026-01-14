@@ -175,8 +175,9 @@ auth-spine/
 │
 ├── packages/
 │   ├── auth-server/          # JWT auth server (port 4000)
-│   ├── shared-db/            # Shared Prisma client
-│   ├── shared-auth/          # Auth utilities
+│   ├── shared/               # Unified auth + database exports
+│   ├── shared-db/            # Shared Prisma client (legacy)
+│   ├── shared-auth/          # Auth utilities (legacy)
 │   └── enterprise/           # 60+ enterprise features
 │
 ├── scripts/                  # Build & utility scripts

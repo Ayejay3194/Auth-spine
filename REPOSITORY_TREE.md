@@ -17,8 +17,9 @@ auth-spine/                           # Root monorepo
 │   ├── create-auth-spine-app/        # CLI tool for bootstrapping
 │   ├── enterprise/                   # 67+ enterprise feature modules
 │   ├── resource-api/                 # Resource API
-│   ├── shared-auth/                  # Shared auth utilities
-│   └── shared-db/                    # Shared Prisma database client
+│   ├── shared/                       # Unified auth + database exports
+│   ├── shared-auth/                  # Shared auth utilities (legacy)
+│   └── shared-db/                    # Shared Prisma database client (legacy)
 │
 ├── docs/                             # Documentation (1.2M)
 ├── scripts/                          # Build and utility scripts (68K)
@@ -307,13 +308,13 @@ packages/auth-server/
 └── package.json                      # Package config (port 4000)
 ```
 
-### Shared Database: packages/shared-db/
+### Shared Database: packages/shared/
 ```
-packages/shared-db/
+packages/shared/
 ├── src/
 │   └── prisma.ts                     # Shared Prisma client instance
 ├── index.ts                          # Main export
-└── package.json                      # Package: @spine/shared-db
+└── package.json                      # Package: @spine/shared
 ```
 
 ### Enterprise Features: packages/enterprise/
@@ -361,7 +362,8 @@ Total enterprise modules: 67+
 ```
 packages/
 ├── auth/                             # Auth utilities
-├── shared-auth/                      # Shared auth functions
+├── shared/                           # Unified auth + database exports
+├── shared-auth/                      # Shared auth functions (legacy)
 ├── resource-api/                     # Resource API
 └── create-auth-spine-app/            # CLI tool
     ├── src/
@@ -374,7 +376,7 @@ packages/
 ```typescript
 {
   "@/*": ["./src/*"],
-  "@spine/shared-db": ["../../packages/shared-db/index.ts"],
+  "@spine/shared": ["../../packages/shared/src/index.ts"],
   "@spine/enterprise": ["../../packages/enterprise/index.ts"],
   "@/suites/*": ["./src/suites/*"],
   "@/suites/core/*": ["./src/suites/core/*"],
@@ -394,7 +396,7 @@ packages/
 ```typescript
 {
   '@': config.context + '/src',
-  '@spine/shared-db': config.context + '/../../packages/shared-db',
+  '@spine/shared': config.context + '/../../packages/shared',
   '@spine/enterprise': config.context + '/../../packages/enterprise',
 }
 ```
@@ -520,7 +522,7 @@ Total verification tests: 206/206 (100%)
 ### Using Workspace Packages
 ```typescript
 // From apps/business-spine
-import { prisma } from '@spine/shared-db/prisma'
+import { prisma } from '@spine/shared/prisma'
 import { monitoring } from '@spine/enterprise/monitoring'
 
 // Using path aliases

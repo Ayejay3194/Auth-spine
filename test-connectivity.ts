@@ -13,9 +13,9 @@ console.log('================================\n')
 console.log('✅ Test 1: Workspace Package Resolution')
 try {
   // These imports verify the monorepo is configured correctly
-  console.log('  → Checking @spine/shared-db...')
-  const sharedDbPackage = await import('./packages/shared-db/package.json', { assert: { type: 'json' } })
-  console.log(`    ✓ Found ${sharedDbPackage.default.name}@${sharedDbPackage.default.version}`)
+  console.log('  → Checking @spine/shared...')
+  const sharedPackage = await import('./packages/shared/package.json', { assert: { type: 'json' } })
+  console.log(`    ✓ Found ${sharedPackage.default.name}@${sharedPackage.default.version}`)
   
   console.log('  → Checking @spine/auth-server...')
   const authPackage = await import('./packages/auth-server/package.json', { assert: { type: 'json' } })
@@ -77,19 +77,19 @@ try {
   const fs = await import('fs/promises')
   const sessionStore = await fs.readFile('./packages/auth-server/src/session-store.ts', 'utf-8')
   
-  if (sessionStore.includes('@spine/shared-db/prisma')) {
-    console.log('    ✓ Uses @spine/shared-db/prisma')
+  if (sessionStore.includes('@spine/shared/prisma')) {
+    console.log('    ✓ Uses @spine/shared/prisma')
   } else {
-    throw new Error('session-store.ts not using shared-db')
+    throw new Error('session-store.ts not using shared package')
   }
   
   console.log('  → Checking server.ts imports...')
   const server = await fs.readFile('./packages/auth-server/src/server.ts', 'utf-8')
   
-  if (server.includes('@spine/shared-db/prisma')) {
-    console.log('    ✓ Uses @spine/shared-db/prisma')
+  if (server.includes('@spine/shared/prisma')) {
+    console.log('    ✓ Uses @spine/shared/prisma')
   } else {
-    throw new Error('server.ts not using shared-db')
+    throw new Error('server.ts not using shared package')
   }
   
   console.log('  ✅ All import paths correct\n')

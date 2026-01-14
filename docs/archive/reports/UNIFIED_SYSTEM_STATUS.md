@@ -85,7 +85,7 @@ auth-spine/                    # Single unified repository
 {
   "name": "@spine/auth-server",
   "dependencies": {
-    "@spine/shared-db": "workspace:*"   ✅
+    "@spine/shared": "workspace:*"   ✅
   }
 }
 ```
@@ -94,8 +94,8 @@ auth-spine/                    # Single unified repository
 ```typescript
 // ✅ Workspace imports working
 import { PlatformOrchestrator } from '@spine/enterprise/platform'
-import { prisma } from '@spine/shared-db/prisma'
-import { authenticateUser } from '@spine/shared-auth'
+import { prisma } from '@spine/shared/prisma'
+import { authenticateUser } from '@spine/shared/auth'
 
 // ✅ Path aliases working
 import { Button } from '@/suites/ui/components'
@@ -109,7 +109,7 @@ import { hasPermission } from '@/security/auth'
 **Single Prisma Schema:**
 - Location: `apps/business-spine/prisma/schema.prisma`
 - Models: **36 database models**
-- Shared client: `@spine/shared-db` (planned)
+- Shared client: `@spine/shared` (planned)
 - Current: Local `@prisma/client` in business-spine
 
 **Database Models:**
@@ -253,7 +253,7 @@ import { HybridAssistantService } from '@spine/enterprise/platform/assistant' �
 ```json
 {
   "@/*": ["./src/*"],
-  "@spine/shared-db": ["../../packages/shared-db/index.ts"],
+  "@spine/shared": ["../../packages/shared/src/index.ts"],
   "@spine/enterprise": ["../../packages/enterprise/index.ts"],
   "@/suites/*": ["./src/suites/*"],
   // ... 53 total path mappings
@@ -264,7 +264,7 @@ import { HybridAssistantService } from '@spine/enterprise/platform/assistant' �
 ```javascript
 {
   '@': config.context + '/src',
-  '@spine/shared-db': config.context + '/../../packages/shared-db',
+  '@spine/shared': config.context + '/../../packages/shared',
   '@spine/enterprise': config.context + '/../../packages/enterprise'
 }
 ```

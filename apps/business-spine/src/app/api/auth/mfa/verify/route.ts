@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@enterprise/auth'
-import { confirmMfa, verifyMfaToken } from '@/security/mfa'
+import { confirmMfa, verifyMfaToken } from '@/security'
 
 /**
  * POST /api/auth/mfa/verify

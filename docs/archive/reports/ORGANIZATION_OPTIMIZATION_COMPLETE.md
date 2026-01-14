@@ -83,7 +83,7 @@ After:  from "@spine/enterprise/platform/assistant/EnhancedAssistantService"
 {
   "paths": {
     "@/*": ["./src/*"],                           // Internal app imports
-    "@spine/shared-db": ["../../packages/shared-db/index.ts"],
+    "@spine/shared": ["../../packages/shared/src/index.ts"],
     "@spine/enterprise": ["../../packages/enterprise/index.ts"],
     "@/suites/*": ["./src/suites/*"]              // Suite imports
   }
@@ -104,7 +104,7 @@ After:  from "@spine/enterprise/platform/assistant/EnhancedAssistantService"
 ```typescript
 config.resolve.alias = {
   '@': config.context + '/src',
-  '@spine/shared-db': config.context + '/../../packages/shared-db',
+  '@spine/shared': config.context + '/../../packages/shared',
   '@spine/enterprise': config.context + '/../../packages/enterprise',
 }
 ```
@@ -121,7 +121,7 @@ config.resolve.alias = {
 ```json
 "dependencies": {
   "@spine/enterprise": "workspace:*",
-  "@spine/shared-db": "workspace:*"
+  "@spine/shared": "workspace:*"
 }
 ```
 
@@ -188,7 +188,7 @@ import { sendEmail } from '@/notifications/adapters/sendgrid'
 **2. Workspace Package Imports:**
 ```typescript
 import { EnhancedAssistant } from '@spine/enterprise/platform/assistant/EnhancedAssistantService'
-import { prisma } from '@spine/shared-db/prisma'
+import { prisma } from '@spine/shared/prisma'
 ```
 
 **3. External Package Imports:**
@@ -277,7 +277,7 @@ optimizePackageImports: [
 # All imports resolve correctly
 ✅ @/ imports → src/*
 ✅ @spine/enterprise → packages/enterprise
-✅ @spine/shared-db → packages/shared-db
+✅ @spine/shared → packages/shared
 ✅ No broken imports found
 ```
 

@@ -54,7 +54,7 @@ Auth-spine/ (Root - Single unified repo)
 **After:**
 - ✅ Single monorepo with npm/pnpm workspaces
 - ✅ All packages connected via `workspace:*`
-- ✅ Shared database client (@spine/shared-db)
+- ✅ Shared database client (@spine/shared)
 - ✅ Unified TypeScript configuration
 - ✅ All imports using workspace packages
 
@@ -90,7 +90,7 @@ Auth-spine/ (Root - Single unified repo)
 ### Database Layer
 - ✅ Single Prisma schema for entire system
 - ✅ 50+ models all in one schema
-- ✅ Shared Prisma client (@spine/shared-db)
+- ✅ Shared Prisma client (@spine/shared)
 - ✅ All packages use same database
 
 ### Authentication & Security
@@ -148,7 +148,7 @@ All packages properly connected via npm/pnpm workspaces:
 **Import Examples:**
 ```typescript
 // Shared database
-import { prisma } from '@spine/shared-db/prisma';
+import { prisma } from '@spine/shared/prisma';
 
 // Authentication
 import { verifyToken } from '@enterprise/auth';

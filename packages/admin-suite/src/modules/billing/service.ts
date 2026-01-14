@@ -71,7 +71,7 @@ export class BillingService {
   async getSubscription(subscriptionId: string): Promise<Subscription> {
     permissionEngine.require(this.currentUser, 'billing.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const sub = await prisma.subscription.findUnique({
       where: { id: subscriptionId },
@@ -113,7 +113,7 @@ export class BillingService {
       throw new Error('Plan override requires detailed reason (min 10 chars)');
     }
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const sub = await prisma.subscription.findUnique({
       where: { id: params.subscriptionId },
@@ -173,7 +173,7 @@ export class BillingService {
       throw new Error('Refund requires detailed note (min 20 chars)');
     }
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const payment = await prisma.payment.findUnique({
       where: { id: params.paymentId },
@@ -236,7 +236,7 @@ export class BillingService {
   }): Promise<RevenueMetrics> {
     permissionEngine.require(this.currentUser, 'billing.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const activeSubscriptions = await prisma.subscription.findMany({
       where: {
@@ -324,7 +324,7 @@ export class BillingService {
   }>> {
     permissionEngine.require(this.currentUser, 'billing.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const users = await prisma.user.findMany({
       include: {
@@ -364,7 +364,7 @@ export class BillingService {
   }>> {
     permissionEngine.require(this.currentUser, 'billing.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const discounts = await prisma.discountUsage.groupBy({
       by: ['userId'],
@@ -394,7 +394,7 @@ export class BillingService {
   }): Promise<CohortAnalysis[]> {
     permissionEngine.require(this.currentUser, 'billing.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const subscriptions = await prisma.subscription.findMany({
       where: {
@@ -456,7 +456,7 @@ export class BillingService {
   async handleFailedPayment(subscriptionId: string, action: 'retry' | 'pause' | 'cancel'): Promise<void> {
     permissionEngine.require(this.currentUser, 'billing.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const sub = await prisma.subscription.findUnique({
       where: { id: subscriptionId },

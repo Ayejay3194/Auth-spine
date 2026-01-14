@@ -15,10 +15,10 @@
 - ✅ `denyIfBanned()` validator exported
 - ✅ Backward compatible with legacy tokens
 
-#### 2. Shared Auth Package (`packages/shared-auth/`)
-- ✅ Package structure created
-- ✅ Types defined (SpineJwtClaims, RiskState)
-- ✅ Verification functions implemented
+#### 2. Shared Package (`packages/shared/`)
+- ✅ Unified shared package created
+- ✅ Auth types + verification utilities re-exported
+- ✅ Database client re-exported for service-wide use
 - ✅ Ready for cross-service use
 
 #### 3. Auth Server (`packages/auth-server/`)

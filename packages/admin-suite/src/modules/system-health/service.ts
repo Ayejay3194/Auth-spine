@@ -45,7 +45,7 @@ export class SystemHealthService {
   }> {
     permissionEngine.require(this.currentUser, 'system_health.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const services = await prisma.serviceStatus.findMany({
       orderBy: { lastCheck: 'desc' },
@@ -94,7 +94,7 @@ export class SystemHealthService {
   }): Promise<SystemJob[]> {
     permissionEngine.require(this.currentUser, 'jobs.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const where: any = {};
     if (filter.status) where.status = filter.status;
@@ -132,7 +132,7 @@ export class SystemHealthService {
   async retryJob(jobId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'jobs.execute');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const job = await prisma.systemJob.findUnique({
       where: { id: jobId },
@@ -174,7 +174,7 @@ export class SystemHealthService {
   async cancelJob(jobId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'jobs.execute');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const job = await prisma.systemJob.findUnique({
       where: { id: jobId },
@@ -215,7 +215,7 @@ export class SystemHealthService {
   async setJobPriority(jobId: string, priority: number): Promise<void> {
     permissionEngine.require(this.currentUser, 'jobs.execute');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     await prisma.systemJob.update({
       where: { id: jobId },
@@ -238,7 +238,7 @@ export class SystemHealthService {
   async getFeatureFlags(): Promise<FeatureFlag[]> {
     permissionEngine.require(this.currentUser, 'feature_flags.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const flags = await prisma.featureFlag.findMany({
       orderBy: { name: 'asc' },
@@ -274,7 +274,7 @@ export class SystemHealthService {
       throw new Error('Flag toggle requires detailed reason (min 10 chars)');
     }
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const flag = await prisma.featureFlag.findUnique({
       where: { id: flagId },
@@ -320,7 +320,7 @@ export class SystemHealthService {
   }): Promise<FeatureFlag> {
     permissionEngine.require(this.currentUser, 'feature_flags.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const flag = await prisma.featureFlag.create({
       data: {
@@ -376,7 +376,7 @@ export class SystemHealthService {
   }> {
     permissionEngine.require(this.currentUser, 'system_health.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const startDate = new Date(Date.now() - timeWindow);
 
@@ -433,7 +433,7 @@ export class SystemHealthService {
   }> {
     permissionEngine.require(this.currentUser, 'system_health.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const startDate = new Date(Date.now() - timeWindow);
     const bucketSize = 60000; // 1 minute buckets

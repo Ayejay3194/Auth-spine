@@ -60,7 +60,7 @@ export class DataToolsService {
       errors: [],
     };
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     await prisma.bulkOperation.create({
       data: {
@@ -107,7 +107,7 @@ export class DataToolsService {
     operationId: string,
     params: BulkOperationParams
   ): Promise<void> {
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     await prisma.bulkOperation.update({
       where: { id: operationId },
@@ -200,7 +200,7 @@ export class DataToolsService {
     operationId: string,
     params: BulkOperationParams
   ): Promise<void> {
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const model = (prisma as any)[params.resourceType];
     if (!model) {
@@ -229,7 +229,7 @@ export class DataToolsService {
   async rollbackBulkOperation(operationId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'data_tools.execute');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const operation = await prisma.bulkOperation.findUnique({
       where: { id: operationId },
@@ -275,7 +275,7 @@ export class DataToolsService {
   }> {
     permissionEngine.require(this.currentUser, 'data_tools.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
     const results: Array<{ entity: string; id: string; data: any }> = [];
 
     for (const entity of query.entities) {
@@ -330,7 +330,7 @@ export class DataToolsService {
   }): Promise<DataCorrection> {
     permissionEngine.require(this.currentUser, 'data_tools.override');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const model = (prisma as any)[params.resourceType];
     const resource = await model.findUnique({
@@ -396,7 +396,7 @@ export class DataToolsService {
   async applyDataCorrection(correctionId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'data_tools.override');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const correction = await prisma.dataCorrection.findUnique({
       where: { id: correctionId },

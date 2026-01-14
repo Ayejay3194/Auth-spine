@@ -20,7 +20,7 @@
   "author": "Auth-Spine Team",
   "license": "MIT",
   "dependencies": {
-    "@spine/shared-db": "workspace:*",
+    "@spine/shared": "workspace:*",
     "crypto": "^1.0.1"
   },
   "devDependencies": {

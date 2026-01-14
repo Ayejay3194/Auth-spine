@@ -54,7 +54,7 @@ export class SecurityService {
   async reviewUserAccess(userId: string): Promise<AccessReview> {
     permissionEngine.require(this.currentUser, 'access_review.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const user = await prisma.adminUser.findUnique({
       where: { id: userId },
@@ -118,7 +118,7 @@ export class SecurityService {
   }): Promise<AbuseSignal[]> {
     permissionEngine.require(this.currentUser, 'abuse.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const timeWindow = params.timeWindow || 3600000;
     const startDate = new Date(Date.now() - timeWindow);
@@ -226,7 +226,7 @@ export class SecurityService {
   async getIPIntelligence(ipAddress: string): Promise<ThreatIntelligence> {
     permissionEngine.require(this.currentUser, 'security.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     let intel = await prisma.ipIntelligence.findUnique({
       where: { ipAddress },
@@ -251,7 +251,7 @@ export class SecurityService {
   }
 
   private async refreshIPIntelligence(ipAddress: string): Promise<any> {
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const reputation = Math.random() * 100;
     const isVpn = Math.random() > 0.9;
@@ -297,7 +297,7 @@ export class SecurityService {
   async blockIP(ipAddress: string, reason: string, duration?: number): Promise<void> {
     permissionEngine.require(this.currentUser, 'security.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const expiresAt = duration ? new Date(Date.now() + duration) : undefined;
 
@@ -333,7 +333,7 @@ export class SecurityService {
   }> {
     permissionEngine.require(this.currentUser, 'security.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const startDate = new Date(Date.now() - timeWindow);
 
@@ -400,7 +400,7 @@ export class SecurityService {
   async setAccessExpiry(userId: string, expiresAt: Date, reason: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'access_review.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     await prisma.adminUser.update({
       where: { id: userId },
@@ -428,7 +428,7 @@ export class SecurityService {
   }> {
     permissionEngine.require(this.currentUser, 'access_review.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const [user1, user2] = await Promise.all([
       prisma.adminUser.findUnique({

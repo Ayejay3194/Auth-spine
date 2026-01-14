@@ -95,7 +95,7 @@
 ### Database
 - **Single unified schema:** ✅
 - **Models:** 50+
-- **Shared client:** @spine/shared-db
+- **Shared client:** @spine/shared
 - **All packages connected:** ✅
 
 ---

@@ -213,8 +213,8 @@ auth-spine/
 
 4. **Shared Packages:**
    ```typescript
-   import { prisma } from '@spine/shared-db/prisma';
-   import { authenticateUser } from '@spine/shared-auth';
+   import { prisma } from '@spine/shared/prisma';
+   import { authenticateUser } from '@spine/shared/auth';
    ```
 
 ### Module Organization

@@ -50,8 +50,8 @@ if (existsSync(tsconfigPath)) {
     tsconfig.compilerOptions?.paths?.['@/*']?.[0] === './src/*',
     'Maps to ./src/*');
   
-  test('@spine/shared-db mapping',
-    tsconfig.compilerOptions?.paths?.['@spine/shared-db'] !== undefined,
+  test('@spine/shared mapping',
+    tsconfig.compilerOptions?.paths?.['@spine/shared'] !== undefined,
     'Workspace package mapped');
   
   test('@spine/enterprise mapping',
@@ -73,8 +73,8 @@ if (existsSync(nextConfigPath)) {
     nextConfig.includes("'@': config.context + '/src'"),
     'Maps to src directory');
   
-  test('Webpack @spine/shared-db alias',
-    nextConfig.includes("'@spine/shared-db': config.context"),
+  test('Webpack @spine/shared alias',
+    nextConfig.includes("'@spine/shared': config.context + '/../../packages/shared'"),
     'Workspace package aliased');
   
   test('Webpack @spine/enterprise alias',

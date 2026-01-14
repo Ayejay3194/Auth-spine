@@ -78,7 +78,7 @@ export class IdentityService {
     const startTime = Date.now();
 
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
 
       const where: any = {};
 
@@ -158,7 +158,7 @@ export class IdentityService {
   }> {
     permissionEngine.require(this.currentUser, 'users.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -236,7 +236,7 @@ export class IdentityService {
   ): Promise<AccountState> {
     permissionEngine.require(this.currentUser, 'users.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const accountState = await prisma.accountState.upsert({
       where: { userId },
@@ -292,7 +292,7 @@ export class IdentityService {
       throw new Error('Impersonation requires detailed reason (min 10 chars)');
     }
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const session: ImpersonationSession = {
       id: randomBytes(16).toString('hex'),
@@ -334,7 +334,7 @@ export class IdentityService {
   async endImpersonation(sessionId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'users.impersonate');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const session = await prisma.impersonationSession.findUnique({
       where: { id: sessionId },
@@ -372,7 +372,7 @@ export class IdentityService {
   ): Promise<LoginHistoryEntry[]> {
     permissionEngine.require(this.currentUser, 'users.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const history = await prisma.loginHistory.findMany({
       where: { userId },
@@ -406,7 +406,7 @@ export class IdentityService {
   ): Promise<void> {
     permissionEngine.require(this.currentUser, 'users.flag');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     await prisma.userFlag.create({
       data: {

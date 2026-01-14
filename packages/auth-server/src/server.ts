@@ -79,7 +79,7 @@ async function recordAudit(eventType: string, data?: { userId?: string; clientId
 
   // Persist to database instead of keeping in memory
   try {
-    const { prisma } = await import('@spine/shared-db/prisma')
+    const { prisma } = await import('@spine/shared/prisma')
     await prisma.auditLog.create({
       data: {
         id: event.id,
@@ -425,7 +425,7 @@ app.get('/sessions', async (req, res) => {
 
   // Get all active sessions from database
   try {
-    const { prisma } = await import('@spine/shared-db/prisma')
+    const { prisma } = await import('@spine/shared/prisma')
     const sessions = await prisma.session.findMany({
       where: {
         expiresAt: { gt: new Date() },
@@ -488,7 +488,7 @@ app.get('/audit/summary', async (req, res) => {
   if (!payload) return
 
   try {
-    const { prisma } = await import('@spine/shared-db/prisma')
+    const { prisma } = await import('@spine/shared/prisma')
 
     // Get event counts by type
     const auditLogs = await prisma.auditLog.findMany({

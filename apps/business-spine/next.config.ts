@@ -47,7 +47,7 @@ const nextConfig: NextConfig = {
       'node:path': false,
       'node:os': false,
       '@': config.context + '/src',
-      '@spine/shared-db': config.context + '/../../packages/shared-db',
+      '@spine/shared': config.context + '/../../packages/shared',
       '@spine/enterprise': config.context + '/../../packages/enterprise',
     };
 

@@ -75,8 +75,8 @@ Created detailed repository tree document:
    ```
    packages/
    ├── auth-server/               # Port 4000
-   ├── shared-db/                 # @spine/shared-db
-   ├── shared-auth/               # @spine/shared-auth
+   ├── shared-db/                 # @spine/shared
+   ├── shared-auth/               # @spine/shared/auth
    └── enterprise/                # 67+ modules
    ```
 
@@ -138,7 +138,7 @@ All documentation now uses correct naming:
 - `@spine/business-spine` for the main app package
 - `apps/business-spine/` for directory references
 - `@spine/enterprise/` for enterprise imports
-- `@spine/shared-db` for database imports
+- `@spine/shared` for database imports
 
 ## Module Routing Status
 
@@ -165,7 +165,7 @@ All documentation now uses correct naming:
 All import patterns standardized:
 ```typescript
 // ✅ Workspace packages
-import { prisma } from '@spine/shared-db/prisma'
+import { prisma } from '@spine/shared/prisma'
 import { monitoring } from '@spine/enterprise/monitoring'
 
 // ✅ Path aliases

@@ -54,7 +54,7 @@ export class AuditLogger {
 
   private async persist(entry: AuditEntry): Promise<void> {
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
       
       await prisma.adminAuditLog.create({
         data: {
@@ -93,7 +93,7 @@ export class AuditLogger {
     offset?: number;
   }): Promise<AuditEntry[]> {
     try {
-      const { prisma } = await import('@spine/shared-db/prisma');
+      const { prisma } = await import('@spine/shared/prisma');
 
       const where: any = {};
       if (filter.actor) where.actor = filter.actor;

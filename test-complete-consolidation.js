@@ -275,12 +275,12 @@ console.log('\n📦 Package System Tests:');
 try {
   // Test if package files exist
   test('Auth Package Files', countFiles('src/packages/auth') > 0, 'Auth package files found');
-  test('Shared Package Files', countFiles('src/packages/shared') > 0, 'Shared package files found');
+  test('Shared Package Files', countFiles('packages/shared') > 0, 'Shared package files found');
   test('Enterprise Package Files', countFiles('src/packages/enterprise') > 0, 'Enterprise package files found');
 
   // Test if package implementations exist
   const authPackageExists = fs.existsSync('src/packages/auth/index.ts');
-  const sharedPackageExists = fs.existsSync('src/packages/shared/index.ts');
+  const sharedPackageExists = fs.existsSync('packages/shared/src/index.ts');
   const enterprisePackageExists = fs.existsSync('src/packages/enterprise/index.ts');
   
   test('Auth Package Implementation', authPackageExists, 'Auth package implementation found');

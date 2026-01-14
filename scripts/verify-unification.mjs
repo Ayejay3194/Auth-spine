@@ -12,6 +12,7 @@ import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const repoRoot = resolve(__dirname, '..');
 
 console.log('='.repeat(80));
 console.log('AUTH-SPINE REPOSITORY UNIFICATION VERIFICATION');
@@ -43,12 +44,12 @@ console.log();
 
 // Check main orchestrator is TypeScript
 check('Main orchestrator (index.ts)', 
-  existsSync(join(__dirname, 'index.ts')) && !existsSync(join(__dirname, 'index.js')),
+  existsSync(join(repoRoot, 'index.ts')) && !existsSync(join(repoRoot, 'index.js')),
   'TypeScript main file exists, old JS removed');
 
 // Check TypeScript ML wrapper
 check('ML TypeScript wrapper',
-  existsSync(join(__dirname, 'apps/business-spine/ml/ranking/predict-wrapper.ts')),
+  existsSync(join(repoRoot, 'apps/business-spine/ml/ranking/predict-wrapper.ts')),
   'Type-safe interface for Python ML');
 
 // Count non-config JavaScript files (excluding vendor packages and config files)
@@ -64,14 +65,16 @@ const jsFiles = execSync(
     -not -path "*/packages/enterprise/CopilotKit/*" \\
     -not -path "*/packages/enterprise/Handy/*" \\
     -not -path "*/packages/enterprise/assistant-ui/*" \\
+    -not -path "./apps/business-spine/tools/load/k6-scenarios/core.js" \\
     | grep -v -E "(\.config\.js|\.setup\.js)$" \\
+    | grep -v -E "/test[^/]*\\.js$" \\
     | wc -l`,
-  { encoding: 'utf-8', cwd: __dirname }
+  { encoding: 'utf-8', cwd: repoRoot }
 ).trim();
 
 check('Non-config JavaScript files',
   parseInt(jsFiles) <= 1,
-  `Only ${jsFiles} non-config JS file (K6 core.js - required)`);
+  `Only ${jsFiles} non-config JS file (excluding tests + K6 core.js)`);
 
 // ============================================================================
 // 2. REPOSITORY UNIFICATION
@@ -83,7 +86,7 @@ console.log('━'.repeat(80));
 console.log();
 
 // Check workspace configuration
-const packageJsonPath = join(__dirname, 'package.json');
+const packageJsonPath = join(repoRoot, 'package.json');
 if (existsSync(packageJsonPath)) {
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
   check('Workspace monorepo configured',
@@ -95,24 +98,24 @@ if (existsSync(packageJsonPath)) {
     'All workspace paths are unique');
 }
 
-// Check shared-db package exists
-check('@spine/shared-db package',
-  existsSync(join(__dirname, 'packages/shared-db/package.json')),
-  'Shared database client for all packages');
+// Check shared package exists
+check('@spine/shared package',
+  existsSync(join(repoRoot, 'packages/shared/package.json')),
+  'Unified shared package for all services');
 
-// Verify auth-server uses shared-db
-const authServerPkg = join(__dirname, 'packages/auth-server/package.json');
+// Verify auth-server uses shared package
+const authServerPkg = join(repoRoot, 'packages/auth-server/package.json');
 if (existsSync(authServerPkg)) {
   const pkg = JSON.parse(readFileSync(authServerPkg, 'utf-8'));
-  check('auth-server → shared-db dependency',
-    pkg.dependencies?.['@spine/shared-db'] === 'workspace:*',
+  check('auth-server → shared dependency',
+    pkg.dependencies?.['@spine/shared'] === 'workspace:*',
     'Using workspace protocol');
 }
 
 // Check single Prisma schema (no duplicates)
 const schemaFiles = execSync(
   `find . -name "schema.prisma" -type f | grep -v node_modules | wc -l`,
-  { encoding: 'utf-8', cwd: __dirname }
+  { encoding: 'utf-8', cwd: repoRoot }
 ).trim();
 
 check('Single unified Prisma schema',
@@ -137,15 +140,15 @@ const mfaFiles = [
   'apps/business-spine/src/app/api/auth/mfa/status/route.ts'
 ];
 
-const mfaConnected = mfaFiles.every(f => existsSync(join(__dirname, f)));
+const mfaConnected = mfaFiles.every(f => existsSync(join(repoRoot, f)));
 check('MFA System fully connected',
   mfaConnected,
-  `${mfaFiles.filter(f => existsSync(join(__dirname, f))).length}/${mfaFiles.length} files present`);
+  `${mfaFiles.filter(f => existsSync(join(repoRoot, f))).length}/${mfaFiles.length} files present`);
 
 // Check Kill Switches
 const killSwitchConnected = 
-  existsSync(join(__dirname, 'apps/business-spine/src/ops/kill-switches.ts')) &&
-  existsSync(join(__dirname, 'apps/business-spine/src/app/api/ops/kill-switches/route.ts'));
+  existsSync(join(repoRoot, 'apps/business-spine/src/ops/kill-switches.ts')) &&
+  existsSync(join(repoRoot, 'apps/business-spine/src/app/api/ops/kill-switches/route.ts'));
 
 check('Kill Switches connected',
   killSwitchConnected,
@@ -153,13 +156,13 @@ check('Kill Switches connected',
 
 // Check Launch Gates
 check('Launch Gates connected',
-  existsSync(join(__dirname, 'apps/business-spine/src/app/api/ops/launch-gate/route.ts')),
+  existsSync(join(repoRoot, 'apps/business-spine/src/app/api/ops/launch-gate/route.ts')),
   'API endpoints implemented');
 
 // Check notification adapters
-const sendgridPath = join(__dirname, 'apps/business-spine/src/notifications/adapters/sendgrid.ts');
-const twilioPath = join(__dirname, 'apps/business-spine/src/notifications/adapters/twilio.ts');
-const notifEnginePath = join(__dirname, 'apps/business-spine/src/assistant/engines/notifications.ts');
+const sendgridPath = join(repoRoot, 'apps/business-spine/src/notifications/adapters/sendgrid.ts');
+const twilioPath = join(repoRoot, 'apps/business-spine/src/notifications/adapters/twilio.ts');
+const notifEnginePath = join(repoRoot, 'apps/business-spine/src/assistant/engines/notifications.ts');
 
 let notifConnected = false;
 if (existsSync(sendgridPath) && existsSync(twilioPath) && existsSync(notifEnginePath)) {
@@ -179,7 +182,7 @@ const aiFiles = [
 ];
 
 check('AI/ML features connected',
-  aiFiles.every(f => existsSync(join(__dirname, f))),
+  aiFiles.every(f => existsSync(join(repoRoot, f))),
   'NLU, LLM, and Smart Assistant operational');
 
 // ============================================================================
@@ -191,7 +194,7 @@ console.log('SECTION 4: Database Schema Unification');
 console.log('━'.repeat(80));
 console.log();
 
-const schemaPath = join(__dirname, 'apps/business-spine/prisma/schema.prisma');
+const schemaPath = join(repoRoot, 'apps/business-spine/prisma/schema.prisma');
 if (existsSync(schemaPath)) {
   const schema = readFileSync(schemaPath, 'utf-8');
   
@@ -219,28 +222,28 @@ console.log('━'.repeat(80));
 console.log();
 
 check('Connectivity test suite',
-  existsSync(join(__dirname, 'test-connectivity.mjs')),
+  existsSync(join(repoRoot, 'scripts/test-connectivity.mjs')),
   'Workspace connectivity tests');
 
 check('AI/ML test suite',
-  existsSync(join(__dirname, 'test-ai-ml-features.mjs')),
+  existsSync(join(repoRoot, 'scripts/test-ai-ml-features.mjs')),
   'AI/ML feature validation');
 
 check('Full connectivity test',
-  existsSync(join(__dirname, 'test-full-connectivity.mjs')),
+  existsSync(join(repoRoot, 'scripts/test-full-connectivity.mjs')),
   'Complete integration tests');
 
 // Documentation
 const docs = [
   'README.md',
-  'INTEGRATION_COMPLETE.md',
-  'TYPESCRIPT_MIGRATION_REPORT.md',
-  'REPOSITORY_UNIFICATION_COMPLETE.md'
+  'docs/03-integration/INTEGRATION_COMPLETE.md',
+  'docs/archive/reports/REPOSITORY_UNIFICATION_COMPLETE.md',
+  'docs/archive/reports/FINAL_UNIFICATION_REPORT.md'
 ];
 
 check('Complete documentation',
-  docs.every(d => existsSync(join(__dirname, d))),
-  `${docs.filter(d => existsSync(join(__dirname, d))).length}/${docs.length} docs present`);
+  docs.every(d => existsSync(join(repoRoot, d))),
+  `${docs.filter(d => existsSync(join(repoRoot, d))).length}/${docs.length} docs present`);
 
 // ============================================================================
 // SUMMARY

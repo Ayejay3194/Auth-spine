@@ -39,7 +39,8 @@ Auth-Spine/
 │   ├── auth-server/ (auth server)
 │   ├── create-auth-spine-app/ (CLI tool)
 │   ├── resource-api/ (API package)
-│   └── shared-auth/ (shared auth utilities)
+│   ├── shared/ (unified auth + database exports)
+│   └── shared-auth/ (shared auth utilities, legacy)
 ├── extracted/ (246 items - cloned repositories)
 │   ├── assistant-core-pack/
 │   ├── assistant-core-pack-v3/

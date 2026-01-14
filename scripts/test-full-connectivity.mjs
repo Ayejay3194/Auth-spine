@@ -11,6 +11,7 @@ import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const repoRoot = join(__dirname, '..');
 
 console.log('='.repeat(80));
 console.log('AUTH-SPINE COMPREHENSIVE CONNECTIVITY TEST');
@@ -48,7 +49,7 @@ function section(name) {
 // ============================================================================
 section('1. Database Schema Models');
 
-const schemaPath = join(__dirname, 'apps/business-spine/prisma/schema.prisma');
+const schemaPath = join(repoRoot, 'apps/business-spine/prisma/schema.prisma');
 try {
   const schema = readFileSync(schemaPath, 'utf-8');
   
@@ -80,7 +81,7 @@ const mfaTests = [
 ];
 
 for (const { file, name } of mfaTests) {
-  const fullPath = join(__dirname, file);
+  const fullPath = join(repoRoot, file);
   const exists = existsSync(fullPath);
   test(name, exists, exists ? 'Connected' : 'Missing');
   
@@ -97,7 +98,7 @@ for (const { file, name } of mfaTests) {
 // ============================================================================
 section('3. Kill Switches System');
 
-const killSwitchPath = join(__dirname, 'apps/business-spine/src/ops/kill-switches.ts');
+const killSwitchPath = join(repoRoot, 'apps/business-spine/src/ops/kill-switches.ts');
 if (existsSync(killSwitchPath)) {
   const content = readFileSync(killSwitchPath, 'utf-8');
   
@@ -108,7 +109,7 @@ if (existsSync(killSwitchPath)) {
        content.includes('killSwitchHistory') ? 'Enabled' : 'Disabled');
   test('  └─ Auto-disable feature', content.includes('autoDisableExpiredSwitches'), 'Implemented');
   
-  const apiPath = join(__dirname, 'apps/business-spine/src/app/api/ops/kill-switches/route.ts');
+  const apiPath = join(repoRoot, 'apps/business-spine/src/app/api/ops/kill-switches/route.ts');
   const hasAPI = existsSync(apiPath);
   test('Kill Switches API', hasAPI, hasAPI ? 'GET, POST, PUT endpoints' : 'Missing');
   
@@ -125,7 +126,7 @@ if (existsSync(killSwitchPath)) {
 // ============================================================================
 section('4. Launch Gate System');
 
-const launchGatePath = join(__dirname, 'apps/business-spine/src/app/api/ops/launch-gate/route.ts');
+const launchGatePath = join(repoRoot, 'apps/business-spine/src/app/api/ops/launch-gate/route.ts');
 if (existsSync(launchGatePath)) {
   const content = readFileSync(launchGatePath, 'utf-8');
   
@@ -143,8 +144,8 @@ if (existsSync(launchGatePath)) {
 // ============================================================================
 section('5. Notification System Integration');
 
-const sendgridPath = join(__dirname, 'apps/business-spine/src/notifications/adapters/sendgrid.ts');
-const twilioPath = join(__dirname, 'apps/business-spine/src/notifications/adapters/twilio.ts');
+const sendgridPath = join(repoRoot, 'apps/business-spine/src/notifications/adapters/sendgrid.ts');
+const twilioPath = join(repoRoot, 'apps/business-spine/src/notifications/adapters/twilio.ts');
 
 if (existsSync(sendgridPath)) {
   const content = readFileSync(sendgridPath, 'utf-8');
@@ -179,7 +180,7 @@ const tsFiles = [
 ];
 
 for (const { path: filePath, name } of tsFiles) {
-  const fullPath = join(__dirname, filePath);
+  const fullPath = join(repoRoot, filePath);
   const exists = existsSync(fullPath);
   test(name, exists, exists ? 'Migrated to TypeScript' : 'Not migrated');
 }
@@ -192,7 +193,7 @@ const jsFiles = [
 ];
 
 for (const file of jsFiles) {
-  const fullPath = join(__dirname, file);
+  const fullPath = join(repoRoot, file);
   const exists = existsSync(fullPath);
   test(`Obsolete JS: ${file}`, !exists, exists ? 'Should be deleted' : 'Cleaned up');
 }
@@ -212,7 +213,7 @@ const aiFiles = [
 ];
 
 for (const { path: filePath, name } of aiFiles) {
-  const fullPath = join(__dirname, filePath);
+  const fullPath = join(repoRoot, filePath);
   const exists = existsSync(fullPath);
   test(name, exists, exists ? 'Operational' : 'Missing');
 }
@@ -222,7 +223,7 @@ for (const { path: filePath, name } of aiFiles) {
 // ============================================================================
 section('8. Workspace Package Resolution');
 
-const packageJsonPath = join(__dirname, 'package.json');
+const packageJsonPath = join(repoRoot, 'package.json');
 if (existsSync(packageJsonPath)) {
   const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
   
@@ -230,17 +231,17 @@ if (existsSync(packageJsonPath)) {
   test('  └─ Workspaces defined', Array.isArray(packageJson.workspaces), 
        `${packageJson.workspaces?.length || 0} workspaces`);
   
-  // Check shared-db package
-  const sharedDbPath = join(__dirname, 'packages/shared-db/package.json');
-  const hasSharedDb = existsSync(sharedDbPath);
-  test('@spine/shared-db package', hasSharedDb, hasSharedDb ? 'Created' : 'Missing');
+  // Check shared package
+  const sharedPackagePath = join(repoRoot, 'packages/shared/package.json');
+  const hasSharedPackage = existsSync(sharedPackagePath);
+  test('@spine/shared package', hasSharedPackage, hasSharedPackage ? 'Created' : 'Missing');
   
-  // Check auth-server uses shared-db
-  const authServerPkgPath = join(__dirname, 'packages/auth-server/package.json');
+  // Check auth-server uses shared package
+  const authServerPkgPath = join(repoRoot, 'packages/auth-server/package.json');
   if (existsSync(authServerPkgPath)) {
     const authServerPkg = JSON.parse(readFileSync(authServerPkgPath, 'utf-8'));
-    const usesSharedDb = authServerPkg.dependencies?.['@spine/shared-db'];
-    test('Auth-server → shared-db', !!usesSharedDb, usesSharedDb || 'Not using shared-db');
+    const usesShared = authServerPkg.dependencies?.['@spine/shared'];
+    test('Auth-server → shared', !!usesShared, usesShared || 'Not using shared');
   }
 }
 
@@ -259,7 +260,7 @@ const apiEndpoints = [
 ];
 
 for (const { path: filePath, name } of apiEndpoints) {
-  const fullPath = join(__dirname, filePath);
+  const fullPath = join(repoRoot, filePath);
   const exists = existsSync(fullPath);
   test(`API: ${name}`, exists, exists ? 'Implemented' : 'Missing');
   
@@ -279,17 +280,17 @@ for (const { path: filePath, name } of apiEndpoints) {
 // ============================================================================
 section('10. Cross-Component Integration Checks');
 
-// Check if MFA APIs import from security/mfa
-const mfaEnrollPath = join(__dirname, 'apps/business-spine/src/app/api/auth/mfa/enroll/route.ts');
+// Check if MFA APIs import from security module
+const mfaEnrollPath = join(repoRoot, 'apps/business-spine/src/app/api/auth/mfa/enroll/route.ts');
 if (existsSync(mfaEnrollPath)) {
   const content = readFileSync(mfaEnrollPath, 'utf-8');
   test('MFA API → MFA Security Module', 
-       content.includes('from \'@/security/mfa\'') || content.includes('from "@/security/mfa"'),
+       content.includes('from \'@/security\'') || content.includes('from "@/security"'),
        'APIs use core MFA logic');
 }
 
 // Check if kill switches API imports manager
-const killSwitchAPIPath = join(__dirname, 'apps/business-spine/src/app/api/ops/kill-switches/route.ts');
+const killSwitchAPIPath = join(repoRoot, 'apps/business-spine/src/app/api/ops/kill-switches/route.ts');
 if (existsSync(killSwitchAPIPath)) {
   const content = readFileSync(killSwitchAPIPath, 'utf-8');
   test('Kill Switch API → Manager', 
@@ -298,14 +299,15 @@ if (existsSync(killSwitchAPIPath)) {
 }
 
 // Check if notification engines use adapters
-const notifEnginePath = join(__dirname, 'apps/business-spine/src/assistant/engines/notifications.ts');
+const notifEnginePath = join(repoRoot, 'apps/business-spine/src/assistant/engines/notifications.ts');
 if (existsSync(notifEnginePath)) {
   const content = readFileSync(notifEnginePath, 'utf-8');
   const usesSendGrid = content.includes('sendgrid') || content.includes('SendGrid');
   const usesTwilio = content.includes('twilio') || content.includes('Twilio');
+  const usesNotificationsBarrel = content.includes('@/notifications') || content.includes('from "@/notifications"');
   test('Notification Engine → Adapters', 
-       usesSendGrid || usesTwilio,
-       `Uses: ${[usesSendGrid && 'SendGrid', usesTwilio && 'Twilio'].filter(Boolean).join(', ')}`);
+       usesSendGrid || usesTwilio || usesNotificationsBarrel,
+       `Uses: ${[usesSendGrid && 'SendGrid', usesTwilio && 'Twilio', usesNotificationsBarrel && 'Notifications barrel'].filter(Boolean).join(', ')}`);
 }
 
 // ============================================================================
@@ -314,13 +316,13 @@ if (existsSync(notifEnginePath)) {
 section('11. Test Infrastructure');
 
 const testFiles = [
-  { path: 'test-connectivity.mjs', name: 'Workspace Connectivity Test' },
-  { path: 'test-ai-ml-features.mjs', name: 'AI/ML Features Test' },
-  { path: 'test-full-connectivity.mjs', name: 'Full Connectivity Test (This file)' }
+  { path: 'scripts/test-connectivity.mjs', name: 'Workspace Connectivity Test' },
+  { path: 'scripts/test-ai-ml-features.mjs', name: 'AI/ML Features Test' },
+  { path: 'scripts/test-full-connectivity.mjs', name: 'Full Connectivity Test (This file)' }
 ];
 
 for (const { path: filePath, name } of testFiles) {
-  const fullPath = join(__dirname, filePath);
+  const fullPath = join(repoRoot, filePath);
   test(name, existsSync(fullPath));
 }
 
@@ -330,13 +332,13 @@ for (const { path: filePath, name } of testFiles) {
 section('12. Documentation');
 
 const docs = [
-  { path: 'INTEGRATION_COMPLETE.md', name: 'Integration Documentation' },
-  { path: 'TYPESCRIPT_MIGRATION_REPORT.md', name: 'TypeScript Migration Report' },
+  { path: 'docs/03-integration/INTEGRATION_COMPLETE.md', name: 'Integration Documentation' },
+  { path: 'docs/archive/reports/REPOSITORY_UNIFICATION_COMPLETE.md', name: 'Repository Unification Report' },
   { path: 'README.md', name: 'Main README' }
 ];
 
 for (const { path: filePath, name } of docs) {
-  const fullPath = join(__dirname, filePath);
+  const fullPath = join(repoRoot, filePath);
   test(name, existsSync(fullPath));
 }
 

@@ -43,7 +43,7 @@ export class ConfigService {
   async getConfig(key: string, environment?: string): Promise<ConfigEntry | null> {
     permissionEngine.require(this.currentUser, 'config.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const env = environment || process.env.NODE_ENV || 'production';
 
@@ -79,7 +79,7 @@ export class ConfigService {
   }): Promise<ConfigEntry> {
     permissionEngine.require(this.currentUser, 'config.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const current = await this.getConfig(params.key, params.environment);
     const version = current ? current.version + 1 : 1;
@@ -133,7 +133,7 @@ export class ConfigService {
   async rollbackConfig(key: string, environment: string): Promise<ConfigEntry> {
     permissionEngine.require(this.currentUser, 'config.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const current = await this.getConfig(key, environment);
     if (!current || !current.canRollback) {
@@ -191,7 +191,7 @@ export class ConfigService {
   }> {
     permissionEngine.require(this.currentUser, 'config.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const [config1, config2] = await Promise.all([
       prisma.configEntry.findFirst({
@@ -246,7 +246,7 @@ export class ConfigService {
   async getMigrationStatus(): Promise<MigrationStatus[]> {
     permissionEngine.require(this.currentUser, 'config.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const migrations = await prisma.migration.findMany({
       orderBy: { appliedAt: 'desc' },
@@ -271,7 +271,7 @@ export class ConfigService {
   async rollbackMigration(migrationId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'config.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const migration = await prisma.migration.findUnique({
       where: { id: migrationId },
@@ -313,7 +313,7 @@ export class ConfigService {
   async checkSchemaIntegrity(): Promise<SchemaIntegrityCheck[]> {
     permissionEngine.require(this.currentUser, 'config.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const checks: SchemaIntegrityCheck[] = [];
 
@@ -377,7 +377,7 @@ export class ConfigService {
   ): Promise<ConfigEntry[]> {
     permissionEngine.require(this.currentUser, 'config.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const configs = await prisma.configEntry.findMany({
       where: { key, environment },
@@ -405,7 +405,7 @@ export class ConfigService {
   async getAllConfigs(environment?: string): Promise<ConfigEntry[]> {
     permissionEngine.require(this.currentUser, 'config.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const env = environment || process.env.NODE_ENV || 'production';
 
@@ -440,7 +440,7 @@ export class ConfigService {
   }>> {
     permissionEngine.require(this.currentUser, 'config.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const locks = await prisma.migrationLock.findMany({
       where: {
@@ -463,7 +463,7 @@ export class ConfigService {
   async releaseMigrationLock(migrationId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'config.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     await prisma.migrationLock.updateMany({
       where: { migrationId, releasedAt: null },

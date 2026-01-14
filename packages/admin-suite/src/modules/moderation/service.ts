@@ -60,7 +60,7 @@ export class ModerationService {
   }> {
     permissionEngine.require(this.currentUser, 'moderation.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const where: any = {};
     if (filter.status) where.status = filter.status;
@@ -129,7 +129,7 @@ export class ModerationService {
   }> {
     permissionEngine.require(this.currentUser, 'moderation.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const flag = await prisma.moderationFlag.findUnique({
       where: { id: flagId },
@@ -244,7 +244,7 @@ export class ModerationService {
       throw new Error('Moderation action requires detailed reason (min 10 chars)');
     }
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const flag = await prisma.moderationFlag.findUnique({
       where: { id: params.flagId },
@@ -315,7 +315,7 @@ export class ModerationService {
     resourceId: string,
     action: ModerationAction['action']
   ): Promise<void> {
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
     const model = (prisma as any)[resourceType];
 
     switch (action) {
@@ -364,7 +364,7 @@ export class ModerationService {
   async detectPatterns(timeWindow: number = 86400000): Promise<PatternDetection[]> {
     permissionEngine.require(this.currentUser, 'moderation.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const startDate = new Date(Date.now() - timeWindow);
     const patterns: PatternDetection[] = [];
@@ -421,7 +421,7 @@ export class ModerationService {
   async assignFlag(flagId: string, moderatorId: string): Promise<void> {
     permissionEngine.require(this.currentUser, 'moderation.write');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     await prisma.moderationFlag.update({
       where: { id: flagId },
@@ -447,7 +447,7 @@ export class ModerationService {
   async getContentHistory(contentId: string): Promise<ContentVersion[]> {
     permissionEngine.require(this.currentUser, 'moderation.read');
 
-    const { prisma } = await import('@spine/shared-db/prisma');
+    const { prisma } = await import('@spine/shared/prisma');
 
     const versions = await prisma.contentVersion.findMany({
       where: { contentId },

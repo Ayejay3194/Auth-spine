@@ -35,8 +35,8 @@
       "@/*": [
         "./src/*"
       ],
-      "@spine/shared-db": [
-        "../../packages/shared-db/index.ts"
+      "@spine/shared": [
+        "../../packages/shared/src/index.ts"
       ],
       "@spine/enterprise": [
         "../../packages/enterprise/index.ts"

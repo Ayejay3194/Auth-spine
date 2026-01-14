@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@enterprise/auth'
-import { useRecoveryCode } from '@/security/mfa'
+import { useRecoveryCode } from '@/security'
 import { prisma } from '@/lib/prisma'
 
 /**

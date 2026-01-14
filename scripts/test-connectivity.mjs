@@ -13,8 +13,8 @@ console.log('================================\n')
 // Test 1: Check workspace packages
 console.log('✅ Test 1: Workspace Package Resolution')
 try {
-  const sharedDbPkg = JSON.parse(await readFile('./packages/shared-db/package.json', 'utf-8'))
-  console.log(`  ✓ Found ${sharedDbPkg.name}@${sharedDbPkg.version}`)
+  const sharedPkg = JSON.parse(await readFile('./packages/shared/package.json', 'utf-8'))
+  console.log(`  ✓ Found ${sharedPkg.name}@${sharedPkg.version}`)
   
   const authPkg = JSON.parse(await readFile('./packages/auth-server/package.json', 'utf-8'))
   console.log(`  ✓ Found ${authPkg.name}@${authPkg.version}`)
@@ -30,18 +30,18 @@ console.log('✅ Test 2: Package Import Paths')
 try {
   const sessionStore = await readFile('./packages/auth-server/src/session-store.ts', 'utf-8')
   
-  if (sessionStore.includes('@spine/shared-db/prisma')) {
-    console.log('  ✓ session-store.ts uses @spine/shared-db/prisma')
+  if (sessionStore.includes('@spine/shared/prisma')) {
+    console.log('  ✓ session-store.ts uses @spine/shared/prisma')
   } else {
-    throw new Error('session-store.ts not using shared-db')
+    throw new Error('session-store.ts not using shared package')
   }
   
   const server = await readFile('./packages/auth-server/src/server.ts', 'utf-8')
   
-  if (server.includes('@spine/shared-db/prisma')) {
-    console.log('  ✓ server.ts uses @spine/shared-db/prisma')
+  if (server.includes('@spine/shared/prisma')) {
+    console.log('  ✓ server.ts uses @spine/shared/prisma')
   } else {
-    throw new Error('server.ts not using shared-db')
+    throw new Error('server.ts not using shared package')
   }
   
   console.log('  ✅ All import paths correct\n')

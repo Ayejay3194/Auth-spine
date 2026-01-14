@@ -7,7 +7,7 @@ This document provides a comprehensive guide to test the multiclient authenticat
 
 ### Components
 1. **Auth Server** (`packages/auth-server`) - Issues JWT tokens with multiclient claims
-2. **Shared Auth** (`packages/shared-auth`) - Token verification utilities
+2. **Shared Package** (`packages/shared`) - Token verification + shared database utilities
 3. **RBAC Middleware** (`apps/business-spine/src/lib/rbac-middleware.ts`) - Enforces permissions
 4. **Business Spine** (`apps/business-spine`) - Main application using RBAC
 
