@@ -41,6 +41,9 @@
       "@spine/enterprise": [
         "../../packages/enterprise/index.ts"
       ],
+      "@spine/enterprise/*": [
+        "../../packages/enterprise/*"
+      ],
       "@/suites/*": [
         "./src/suites/*"
       ],

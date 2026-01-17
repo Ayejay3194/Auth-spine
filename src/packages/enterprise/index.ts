@@ -1,9 +1,16 @@
 /**
- * Financial Reporting Dashboard
- * 
- * Comprehensive financial reporting and analytics dashboard for enterprise
- * financial operations, reporting, and analysis.
+ * Enterprise Module Index
+ *
+ * Consolidated, organized entry points for enterprise functionality.
  */
+
+export * as audit from './audit/index.js';
+export * as compliance from './compliance/index.js';
+export * as security from './security/index.js';
+export * as supabase from './supabase/index.js';
+export * as operations from './operations/index.js';
+export * as finance from './finance/index.js';
+export * as platform from './platform/index.js';
 
 export * from './revenue-analytics.js';
 export * from './expense-tracking.js';

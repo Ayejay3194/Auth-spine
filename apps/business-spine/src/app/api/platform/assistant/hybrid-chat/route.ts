@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { HybridAssistantService } from "@spine/enterprise/platform/assistant/HybridAssistantService";
+import { HybridAssistantService } from "@spine/enterprise/platform/assistant";
 
 // Initialize the hybrid assistant service with Snips NLU
 const assistant = new HybridAssistantService({
