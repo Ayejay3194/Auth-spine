@@ -1,0 +1,7 @@
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    ports:
+      - "8000:8000"
+    # You must provide a model path or HF repo id. Example:
+    # command: ["--model", "meta-llama/Llama-3.1-8B-Instruct", "--host", "0.0.0.0", "--port", "8000"]

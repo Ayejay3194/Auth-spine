@@ -459,32 +459,126 @@ export class UnifiedAIAgent {
    * Call OpenAI API
    */
   private async callOpenAI(input: string): Promise<string> {
-    // Placeholder implementation
-    return `OpenAI response to: ${input}`;
+    if (!this.llmConfig?.apiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.llmConfig.apiKey}`
+      },
+      body: JSON.stringify({
+        model: this.llmConfig.modelName || 'gpt-4',
+        messages: [
+          { role: 'system', content: this.llmConfig.systemPrompt },
+          { role: 'user', content: input }
+        ],
+        temperature: this.llmConfig.temperature,
+        max_tokens: this.llmConfig.maxTokens
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content || '';
   }
 
   /**
    * Call Anthropic API
    */
   private async callAnthropic(input: string): Promise<string> {
-    // Placeholder implementation
-    return `Anthropic response to: ${input}`;
+    if (!this.llmConfig?.apiKey) {
+      throw new Error('Anthropic API key not configured');
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': this.llmConfig.apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: this.llmConfig.modelName || 'claude-3-sonnet-20240229',
+        max_tokens: this.llmConfig.maxTokens || 1024,
+        temperature: this.llmConfig.temperature,
+        system: this.llmConfig.systemPrompt,
+        messages: [{ role: 'user', content: input }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Anthropic API error: ${response.status} ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    return data.content[0]?.text || '';
   }
 
   /**
    * Call HuggingFace API
    */
   private async callHuggingFace(input: string): Promise<string> {
-    // Placeholder implementation
-    return `HuggingFace response to: ${input}`;
+    if (!this.llmConfig?.apiKey) {
+      throw new Error('HuggingFace API key not configured');
+    }
+
+    const model = this.llmConfig.modelName || 'meta-llama/Llama-2-7b-chat-hf';
+    const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.llmConfig.apiKey}`
+      },
+      body: JSON.stringify({
+        inputs: `<s>[INST] ${this.llmConfig.systemPrompt}\n\n${input} [/INST]`,
+        parameters: {
+          temperature: this.llmConfig.temperature,
+          max_new_tokens: this.llmConfig.maxTokens,
+          return_full_text: false
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HuggingFace API error: ${response.status} ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    return data[0]?.generated_text || '';
   }
 
   /**
-   * Call local LLM
+   * Call local LLM (Ollama)
    */
   private async callLocalLLM(input: string): Promise<string> {
-    // Placeholder implementation
-    return `Local LLM response to: ${input}`;
+    const baseUrl = this.llmConfig?.baseUrl || 'http://localhost:11434';
+    
+    const response = await fetch(`${baseUrl}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: this.llmConfig?.modelName || 'llama2',
+        prompt: `${this.llmConfig?.systemPrompt || 'You are a helpful assistant.'}\n\nUser: ${input}\nAssistant:`,
+        stream: false,
+        options: {
+          temperature: this.llmConfig?.temperature || 0.7,
+          num_predict: this.llmConfig?.maxTokens || 2048
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Local LLM error: ${response.status} ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    return data.response || '';
   }
 
   /**

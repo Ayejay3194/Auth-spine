@@ -1,0 +1,29 @@
+{
+  "name": "@auth-spine/insight-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --enable-source-maps dist/tests/run-tests.js",
+    "dev:demo": "node --enable-source-maps dist/demo/run-demo.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./engine": {
+      "import": "./dist/engine.js",
+      "types": "./dist/engine.d.ts"
+    },
+    "./fusion": {
+      "import": "./dist/fusion/nowContext.js",
+      "types": "./dist/fusion/nowContext.d.ts"
+    }
+  }
+}

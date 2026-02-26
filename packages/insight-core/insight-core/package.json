@@ -1,0 +1,15 @@
+{
+  "name": "insight-aware-site-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --enable-source-maps dist/tests/run-tests.js",
+    "dev:demo": "node --enable-source-maps dist/demo/run-demo.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "examples",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@aj/ml-core": "workspace:*",
+    "@aj/ml-astro": "workspace:*",
+    "@aj/ml-ranking": "workspace:*",
+    "@aj/ml-recs": "workspace:*",
+    "@aj/ml-risk": "workspace:*",
+    "@aj/ml-forecast": "workspace:*",
+    "@aj/ml-search": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

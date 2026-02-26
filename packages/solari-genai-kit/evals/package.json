@@ -1,0 +1,11 @@
+{
+  "name": "@aj/solari-evals",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "node src/run_golden.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
+}

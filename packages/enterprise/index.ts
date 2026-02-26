@@ -59,6 +59,9 @@ export * from './launch-gate/index.js';
 export * from './nlu/index.js';
 export * from './vibe-coding-disasters/index.js';
 
+// AI/ML Platform
+export * from './ai-platform/index.js';
+
 // New Platform Modules
 export * from './platform/index.js';
 

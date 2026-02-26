@@ -1,0 +1,10 @@
+services:
+  llama:
+    image: ghcr.io/abetlen/llama-cpp-python:latest
+    ports:
+      - "8080:8080"
+    # Mount your GGUF model and set MODEL env vars as needed.
+    # environment:
+    #   - MODEL=/models/your-model.gguf
+    # volumes:
+    #   - ./models:/models

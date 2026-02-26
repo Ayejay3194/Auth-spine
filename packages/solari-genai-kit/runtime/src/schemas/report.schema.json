@@ -1,0 +1,60 @@
+{
+  "$id": "solari.report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "summary",
+    "bullets",
+    "actions",
+    "cautions",
+    "citations"
+  ],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "bullets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "cautions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sourceId",
+          "quote"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "quote": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

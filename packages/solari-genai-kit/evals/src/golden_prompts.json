@@ -1,0 +1,20 @@
+[
+  {
+    "name": "basic_report",
+    "schemaName": "report",
+    "mode": "controlled",
+    "input": "Write a premium structured report about improving retention in a booking app. Include actions and cautions.",
+    "context": {
+      "product": "Beauty Booking"
+    }
+  },
+  {
+    "name": "tool_loop_report",
+    "schemaName": "report",
+    "mode": "tools",
+    "input": "Generate a structured astrology interpretation using tool output as truth.",
+    "context": {
+      "chartId": "demo"
+    }
+  }
+]

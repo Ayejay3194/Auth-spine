@@ -1,0 +1,16 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE TABLE IF NOT EXISTS documents (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  source TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS chunks (
+  id TEXT PRIMARY KEY,
+  doc_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  chunk_index INT NOT NULL,
+  content TEXT NOT NULL,
+  embedding VECTOR(1536),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_chunks_doc_id ON chunks(doc_id);

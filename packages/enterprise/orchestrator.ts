@@ -66,6 +66,10 @@ import { killSwitches } from './kill-switches/manager.js';
 import { launchGate } from './launch-gate/launch-gate.js';
 import { nlu } from './nlu/nlu.js';
 import { vibeCodingDisasters } from './vibe-coding-disasters/vibe-coding-disasters.js';
+import { AIPlatformManager } from './ai-platform/manager.js';
+
+// Insight Core - Unified AI/ML Spine
+import * as insightCore from '@auth-spine/insight-core';
 
 export class EnterpriseOrchestrator {
   private packages: Map<string, any> = new Map();
@@ -142,6 +146,9 @@ export class EnterpriseOrchestrator {
     this.packages.set('launchGate', launchGate);
     this.packages.set('nlu', nlu);
     this.packages.set('vibeCodingDisasters', vibeCodingDisasters);
+
+    // AI/ML Platform
+    this.packages.set('aiPlatform', new AIPlatformManager());
   }
 
   /**
