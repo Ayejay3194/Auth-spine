@@ -5,6 +5,7 @@
 
 import { Logger } from './logger.js';
 import { AnalyticsConfig } from './types.js';
+import { MetricsCollector } from './metrics-collector.js';
 
 export interface DashboardLayout {
   id: string;
@@ -57,6 +58,7 @@ export interface WidgetData {
 export class DashboardManager {
   private config: AnalyticsConfig;
   private logger: Logger;
+  private metricsCollector: MetricsCollector;
   private isInitialized: boolean = false;
   private dashboards: Map<string, DashboardLayout> = new Map();
   private widgets: Map<string, WidgetConfig> = new Map();
@@ -69,6 +71,7 @@ export class DashboardManager {
       format: 'json',
       service: 'dashboard-manager'
     });
+    this.metricsCollector = new MetricsCollector(config);
   }
 
   async initialize(): Promise<void> {
@@ -78,6 +81,9 @@ export class DashboardManager {
 
     try {
       this.logger.info('Initializing Dashboard Manager...');
+      
+      // Initialize metrics collector for real data
+      await this.metricsCollector.initialize();
       
       // Load default dashboards
       await this.loadDefaultDashboards();
@@ -561,75 +567,101 @@ export class DashboardManager {
   }
 
   private async fetchKPIData(widgetConfig: WidgetConfig): Promise<any> {
-    const mockKPIData: Record<string, any> = {
-      mrr: { value: 125000, change: 5.2, trend: 'up' },
-      headcount: { value: 145, change: 2.1, trend: 'up' },
-      cashBalance: { value: 450000, change: -2.1, trend: 'down' },
-      turnoverRate: { value: 8.5, change: -1.2, trend: 'down' },
-      payrollCosts: { value: 280000, change: 3.5, trend: 'up' },
-      arOutstanding: { value: 78000, change: 8.5, trend: 'up' },
-      apOutstanding: { value: 45000, change: -3.2, trend: 'down' },
-      errorRate: { value: 0.2, change: -0.1, trend: 'down' }
-    };
-
     const metric = widgetConfig.config.metric;
-    return mockKPIData[metric] || { value: 0, change: 0, trend: 'stable' };
+    
+    try {
+      const latest = await this.metricsCollector.getLatestValue(metric);
+      const previous = await this.metricsCollector.getPreviousValue(metric, '30d');
+      const change = latest && previous ? ((latest - previous) / previous) * 100 : 0;
+      
+      return {
+        value: latest || 0,
+        change: Math.abs(change),
+        trend: change > 0.01 ? 'up' : change < -0.01 ? 'down' : 'stable'
+      };
+    } catch {
+      // Return default fallback when no data available
+      return { value: 0, change: 0, trend: 'stable' };
+    }
   }
 
   private async fetchChartData(widgetConfig: WidgetConfig): Promise<any> {
-    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const mockChartData = {
-      mrr: [100000, 105000, 110000, 118000, 122000, 125000],
-      headcount: [135, 138, 140, 142, 143, 145],
-      cashBalance: [420000, 435000, 445000, 460000, 455000, 450000],
-      systemUptime: [99.8, 99.9, 99.7, 99.9, 99.95, 99.9],
-      errorRate: [0.5, 0.3, 0.4, 0.2, 0.3, 0.2]
-    };
-
+    const now = new Date();
+    const labels: string[] = [];
+    const datasets: any[] = [];
+    
     const metrics = widgetConfig.config.metrics || [];
-    const datasets = metrics.map((metric: string) => ({
-      label: metric,
-      data: mockChartData[metric as keyof typeof mockChartData] || []
-    }));
+    
+    // Build labels from last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      labels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+    }
+    
+    // Get real data for each metric
+    for (const metric of metrics) {
+      const dataPoints: number[] = [];
+      try {
+        const history = await this.metricsCollector.getMetricHistory(metric, new Date(now.getFullYear(), now.getMonth() - 5, 1), now);
+        // Map history to data points
+        for (let i = 5; i >= 0; i--) {
+          const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const snapshot = history.find(h => h.asOfDate.getMonth() === monthStart.getMonth());
+          dataPoints.push(snapshot?.valueNumber || 0);
+        }
+      } catch {
+        // Fallback to empty data if metric not available
+        dataPoints.push(...Array(6).fill(0));
+      }
+      datasets.push({ label: metric, data: dataPoints });
+    }
 
     return { labels, datasets };
   }
 
   private async fetchTableData(widgetConfig: WidgetConfig): Promise<any> {
-    const mockTableData = {
-      top_customers: [
-        { name: 'Customer A', revenue: 25000, growth: 12.5 },
-        { name: 'Customer B', revenue: 18000, growth: 8.3 },
-        { name: 'Customer C', revenue: 15000, growth: -2.1 }
-      ],
-      department_breakdown: [
-        { department: 'Engineering', employees: 45, avgSalary: 95000 },
-        { department: 'Sales', employees: 25, avgSalary: 75000 },
-        { department: 'Marketing', employees: 15, avgSalary: 65000 }
-      ],
-      aging_report: [
-        { customer: 'Customer X', amount: 15000, daysOutstanding: 45 },
-        { customer: 'Customer Y', amount: 8500, daysOutstanding: 30 },
-        { customer: 'Customer Z', amount: 5200, daysOutstanding: 15 }
-      ],
-      events: [
-        { timestamp: '2024-12-16 10:30', event: 'User Login', user: 'john@example.com', status: 'Success' },
-        { timestamp: '2024-12-16 10:25', event: 'Report Generated', user: 'jane@example.com', status: 'Success' },
-        { timestamp: '2024-12-16 10:20', event: 'Payment Processed', user: 'system', status: 'Success' }
-      ]
-    };
-
     const metric = widgetConfig.config.metric;
-    return mockTableData[metric as keyof typeof mockTableData] || [];
+    const limit = widgetConfig.config.limit || 10;
+    
+    try {
+      const history = await this.metricsCollector.getMetricHistory(metric, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date());
+      
+      if (history.length > 0) {
+        return history.slice(0, limit).map((h: any) => ({
+          ...h.dims,
+          value: h.valueNumber || 0,
+          timestamp: h.asOfDate
+        }));
+      }
+      
+      // Return empty array if no data available
+      return [];
+    } catch {
+      return [];
+    }
   }
 
   private async fetchGaugeData(widgetConfig: WidgetConfig): Promise<any> {
-    const mockGaugeData: Record<string, any> = {
-      systemUptime: { value: 99.9, status: 'excellent' },
-      complianceScore: { value: 94.5, status: 'good' }
-    };
-
     const metric = widgetConfig.config.metric;
-    return mockGaugeData[metric] || { value: 0, status: 'unknown' };
+    
+    try {
+      const latest = await this.metricsCollector.getLatestValue(metric);
+      const value = latest || 0;
+      
+      // Determine status based on value thresholds
+      const min = widgetConfig.config.min || 0;
+      const max = widgetConfig.config.max || 100;
+      const percentage = ((value - min) / (max - min)) * 100;
+      
+      let status = 'unknown';
+      if (percentage >= 90) status = 'excellent';
+      else if (percentage >= 70) status = 'good';
+      else if (percentage >= 50) status = 'fair';
+      else status = 'poor';
+      
+      return { value, status };
+    } catch {
+      return { value: 0, status: 'unknown' };
+    }
   }
 }
