@@ -71,6 +71,13 @@ import { AIPlatformManager } from './ai-platform/manager.js';
 // Insight Core - Unified AI/ML Spine
 import * as insightCore from '@auth-spine/insight-core';
 
+// ML Platform
+import * as mlCore from '@auth-spine/ml-core';
+import * as mlPlatform from '@auth-spine/ml-platform';
+
+// Parquet Data Processing
+import * as hyparquet from '@auth-spine/hyparquet';
+
 export class EnterpriseOrchestrator {
   private packages: Map<string, any> = new Map();
   private initialized = false;
@@ -149,6 +156,12 @@ export class EnterpriseOrchestrator {
 
     // AI/ML Platform
     this.packages.set('aiPlatform', new AIPlatformManager());
+
+    // New AI/ML Packages
+    this.packages.set('insightCore', insightCore);
+    this.packages.set('mlCore', mlCore);
+    this.packages.set('mlPlatform', mlPlatform);
+    this.packages.set('hyparquet', hyparquet);
   }
 
   /**

@@ -1,5 +1,5 @@
 {
-  "name": "@auth-spine/solari-runtime",
+  "name": "@aj/solari-runtime",
   "version": "0.1.0",
   "private": true,
   "type": "module",

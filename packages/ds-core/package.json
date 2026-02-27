@@ -1,0 +1,29 @@
+{
+  "name": "@aj/ds-core",
+  "version": "0.1.0",
+  "description": "Lightweight, auditable data science core for TypeScript products (datasets, features, pipelines, scaling, models, training, validation, experiments).",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "example:run": "node dist/examples/run_example.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  },
+  "license": "MIT"
+}

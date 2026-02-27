@@ -1,0 +1,8 @@
+{
+  "mode": "production",
+  "guardrails": true,
+  "allow_directive_advice": false,
+  "confidence_tone_binding": true,
+  "require_user_confirmation_for_depth": true,
+  "multiple_frames_required": true
+}

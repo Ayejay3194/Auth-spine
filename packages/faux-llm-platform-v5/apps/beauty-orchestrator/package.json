@@ -1,0 +1,26 @@
+{
+  "name": "beauty-orchestrator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "node dist/server.js"
+  },
+  "dependencies": {
+    "@aj/llm-client": "workspace:*",
+    "@aj/policy": "workspace:*",
+    "@aj/tools": "workspace:*",
+    "@aj/rag": "workspace:*",
+    "@aj/schemas": "workspace:*",
+    "@aj/state": "workspace:*",
+    "@aj/memory": "workspace:*",
+    "@aj/learning": "workspace:*",
+    "@aj/config": "workspace:*",
+    "@aj/storage-postgres": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

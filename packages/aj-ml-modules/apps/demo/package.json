@@ -1,0 +1,20 @@
+{
+  "name": "@aj/app-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@aj/project-iris": "workspace:*",
+    "@aj/project-linear-regression": "workspace:*",
+    "@aj/project-sentiment": "workspace:*",
+    "@aj/project-recsys": "workspace:*",
+    "@aj/nlp": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

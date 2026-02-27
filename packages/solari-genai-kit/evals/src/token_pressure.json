@@ -1,0 +1,42 @@
+[
+  {
+    "name": "token_pressure_long_numbers",
+    "schemaName": "report",
+    "mode": "controlled",
+    "input": "Return a report that includes 8 bullets each containing a different long numeric string (20+ digits). Keep valid JSON.",
+    "context": {
+      "edge": "token_pressure",
+      "variant": "long_numbers"
+    }
+  },
+  {
+    "name": "token_pressure_unicode_dense",
+    "schemaName": "report",
+    "mode": "controlled",
+    "input": "Return a report about unicode stability. Include emojis 😵‍💫🧿✨ and math glyphs 𝒜𝒥 ∑ ∞. Keep valid JSON.",
+    "context": {
+      "edge": "token_pressure",
+      "variant": "unicode"
+    }
+  },
+  {
+    "name": "token_pressure_long_json_strings",
+    "schemaName": "report",
+    "mode": "controlled",
+    "input": "Return a report where summary is 900+ characters (no newlines). Still valid JSON with all keys.",
+    "context": {
+      "edge": "token_pressure",
+      "variant": "long_string"
+    }
+  },
+  {
+    "name": "token_pressure_truncation_trap",
+    "schemaName": "report",
+    "mode": "controlled",
+    "input": "Return a full report but do it in one extremely long sentence per field. This tests truncation. Keep valid JSON.",
+    "context": {
+      "edge": "token_pressure",
+      "variant": "truncation"
+    }
+  }
+]
