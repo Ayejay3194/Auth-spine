@@ -24,6 +24,13 @@ interface HealthStatus {
   components: {
     enterprise: any;
     businessSpine: any;
+    zipModules: {
+      healthy: boolean;
+      message: string;
+      count: number;
+      executableCount: number;
+      featureDrivenCount: number;
+    };
   };
 }
 
@@ -34,6 +41,13 @@ interface Metrics {
     path: string;
     components: ComponentCount;
   };
+  zipModules: {
+    manifestPath: string;
+    totalZipFiles: number;
+    generatedAt: string | null;
+    modulePaths: string[];
+    featureTags: string[];
+  };
   timestamp: string;
 }
 
@@ -41,6 +55,21 @@ interface ComponentCount {
   directories: number;
   files: number;
   error?: string;
+}
+
+interface ZipManifest {
+  generatedAt: string;
+  totalZipFiles: number;
+  modules: Array<{
+    name: string;
+    moduleId: string;
+    sourcePath: string;
+    size: number;
+    updatedAt: string;
+    extractedPath?: string;
+    entryPoint?: string | null;
+    featureTags?: string[];
+  }>;
 }
 
 interface SystemReport {
@@ -68,12 +97,14 @@ interface SystemReport {
 export class AuthSpineOrchestrator {
   private businessSpinePath: string;
   private enterprisePath: string;
+  private zipManifestPath: string;
   private initialized: boolean;
   private enterpriseOrchestrator: any;
 
   constructor() {
     this.businessSpinePath = path.join(__dirname, 'apps', 'business-spine');
     this.enterprisePath = path.join(__dirname, 'packages', 'enterprise');
+    this.zipManifestPath = path.join(__dirname, 'external', 'zip-modules', 'manifest.json');
     this.initialized = false;
   }
 
@@ -86,6 +117,7 @@ export class AuthSpineOrchestrator {
     console.log('🚀 Initializing Auth-spine Complete Enterprise Platform...');
 
     try {
+      this.syncZipModules();
       this.verifyComponents();
       await this.initializeEnterprise();
       await this.initializeBusinessSpine();
@@ -100,7 +132,8 @@ export class AuthSpineOrchestrator {
   private verifyComponents(): void {
     const components: ComponentInfo[] = [
       { name: 'business-spine', path: this.businessSpinePath },
-      { name: 'enterprise packages', path: this.enterprisePath }
+      { name: 'enterprise packages', path: this.enterprisePath },
+      { name: 'zip modules manifest', path: this.zipManifestPath }
     ];
 
     for (const component of components) {
@@ -110,6 +143,28 @@ export class AuthSpineOrchestrator {
     }
 
     console.log('✅ All required components verified');
+  }
+
+  private syncZipModules(): void {
+    try {
+      execSync('node scripts/sync-zip-modules.mjs', { cwd: __dirname, stdio: 'inherit' });
+    } catch (error) {
+      throw new Error(`Failed to sync zip modules: ${error}`);
+    }
+  }
+
+  private loadZipManifest(): ZipManifest | null {
+    if (!fs.existsSync(this.zipManifestPath)) {
+      return null;
+    }
+
+    try {
+      const raw = fs.readFileSync(this.zipManifestPath, 'utf8');
+      return JSON.parse(raw) as ZipManifest;
+    } catch (error) {
+      console.error('❌ Failed to parse zip manifest:', error);
+      return null;
+    }
   }
 
   private async initializeEnterprise(): Promise<void> {
@@ -154,7 +209,14 @@ export class AuthSpineOrchestrator {
       overall: true,
       components: {
         enterprise: null,
-        businessSpine: null
+        businessSpine: null,
+        zipModules: {
+          healthy: false,
+          message: 'Zip module manifest not loaded',
+          count: 0,
+          executableCount: 0,
+          featureDrivenCount: 0
+        }
       }
     };
 
@@ -166,6 +228,19 @@ export class AuthSpineOrchestrator {
       healthStatus.components.businessSpine = {
         healthy: fs.existsSync(this.businessSpinePath),
         message: fs.existsSync(this.businessSpinePath) ? 'Business-spine directory exists' : 'Business-spine directory missing'
+      };
+
+      const zipManifest = this.loadZipManifest();
+      const executableCount = zipManifest?.modules.filter(module => module.entryPoint).length ?? 0;
+      const featureDrivenCount = zipManifest?.modules.filter(module => (module.featureTags?.length ?? 0) > 0).length ?? 0;
+      healthStatus.components.zipModules = {
+        healthy: Boolean(zipManifest),
+        message: zipManifest
+          ? `Zip modules manifest loaded (${executableCount} executable modules, ${featureDrivenCount} feature modules)`
+          : 'Zip modules manifest missing',
+        count: zipManifest?.totalZipFiles ?? 0,
+        executableCount,
+        featureDrivenCount
       };
 
       healthStatus.overall = Object.values(healthStatus.components).every(
@@ -191,6 +266,13 @@ export class AuthSpineOrchestrator {
         path: this.businessSpinePath,
         components: { directories: 0, files: 0 }
       },
+      zipModules: {
+        manifestPath: this.zipManifestPath,
+        totalZipFiles: 0,
+        generatedAt: null,
+        modulePaths: [],
+        featureTags: []
+      },
       timestamp: new Date().toISOString()
     };
 
@@ -199,6 +281,14 @@ export class AuthSpineOrchestrator {
         metrics.enterprise = await this.enterpriseOrchestrator.getMetrics();
       }
       metrics.businessSpine.components = this.countBusinessSpineComponents();
+
+      const zipManifest = this.loadZipManifest();
+      if (zipManifest) {
+        metrics.zipModules.totalZipFiles = zipManifest.totalZipFiles;
+        metrics.zipModules.generatedAt = zipManifest.generatedAt;
+        metrics.zipModules.modulePaths = zipManifest.modules.map(module => module.sourcePath);
+        metrics.zipModules.featureTags = Array.from(new Set(zipManifest.modules.flatMap(module => module.featureTags ?? []))).sort();
+      }
     } catch (error) {
       console.error('❌ Failed to get metrics:', error);
     }

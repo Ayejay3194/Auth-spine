@@ -1,0 +1,310 @@
+{
+  "generatedAt": "2026-02-28T06:40:58.733Z",
+  "totalZipFiles": 15,
+  "modules": [
+    {
+      "name": "bioplausible-learning.zip",
+      "moduleId": "bioplausible-learning",
+      "sourcePath": "bioplausible-learning.zip",
+      "size": 10263,
+      "updatedAt": "2026-02-28T05:57:32.122Z",
+      "extractedPath": "external/zip-modules/extracted/bioplausible-learning",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/bioplausible-learning.mjs",
+      "entryPoint": "external/zip-modules/runtime/bioplausible-learning.mjs",
+      "featureTags": [
+        "learning"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "ds-core.zip",
+      "moduleId": "ds-core",
+      "sourcePath": "ds-core.zip",
+      "size": 14387,
+      "updatedAt": "2026-02-28T05:57:32.210Z",
+      "extractedPath": "external/zip-modules/extracted/ds-core",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/ds-core.mjs",
+      "entryPoint": "external/zip-modules/runtime/ds-core.mjs",
+      "featureTags": [
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "ephemeris-teacher-student-upgrades.zip",
+      "moduleId": "ephemeris-teacher-student-upgrades",
+      "sourcePath": "ephemeris-teacher-student-upgrades.zip",
+      "size": 10986,
+      "updatedAt": "2026-02-28T05:57:32.210Z",
+      "extractedPath": "external/zip-modules/extracted/ephemeris-teacher-student-upgrades",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/ephemeris-teacher-student-upgrades.mjs",
+      "entryPoint": "external/zip-modules/runtime/ephemeris-teacher-student-upgrades.mjs",
+      "featureTags": [
+        "ml",
+        "learning",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "faux-llm-platform-v2.zip",
+      "moduleId": "faux-llm-platform-v2",
+      "sourcePath": "faux-llm-platform-v2.zip",
+      "size": 30726,
+      "updatedAt": "2026-02-28T05:57:32.210Z",
+      "extractedPath": "external/zip-modules/extracted/faux-llm-platform-v2",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/faux-llm-platform-v2.mjs",
+      "entryPoint": "external/zip-modules/runtime/faux-llm-platform-v2.mjs",
+      "featureTags": [
+        "nlp",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "faux-llm-platform-v3.zip",
+      "moduleId": "faux-llm-platform-v3",
+      "sourcePath": "faux-llm-platform-v3.zip",
+      "size": 43135,
+      "updatedAt": "2026-02-28T05:57:32.214Z",
+      "extractedPath": "external/zip-modules/extracted/faux-llm-platform-v3",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/faux-llm-platform-v3.mjs",
+      "entryPoint": "external/zip-modules/runtime/faux-llm-platform-v3.mjs",
+      "featureTags": [
+        "nlp",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "faux-llm-platform.zip",
+      "moduleId": "faux-llm-platform",
+      "sourcePath": "faux-llm-platform.zip",
+      "size": 27629,
+      "updatedAt": "2026-02-28T05:57:32.214Z",
+      "extractedPath": "external/zip-modules/extracted/faux-llm-platform",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/faux-llm-platform.mjs",
+      "entryPoint": "external/zip-modules/runtime/faux-llm-platform.mjs",
+      "featureTags": [
+        "nlp",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "insight_production.zip",
+      "moduleId": "insight_production",
+      "sourcePath": "insight_production.zip",
+      "size": 470,
+      "updatedAt": "2026-02-28T05:57:32.222Z",
+      "extractedPath": "external/zip-modules/extracted/insight_production",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/insight_production.mjs",
+      "entryPoint": "external/zip-modules/runtime/insight_production.mjs",
+      "featureTags": [
+        "insight"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "insight-aware-site-core_teacher-student_oracle.zip",
+      "moduleId": "insight-aware-site-core_teacher-student_oracle",
+      "sourcePath": "insight-aware-site-core_teacher-student_oracle.zip",
+      "size": 61184,
+      "updatedAt": "2026-02-28T05:57:32.222Z",
+      "extractedPath": "external/zip-modules/extracted/insight-aware-site-core_teacher-student_oracle",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/insight-aware-site-core_teacher-student_oracle.mjs",
+      "entryPoint": "external/zip-modules/runtime/insight-aware-site-core_teacher-student_oracle.mjs",
+      "featureTags": [
+        "ml",
+        "learning",
+        "insight",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "insight-aware-site-core.zip",
+      "moduleId": "insight-aware-site-core",
+      "sourcePath": "insight-aware-site-core.zip",
+      "size": 20841,
+      "updatedAt": "2026-02-28T05:57:32.222Z",
+      "extractedPath": "external/zip-modules/extracted/insight-aware-site-core",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/insight-aware-site-core.mjs",
+      "entryPoint": "external/zip-modules/runtime/insight-aware-site-core.mjs",
+      "featureTags": [
+        "ml",
+        "insight",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "ml-core.zip",
+      "moduleId": "ml-core",
+      "sourcePath": "ml-core.zip",
+      "size": 12884,
+      "updatedAt": "2026-02-28T05:57:32.222Z",
+      "extractedPath": "external/zip-modules/extracted/ml-core",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/ml-core.mjs",
+      "entryPoint": "external/zip-modules/runtime/ml-core.mjs",
+      "featureTags": [
+        "ml",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "ml-platform.zip",
+      "moduleId": "ml-platform",
+      "sourcePath": "ml-platform.zip",
+      "size": 19221,
+      "updatedAt": "2026-02-28T05:57:32.222Z",
+      "extractedPath": "external/zip-modules/extracted/ml-platform",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/ml-platform.mjs",
+      "entryPoint": "external/zip-modules/runtime/ml-platform.mjs",
+      "featureTags": [
+        "ml",
+        "platform"
+      ],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": true,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "solari-genai-agent-v1.zip",
+      "moduleId": "solari-genai-agent-v1",
+      "sourcePath": "solari-genai-agent-v1.zip",
+      "size": 3277,
+      "updatedAt": "2026-02-28T05:57:32.402Z",
+      "extractedPath": "external/zip-modules/extracted/solari-genai-agent-v1",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/solari-genai-agent-v1.mjs",
+      "entryPoint": "external/zip-modules/runtime/solari-genai-agent-v1.mjs",
+      "featureTags": [],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": false,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "solari-genai-kit-upgraded.zip",
+      "moduleId": "solari-genai-kit-upgraded",
+      "sourcePath": "solari-genai-kit-upgraded.zip",
+      "size": 18283,
+      "updatedAt": "2026-02-28T05:57:32.402Z",
+      "extractedPath": "external/zip-modules/extracted/solari-genai-kit-upgraded",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/solari-genai-kit-upgraded.mjs",
+      "entryPoint": "external/zip-modules/runtime/solari-genai-kit-upgraded.mjs",
+      "featureTags": [],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": false,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "solari-genai-kit-v3.zip",
+      "moduleId": "solari-genai-kit-v3",
+      "sourcePath": "solari-genai-kit-v3.zip",
+      "size": 20920,
+      "updatedAt": "2026-02-28T05:57:32.402Z",
+      "extractedPath": "external/zip-modules/extracted/solari-genai-kit-v3",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/solari-genai-kit-v3.mjs",
+      "entryPoint": "external/zip-modules/runtime/solari-genai-kit-v3.mjs",
+      "featureTags": [],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": false,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    },
+    {
+      "name": "solari-genai-kit.zip",
+      "moduleId": "solari-genai-kit",
+      "sourcePath": "solari-genai-kit.zip",
+      "size": 14353,
+      "updatedAt": "2026-02-28T05:57:32.406Z",
+      "extractedPath": "external/zip-modules/extracted/solari-genai-kit",
+      "nativeEntryPoint": null,
+      "runtimeAdapter": "external/zip-modules/runtime/solari-genai-kit.mjs",
+      "entryPoint": "external/zip-modules/runtime/solari-genai-kit.mjs",
+      "featureTags": [],
+      "capabilities": {
+        "executable": true,
+        "featureDriven": false,
+        "hasNativeEntrypoint": false,
+        "executesNativeByDefault": false
+      }
+    }
+  ]
+}

@@ -31,8 +31,10 @@
     "security:gate": "node scripts/security-gate.mjs security-audit.json",
     "deploy:staging": "./scripts/deploy-staging.sh",
     "deploy:production": "./scripts/deploy-production.sh",
+    "sync:zips": "node scripts/sync-zip-modules.mjs",
     "prepare": "husky install",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "verify:zips": "node scripts/verify-zip-module-connectivity.mjs"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.5",
