@@ -11,10 +11,14 @@ export interface ZipModuleRecord {
   updatedAt: string;
   extractedPath?: string;
   entryPoint?: string | null;
+  nativeEntryPoint?: string | null;
+  runtimeAdapter?: string | null;
   featureTags?: string[];
   capabilities?: {
     executable?: boolean;
     featureDriven?: boolean;
+    hasNativeEntrypoint?: boolean;
+    executesNativeByDefault?: boolean;
   };
 }
 
@@ -60,20 +64,22 @@ export class ZipModuleConnector {
       throw new Error(`Module ${moduleId} is unavailable in the zip registry`);
     }
 
-    if (moduleRecord.entryPoint && moduleRecord.extractedPath) {
-      const absoluteEntry = path.join(this.repoRoot, moduleRecord.entryPoint);
+    const executionEntries = this.resolveExecutionEntries(moduleRecord);
+    for (const entryPoint of executionEntries) {
+      const absoluteEntry = path.join(this.repoRoot, entryPoint);
       if (!fs.existsSync(absoluteEntry)) {
-        throw new Error(`Entry point not found for module ${moduleId}: ${moduleRecord.entryPoint}`);
+        continue;
       }
 
-      const imported = (await import(pathToFileURL(absoluteEntry).href)) as ZipModuleExecutor;
-      const execute = imported.execute ?? imported.default?.execute;
-
-      if (!execute) {
-        throw new Error(`Module ${moduleId} does not export an execute(payload) function`);
+      try {
+        const imported = (await import(pathToFileURL(absoluteEntry).href)) as ZipModuleExecutor;
+        const execute = imported.execute ?? imported.default?.execute;
+        if (typeof execute === 'function') {
+          return execute(payload);
+        }
+      } catch {
+        // Fall through to next candidate (typically runtime adapter fallback)
       }
-
-      return execute(payload);
     }
 
     return runFeatureAdapter({
@@ -84,6 +90,16 @@ export class ZipModuleConnector {
       input: (payload.input as Record<string, unknown>) ?? {},
       featureTags: moduleRecord.featureTags ?? []
     });
+  }
+
+  private resolveExecutionEntries(moduleRecord: ZipModuleRecord): string[] {
+    const entries = [
+      moduleRecord.nativeEntryPoint,
+      moduleRecord.entryPoint,
+      moduleRecord.runtimeAdapter
+    ].filter((entryPoint): entryPoint is string => Boolean(entryPoint));
+
+    return [...new Set(entries)];
   }
 
   private readManifest(): ZipManifest | null {

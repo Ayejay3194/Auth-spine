@@ -144,6 +144,7 @@ function collectModules() {
       const nativeEntryPoint = findZipEntrypoint(extractedDir);
       const featureTags = detectFeatureTags({ sourcePath, extractedDir });
       const runtimeAdapter = writeRuntimeAdapter(moduleId, featureTags, nativeEntryPoint);
+      const nativeEntryPath = nativeEntryPoint ? path.join(extractedPath, nativeEntryPoint) : null;
 
       return {
         name: path.basename(sourcePath),
@@ -152,13 +153,15 @@ function collectModules() {
         size: stat.size,
         updatedAt: stat.mtime.toISOString(),
         extractedPath,
-        nativeEntryPoint: nativeEntryPoint ? path.join(extractedPath, nativeEntryPoint) : null,
-        entryPoint: runtimeAdapter,
+        nativeEntryPoint: nativeEntryPath,
+        runtimeAdapter,
+        entryPoint: nativeEntryPath ?? runtimeAdapter,
         featureTags,
         capabilities: {
           executable: true,
           featureDriven: featureTags.length > 0,
-          hasNativeEntrypoint: Boolean(nativeEntryPoint)
+          hasNativeEntrypoint: Boolean(nativeEntryPoint),
+          executesNativeByDefault: Boolean(nativeEntryPoint)
         }
       };
     });
