@@ -2,7 +2,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -62,7 +62,7 @@ function findZipFiles(startDir = repoRoot, fromRoot = '') {
 
 function runUnzip(sourceFile, targetDir) {
   ensureDir(targetDir);
-  execSync(`unzip -o ${JSON.stringify(sourceFile)} -d ${JSON.stringify(targetDir)}`, { stdio: 'pipe' });
+  execFileSync('unzip', ['-o', sourceFile, '-d', targetDir], { stdio: 'pipe' });
 }
 
 function findZipEntrypoint(extractedDir) {
