@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EnhancedAssistantService } from "@spine/enterprise/platform/assistant/EnhancedAssistantService";
+import { EnhancedAssistantService } from "@spine/enterprise/platform/assistant";
 
 // Initialize the enhanced assistant service
 const assistant = new EnhancedAssistantService({
