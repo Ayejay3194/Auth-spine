@@ -82,6 +82,27 @@ export class SessionStore {
   }
 
   /**
+   * Update an existing session
+   */
+  async updateSession(session: Session): Promise<boolean> {
+    try {
+      await prisma.session.update({
+        where: { id: session.id },
+        data: {
+          scopes: session.scopes,
+          risk: session.risk,
+          entitlements: session.entitlements,
+          expiresAt: new Date(session.expiresAt)
+        }
+      })
+      return true
+    } catch (error) {
+      console.error('Failed to update session:', error)
+      return false
+    }
+  }
+
+  /**
    * Delete session by ID
    */
   async deleteSession(sessionId: string): Promise<boolean> {

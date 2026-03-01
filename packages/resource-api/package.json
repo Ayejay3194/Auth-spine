@@ -10,10 +10,12 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "multer": "^2.1.0",
     "zod": "^3.23.8",
     "@spine/shared": "workspace:*"
   },
   "devDependencies": {
+    "@types/multer": "^1.4.12",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "@types/express": "^4.17.21",

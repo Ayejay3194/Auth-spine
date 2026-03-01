@@ -9,6 +9,7 @@ import { issueAccessToken, loadSigningKey, JwtAlgorithm, TokenKey } from './toke
 import { sessionStore } from './session-store'
 import { SpineJwtClaims, Session, RefreshToken, AuditEvent, AuthError, validateScopes, AllowedScope } from './types'
 import { loginLimiter, refreshLimiter, apiLimiter } from './middleware'
+import { prisma } from '@spine/shared/prisma'
 
 const PORT = Number(process.env.PORT ?? 4000)
 const ISSUER = process.env.ISSUER?.trim()
@@ -79,7 +80,6 @@ async function recordAudit(eventType: string, data?: { userId?: string; clientId
 
   // Persist to database instead of keeping in memory
   try {
-    const { prisma } = await import('@spine/shared/prisma')
     await prisma.auditLog.create({
       data: {
         id: event.id,
@@ -364,11 +364,12 @@ app.post('/token/refresh', refreshLimiter, async (req, res) => {
   const scopes = resolveScopes(user, client, requested_scopes)
   if (!scopes) return res.status(403).json({ error: 'no_scopes_for_client' })
 
-  // Update session with new scopes and expiry
+  // Update session with new scopes and expiry, then persist
   session.scopes = scopes
   session.risk = user.risk ?? 'ok'
   session.entitlements = user.entitlements ?? {}
   session.expiresAt = Date.now() + REFRESH_TTL_SECONDS * 1000
+  await sessionStore.updateSession(session)
 
   const newRefresh = await createRefreshToken(session.id, user.id)
   await sessionStore.deleteRefreshToken(refresh_token)
@@ -425,7 +426,6 @@ app.get('/sessions', async (req, res) => {
 
   // Get all active sessions from database
   try {
-    const { prisma } = await import('@spine/shared/prisma')
     const sessions = await prisma.session.findMany({
       where: {
         expiresAt: { gt: new Date() },
@@ -451,10 +451,7 @@ app.get('/permissions/stream', async (req, res) => {
   res.write('data: {"ok":true}\n\n')
 
   permissionStreams.add(res)
-
-  req.on('close', () => {
-    permissionStreams.delete(res)
-  })
+  cleanupStream(res)
 })
 
 app.post('/permissions/update', async (req, res) => {
@@ -488,8 +485,6 @@ app.get('/audit/summary', async (req, res) => {
   if (!payload) return
 
   try {
-    const { prisma } = await import('@spine/shared/prisma')
-
     // Get event counts by type
     const auditLogs = await prisma.auditLog.findMany({
       orderBy: { createdAt: 'desc' },
@@ -575,6 +570,7 @@ app.post('/oauth/token', loginLimiter, async (req, res) => {
     session.risk = user.risk ?? 'ok'
     session.entitlements = user.entitlements ?? {}
     session.expiresAt = Date.now() + REFRESH_TTL_SECONDS * 1000
+    await sessionStore.updateSession(session)
 
     const newRefresh = await createRefreshToken(session.id, user.id)
     await sessionStore.deleteRefreshToken(refresh_token)

@@ -48,28 +48,20 @@ export class AuthError extends Error {
   }
 }
 
-export const ALLOWED_SCOPES = ['read', 'write', 'delete', 'admin'] as const
-export type AllowedScope = typeof ALLOWED_SCOPES[number]
-
-export function isValidScope(scope: string): scope is AllowedScope {
-  return ALLOWED_SCOPES.includes(scope as AllowedScope)
-}
+export type AllowedScope = string
 
 export function validateScopes(scopes: unknown): AllowedScope[] {
   if (!Array.isArray(scopes)) {
     throw new AuthError('Scopes must be an array', 'INVALID_SCOPES', 400)
   }
-  
+
   const validScopes: AllowedScope[] = []
   for (const scope of scopes) {
     if (typeof scope !== 'string') {
       throw new AuthError('Each scope must be a string', 'INVALID_SCOPE_TYPE', 400)
     }
-    if (!isValidScope(scope)) {
-      throw new AuthError(`Invalid scope: ${scope}`, 'INVALID_SCOPE', 400)
-    }
     validScopes.push(scope)
   }
-  
+
   return validScopes
 }
