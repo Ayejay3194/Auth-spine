@@ -32,6 +32,7 @@ Auth-Spine is a **complete drop-in backend/full stack solution** - a unified Typ
 ✅ **MFA Ready** - TOTP with recovery codes  
 ✅ **Rate Limiting** - Brute force protection  
 ✅ **Audit Logging** - Complete compliance trail  
+✅ **Advanced AI/ML System** - 25+ ML functions, RAG, LLM integration, bioplausible learning ⭐
 ✅ **60+ Enterprise Features** - AI/ML, booking, payments, and more  
 
 ## 🚀 Quick Start
@@ -191,6 +192,65 @@ Single PostgreSQL database shared by all services:
 - **User** - User accounts
 - **Provider/Client** - Business entities
 - **Booking, Payment, Review** - Business features
+
+## 🤖 AI/ML Capabilities
+
+Auth-Spine includes an **advanced, production-ready AI/ML system** with multiple specialized packages:
+
+### AI/ML Packages
+
+1. **Solari GenAI Kit** - Self-hosted controlled generation
+   - Schema-validated outputs with automatic JSON repair
+   - RAG (Retrieval-Augmented Generation)
+   - Tool framework and router
+   - Training pipeline (LoRA/QLoRA)
+   - Evaluation and regression testing
+
+2. **Faux LLM Platform** - Multi-provider LLM orchestration
+   - OpenAI, Anthropic, local vLLM, llama-cpp support
+   - Guardrails and policy engine
+   - Multi-tenant architecture
+   - Session management with feedback loops
+
+3. **ML Platform** - Specialized ML packages
+   - `ml-core` - Types, metrics, drift detection
+   - `ml-ranking` - Learning-to-rank + calibration
+   - `ml-recs` - Two-tower models + bandits
+   - `ml-risk` - Fraud/abuse detection
+   - `ml-forecast` - Time series forecasting
+   - `ml-search` - Semantic search + reranking
+   - `ml-astro` - Astrology-specific models
+
+4. **Bioplausible Learning** - Advanced learning algorithms
+   - Direct Feedback Alignment (DFA)
+   - Feedback Alignment (FA)
+   - Predictive Coding (PC)
+   - Equilibrium Propagation (EP)
+
+5. **Unified AI Agent** - Transformers.js integration
+   - Autonomous operation (no external LLM required)
+   - NLP: sentiment, intent, NER, QA, summarization
+   - Teacher mode with continuous learning
+   - Authentication-based firewall
+
+### Quick Start
+
+```typescript
+import { UnifiedAIAgent } from '@auth-spine/enterprise';
+
+const agent = new UnifiedAIAgent({ authLevel: 'authenticated' });
+await agent.initialize();
+
+// Sentiment analysis
+const sentiment = await agent.analyzeSentiment('Great product!');
+// { score: 0.95, label: 'POSITIVE' }
+
+// Intent detection
+const intent = await agent.detectIntent('I want to book');
+// { intent: 'booking', confidence: 0.92 }
+```
+
+**See [AI_ML_CAPABILITIES.md](AI_ML_CAPABILITIES.md) for complete AI/ML documentation.**
 
 ## 🔒 Security Features
 
