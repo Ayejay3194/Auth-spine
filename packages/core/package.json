@@ -1,0 +1,28 @@
+{
+  "name": "@auth-spine/core",
+  "version": "1.0.0",
+  "description": "Drop-in authentication and enterprise platform - Core integration package",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "auth",
+    "authentication",
+    "authorization",
+    "jwt",
+    "rbac",
+    "enterprise",
+    "drop-in",
+    "ai-ml",
+    "full-stack"
+  ],
+  "author": "Auth-Spine Contributors",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

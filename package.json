@@ -1,5 +1,33 @@
 {
   "name": "auth-spine-multiclient-starter",
+  "version": "1.0.0",
+  "description": "Drop-in backend/full stack solution - Enterprise-grade TypeScript authentication and authorization system with multi-tenant RBAC, JWT, MFA, and 60+ enterprise features",
+  "author": "Auth-Spine Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ayejay3194/Auth-spine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ayejay3194/Auth-spine/issues"
+  },
+  "homepage": "https://github.com/Ayejay3194/Auth-spine#readme",
+  "keywords": [
+    "authentication",
+    "authorization",
+    "jwt",
+    "rbac",
+    "mfa",
+    "typescript",
+    "nextjs",
+    "prisma",
+    "saas",
+    "enterprise",
+    "full-stack",
+    "backend",
+    "docker",
+    "kubernetes"
+  ],
   "private": true,
   "workspaces": [
     "packages/*",
@@ -31,6 +59,12 @@
     "security:gate": "node scripts/security-gate.mjs security-audit.json",
     "deploy:staging": "./scripts/deploy-staging.sh",
     "deploy:production": "./scripts/deploy-production.sh",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d",
+    "docker:logs": "docker-compose logs -f",
+    "verify": "./verify-deployment.sh",
     "prepare": "husky install",
     "pre-commit": "lint-staged"
   },

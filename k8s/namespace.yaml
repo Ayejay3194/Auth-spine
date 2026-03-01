@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auth-spine
+  labels:
+    name: auth-spine
+    environment: production

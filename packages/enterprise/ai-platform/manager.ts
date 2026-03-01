@@ -4,18 +4,71 @@
  * Central manager for all AI/ML packages in the Auth-Spine ecosystem.
  * Provides unified interfaces for initialization, health monitoring,
  * and coordination between AI, ML, RAG, and Oracle systems.
+ * 
+ * Enhanced with:
+ * - Multiple response modes (instant, streaming, long)
+ * - Parquet-based metrics collection
+ * - Real-time performance monitoring
+ * - Cost tracking and analytics
  */
 
 import { ToolRegistry } from '@auth-spine/ai-tools';
 import { InMemoryKeywordStore } from '@auth-spine/ai-rag';
 import { LlmClient } from '@auth-spine/llm-client';
 import type { LlmClientConfig } from '@auth-spine/llm-client';
+import { EnhancedLlmClient, type ChatMetrics, type StreamChunk } from './enhanced-llm-client.js';
+import { AIMetricsStore } from './ai-metrics-store.js';
+import { FeedbackCollector, type FeedbackEntry, type ThumbsFeedback } from './feedback-collector.js';
+import { SupervisedLearner, type LearningMode, type LearningInsight, type ImprovementSuggestion } from './supervised-learner.js';
+import { TrainingDataPipeline, type TrainingDataset } from './training-data-pipeline.js';
+import { TrainingLoopOrchestrator, type TrainingJob, type RetrainingThresholds } from './training-loop-orchestrator.js';
+import { ResponseCache, type CacheConfig, type CacheStats } from './response-cache.js';
+import { UserRateLimiter, RateLimitTiers, type RateLimitResult } from './rate-limiter.js';
+import { WebhookManager, WebhookEvents, type WebhookEvent, type WebhookSubscription } from './webhook-system.js';
 
 export interface AIPlatformConfig {
   llm?: LlmClientConfig;
   enableTools?: boolean;
   enableRag?: boolean;
   enableOracle?: boolean;
+  enableMetrics?: boolean;  // Enable Parquet-based metrics
+  enableFeedback?: boolean;  // Enable feedback collection
+  enableLearning?: boolean;  // Enable supervised learning
+  enableTrainingLoop?: boolean;  // Enable automated training loops
+  enableCaching?: boolean;  // NEW: Enable response caching
+  enableRateLimiting?: boolean;  // NEW: Enable rate limiting
+  enableWebhooks?: boolean;  // NEW: Enable webhook notifications
+  metricsConfig?: {
+    dataDir?: string;
+    retentionDays?: number;
+    compression?: 'SNAPPY' | 'ZSTD' | 'GZIP';
+  };
+  feedbackConfig?: {
+    dataDir?: string;
+    promptAfterResponses?: number;
+    proactivePrompts?: boolean;
+  };
+  learningConfig?: {
+    mode?: LearningMode;
+    minFeedbackForInsight?: number;
+    requireApproval?: boolean;
+  };
+  trainingLoopConfig?: {
+    baseModel?: string;
+    thresholds?: Partial<RetrainingThresholds>;
+    schedule?: 'hourly' | 'daily' | 'weekly' | 'monthly';
+    requireApproval?: boolean;
+    enableABTesting?: boolean;
+  };
+  cacheConfig?: Partial<CacheConfig>;  // NEW: Cache configuration
+  rateLimitConfig?: {  // NEW: Rate limiting configuration
+    defaultTier?: keyof typeof RateLimitTiers;
+  };
+  webhookConfig?: {  // NEW: Webhook configuration
+    maxAttempts?: number;
+    retryDelay?: number;
+    timeout?: number;
+  };
 }
 
 export interface AIPlatformHealth {
@@ -23,7 +76,45 @@ export interface AIPlatformHealth {
   toolsReady: boolean;
   ragReady: boolean;
   oracleReady: boolean;
+  metricsReady: boolean;
+  feedbackReady: boolean;
+  learningReady: boolean;
+  trainingLoopReady: boolean;
+  cacheReady: boolean;  // NEW
+  rateLimitReady: boolean;  // NEW
+  webhooksReady: boolean;  // NEW
   errors: string[];
+  performance?: {
+    avgLatencyMs: number;
+    successRate: number;
+    totalRequests: number;
+  };
+  feedback?: {
+    totalFeedback: number;
+    helpfulRate: number;
+    avgRating: number;
+  };
+  learning?: {
+    totalInsights: number;
+    pendingSuggestions: number;
+    approvedSuggestions: number;
+  };
+  trainingLoop?: {
+    activeJob: boolean;
+    totalJobs: number;
+    jobsAwaitingApproval: number;
+    lastRetrainedAt?: Date;
+  };
+  cache?: CacheStats;  // NEW: Cache statistics
+  rateLimit?: {  // NEW: Rate limit statistics
+    totalUsers: number;
+    blockedRequests: number;
+  };
+  webhooks?: {  // NEW: Webhook statistics
+    totalSubscriptions: number;
+    activeSubscriptions: number;
+    successRate: number;
+  };
 }
 
 export class AIPlatformManager {
@@ -34,16 +125,42 @@ export class AIPlatformManager {
     toolsReady: false,
     ragReady: false,
     oracleReady: false,
+    metricsReady: false,
+    feedbackReady: false,
+    learningReady: false,
+    trainingLoopReady: false,
+    cacheReady: false,
+    rateLimitReady: false,
+    webhooksReady: false,
     errors: []
   };
 
   // Public accessors for subsystems
   public llmClient?: LlmClient;
+  public enhancedLlmClient?: EnhancedLlmClient;
+  public metricsStore?: AIMetricsStore;
+  public feedbackCollector?: FeedbackCollector;
+  public supervisedLearner?: SupervisedLearner;
+  public trainingDataPipeline?: TrainingDataPipeline;
+  public trainingOrchestrator?: TrainingLoopOrchestrator;
+  public cache?: ResponseCache;  // NEW: Response cache
+  public rateLimiter?: UserRateLimiter;  // NEW: Rate limiter
+  public webhooks?: WebhookManager;  // NEW: Webhook manager
+  public webhookEvents?: WebhookEvents;  // NEW: Webhook event helpers
   public toolRegistry?: ToolRegistry;
   public ragStore?: InMemoryKeywordStore;
 
   constructor(config: AIPlatformConfig = {}) {
-    this.config = config;
+    this.config = {
+      enableMetrics: true,
+      enableFeedback: true,
+      enableLearning: true,
+      enableTrainingLoop: true,
+      enableCaching: true,  // NEW: Enable by default
+      enableRateLimiting: true,  // NEW: Enable by default
+      enableWebhooks: true,  // NEW: Enable by default
+      ...config
+    };
   }
 
   /**
@@ -55,9 +172,95 @@ export class AIPlatformManager {
     this.health.errors = [];
 
     try {
-      // Initialize LLM Client
+      // Initialize Metrics Store first (for all subsystems)
+      if (this.config.enableMetrics !== false) {
+        this.metricsStore = new AIMetricsStore(this.config.metricsConfig);
+        await this.metricsStore.initialize();
+        this.health.metricsReady = true;
+      }
+
+      // Initialize Feedback Collector
+      if (this.config.enableFeedback !== false) {
+        this.feedbackCollector = new FeedbackCollector(this.config.feedbackConfig);
+        this.health.feedbackReady = true;
+      }
+
+      // Initialize Supervised Learner
+      if (this.config.enableLearning !== false) {
+        this.supervisedLearner = new SupervisedLearner(this.config.learningConfig);
+        this.health.learningReady = true;
+      }
+
+      // Initialize Training Data Pipeline
+      if (this.config.enableTrainingLoop !== false) {
+        this.trainingDataPipeline = new TrainingDataPipeline({
+          minRating: 4,
+          requireHelpful: true,
+          deduplicate: true
+        });
+      }
+
+      // Initialize Training Loop Orchestrator
+      if (this.config.enableTrainingLoop !== false) {
+        this.trainingOrchestrator = new TrainingLoopOrchestrator({
+          thresholds: this.config.trainingLoopConfig?.thresholds,
+          schedule: this.config.trainingLoopConfig?.schedule,
+          baseModel: this.config.trainingLoopConfig?.baseModel || this.config.llm?.defaultModel || 'gpt-3.5-turbo',
+          requireApproval: this.config.trainingLoopConfig?.requireApproval ?? true,
+          abTest: {
+            enabled: this.config.trainingLoopConfig?.enableABTesting ?? true,
+            trafficSplit: 0.5,
+            minSampleSize: 100,
+            maxDuration: 7 * 24 * 60 * 60,
+            significanceLevel: 0.05,
+            minImprovement: 0.05
+          }
+        });
+        this.health.trainingLoopReady = true;
+      }
+
+      // Initialize Response Cache
+      if (this.config.enableCaching !== false) {
+        this.cache = new ResponseCache(this.config.cacheConfig);
+        this.health.cacheReady = true;
+      }
+
+      // Initialize Rate Limiter
+      if (this.config.enableRateLimiting !== false) {
+        this.rateLimiter = new UserRateLimiter();
+        this.health.rateLimitReady = true;
+      }
+
+      // Initialize Webhook System
+      if (this.config.enableWebhooks !== false) {
+        this.webhooks = new WebhookManager(this.config.webhookConfig);
+        this.webhookEvents = new WebhookEvents(this.webhooks);
+        this.health.webhooksReady = true;
+      }
+
+      // Initialize LLM Client (legacy)
       if (this.config.llm) {
         this.llmClient = new LlmClient(this.config.llm);
+        this.health.llmConnected = true;
+      }
+
+      // Initialize Enhanced LLM Client with metrics and feedback
+      if (this.config.llm) {
+        this.enhancedLlmClient = new EnhancedLlmClient({
+          baseUrl: this.config.llm.baseUrl,
+          apiKey: this.config.llm.apiKey,
+          defaultModel: this.config.llm.defaultModel,
+          timeoutMs: this.config.llm.timeoutMs,
+          collectMetrics: this.config.enableMetrics !== false
+        });
+
+        // Connect metrics collector
+        if (this.metricsStore) {
+          this.enhancedLlmClient.onMetrics((metrics: ChatMetrics) => {
+            this.metricsStore?.recordMetrics(metrics).catch(console.error);
+          });
+        }
+
         this.health.llmConnected = true;
       }
 
@@ -93,10 +296,695 @@ export class AIPlatformManager {
   }
 
   /**
-   * Get current health status
+   * Get current health status with performance metrics
    */
-  getHealth(): AIPlatformHealth {
+  async getHealth(): Promise<AIPlatformHealth> {
+    // Add real-time performance metrics
+    if (this.metricsStore && this.health.metricsReady) {
+      try {
+        const stats = await this.metricsStore.getStatistics({
+          startDate: new Date(Date.now() - 60 * 60 * 1000), // Last hour
+          endDate: new Date()
+        });
+        
+        this.health.performance = {
+          avgLatencyMs: stats.avgLatencyMs,
+          successRate: stats.successRate,
+          totalRequests: stats.totalRequests
+        };
+      } catch (error) {
+        console.error('Failed to get performance metrics:', error);
+      }
+    }
+
+    // Add feedback statistics
+    if (this.feedbackCollector && this.health.feedbackReady) {
+      try {
+        const stats = await this.feedbackCollector.getStats();
+        this.health.feedback = {
+          totalFeedback: stats.totalFeedback,
+          helpfulRate: stats.helpfulRate,
+          avgRating: stats.avgRating
+        };
+      } catch (error) {
+        console.error('Failed to get feedback stats:', error);
+      }
+    }
+
+    // Add learning statistics
+    if (this.supervisedLearner && this.health.learningReady) {
+      try {
+        const summary = this.supervisedLearner.getInsightsSummary();
+        const pending = this.supervisedLearner.getPendingSuggestions();
+        const approved = this.supervisedLearner.getApprovedSuggestions();
+        
+        this.health.learning = {
+          totalInsights: summary.totalInsights,
+          pendingSuggestions: pending.length,
+          approvedSuggestions: approved.length
+        };
+      } catch (error) {
+        console.error('Failed to get learning stats:', error);
+      }
+    }
+
+    // Add training loop statistics
+    if (this.trainingOrchestrator && this.health.trainingLoopReady) {
+      try {
+        const activeJob = this.trainingOrchestrator.getActiveJob();
+        const allJobs = this.trainingOrchestrator.getJobs();
+        const awaitingApproval = this.trainingOrchestrator.getJobsAwaitingApproval();
+        
+        this.health.trainingLoop = {
+          activeJob: activeJob !== null,
+          totalJobs: allJobs.length,
+          jobsAwaitingApproval: awaitingApproval.length,
+          lastRetrainedAt: allJobs.filter(j => j.deployed).sort((a, b) => 
+            (b.deployedAt?.getTime() || 0) - (a.deployedAt?.getTime() || 0)
+          )[0]?.deployedAt
+        };
+      } catch (error) {
+        console.error('Failed to get training loop stats:', error);
+      }
+    }
+
+    // Add cache statistics
+    if (this.cache && this.health.cacheReady) {
+      try {
+        this.health.cache = this.cache.getStats();
+      } catch (error) {
+        console.error('Failed to get cache stats:', error);
+      }
+    }
+
+    // Add rate limit statistics
+    if (this.rateLimiter && this.health.rateLimitReady) {
+      try {
+        const allStats = this.rateLimiter.getAllStats();
+        const blocked = allStats.reduce((sum, stat) => sum + stat.blocked, 0);
+        
+        this.health.rateLimit = {
+          totalUsers: allStats.length,
+          blockedRequests: blocked
+        };
+      } catch (error) {
+        console.error('Failed to get rate limit stats:', error);
+      }
+    }
+
+    // Add webhook statistics
+    if (this.webhooks && this.health.webhooksReady) {
+      try {
+        const stats = this.webhooks.getStats();
+        
+        this.health.webhooks = {
+          totalSubscriptions: stats.totalSubscriptions,
+          activeSubscriptions: stats.activeSubscriptions,
+          successRate: stats.successRate
+        };
+      } catch (error) {
+        console.error('Failed to get webhook stats:', error);
+      }
+    }
+
     return { ...this.health };
+  }
+
+  /**
+   * Instant response mode - fast, non-streaming
+   * Best for: Simple queries, cached responses
+   */
+  async instant(messages: Array<{ role: string; content: string }>, options?: {
+    model?: string;
+    temperature?: number;
+    tenantId?: string;
+    userId?: string;
+  }): Promise<string> {
+    if (!this.enhancedLlmClient) {
+      throw new Error('Enhanced LLM client not initialized');
+    }
+
+    return this.enhancedLlmClient.instant({
+      messages,
+      model: options?.model,
+      temperature: options?.temperature
+    });
+  }
+
+  /**
+   * Streaming response mode - real-time token-by-token
+   * Best for: Interactive chat, long responses, better UX
+   */
+  async *streaming(messages: Array<{ role: string; content: string }>, options?: {
+    model?: string;
+    temperature?: number;
+    max_tokens?: number;
+  }): AsyncGenerator<StreamChunk> {
+    if (!this.enhancedLlmClient) {
+      throw new Error('Enhanced LLM client not initialized');
+    }
+
+    yield* this.enhancedLlmClient.streaming({
+      messages,
+      model: options?.model,
+      temperature: options?.temperature,
+      max_tokens: options?.max_tokens
+    });
+  }
+
+  /**
+   * Long response mode - optimized for lengthy completions
+   * Best for: Complex tasks, document generation
+   */
+  async long(messages: Array<{ role: string; content: string }>, options?: {
+    model?: string;
+    temperature?: number;
+    max_tokens?: number;
+  }): Promise<string> {
+    if (!this.enhancedLlmClient) {
+      throw new Error('Enhanced LLM client not initialized');
+    }
+
+    return this.enhancedLlmClient.long({
+      messages,
+      model: options?.model,
+      temperature: options?.temperature,
+      max_tokens: options?.max_tokens
+    });
+  }
+
+  /**
+   * Auto-select best response mode
+   */
+  async auto(messages: Array<{ role: string; content: string }>, options?: {
+    model?: string;
+    temperature?: number;
+  }): Promise<string> {
+    if (!this.enhancedLlmClient) {
+      throw new Error('Enhanced LLM client not initialized');
+    }
+
+    return this.enhancedLlmClient.auto({
+      messages,
+      model: options?.model,
+      temperature: options?.temperature
+    });
+  }
+
+  /**
+   * Get AI metrics dashboard
+   */
+  async getDashboard(): Promise<any> {
+    if (!this.metricsStore) {
+      throw new Error('Metrics store not initialized');
+    }
+
+    return this.metricsStore.getDashboard();
+  }
+
+  /**
+   * Get AI metrics for specific time range
+   */
+  async getMetrics(startDate: Date, endDate: Date, groupBy?: 'model' | 'provider' | 'tenant' | 'hour'): Promise<any> {
+    if (!this.metricsStore) {
+      throw new Error('Metrics store not initialized');
+    }
+
+    return this.metricsStore.getStatistics({ startDate, endDate }, groupBy);
+  }
+
+  // ========== FEEDBACK METHODS ==========
+
+  /**
+   * Record thumbs up/down feedback for a response
+   */
+  async giveFeedback(requestId: string, thumbs: ThumbsFeedback, context?: {
+    userId?: string;
+    tenantId?: string;
+    sessionId?: string;
+  }): Promise<void> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    await this.feedbackCollector.recordThumbs(requestId, thumbs, context);
+  }
+
+  /**
+   * Record detailed rating feedback
+   */
+  async rateResponse(requestId: string, rating: number, categories?: {
+    accuracy?: number;
+    helpfulness?: number;
+    tone?: number;
+    relevance?: number;
+    completeness?: number;
+  }, text?: string): Promise<void> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    await this.feedbackCollector.recordRating(requestId, rating, categories, { text });
+  }
+
+  /**
+   * Submit improvement suggestion
+   */
+  async suggestImprovement(requestId: string, suggestion: string, context?: {
+    wasHelpful?: boolean;
+    userId?: string;
+    tenantId?: string;
+  }): Promise<void> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    await this.feedbackCollector.recordTextFeedback(requestId, suggestion, {
+      improvementSuggestion: suggestion,
+      wasHelpful: context?.wasHelpful,
+      userId: context?.userId,
+      tenantId: context?.tenantId
+    });
+  }
+
+  /**
+   * Check if should prompt user for feedback
+   * Customer service feature - proactively asks for improvement suggestions
+   */
+  shouldAskForFeedback(): boolean {
+    if (!this.feedbackCollector) return false;
+    return this.feedbackCollector.shouldPromptForFeedback();
+  }
+
+  /**
+   * Get a feedback prompt to show to user
+   * Returns customer service style questions like:
+   * - "How could I improve my response?"
+   * - "What would make this more helpful?"
+   * - "Do you have any suggestions?"
+   */
+  getFeedbackPrompt(type?: 'improvement' | 'clarification' | 'satisfaction' | 'suggestion'): {
+    question: string;
+    context?: string;
+    followUp?: string;
+  } | null {
+    if (!this.feedbackCollector) return null;
+    
+    const prompt = this.feedbackCollector.getPrompt(type);
+    return {
+      question: prompt.question,
+      context: prompt.context,
+      followUp: prompt.followUp
+    };
+  }
+
+  /**
+   * Get feedback statistics
+   */
+  async getFeedbackStats(filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    userId?: string;
+    tenantId?: string;
+  }): Promise<any> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    return this.feedbackCollector.getStats(filters);
+  }
+
+  // ========== LEARNING METHODS ==========
+
+  /**
+   * Analyze recent feedback and generate learning insights
+   * This is the supervised learning component
+   */
+  async analyzeAndLearn(feedback: FeedbackEntry[]): Promise<LearningInsight[]> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    return this.supervisedLearner.analyzeFeedback(feedback);
+  }
+
+  /**
+   * Generate improvement suggestions based on learned patterns
+   * Requires human approval in supervised mode
+   */
+  async generateImprovementSuggestions(): Promise<ImprovementSuggestion[]> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    return this.supervisedLearner.generateSuggestions();
+  }
+
+  /**
+   * Get pending suggestions that need human approval
+   */
+  getPendingApprovals(): ImprovementSuggestion[] {
+    if (!this.supervisedLearner) {
+      return [];
+    }
+
+    return this.supervisedLearner.getPendingSuggestions();
+  }
+
+  /**
+   * Approve a learning suggestion for deployment
+   * Human-in-the-loop approval workflow
+   */
+  async approveSuggestion(suggestionId: string, approvedBy: string, skipTesting = false): Promise<void> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    await this.supervisedLearner.approveSuggestion(suggestionId, approvedBy, skipTesting);
+  }
+
+  /**
+   * Reject a learning suggestion
+   */
+  async rejectSuggestion(suggestionId: string, reason?: string): Promise<void> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    await this.supervisedLearner.rejectSuggestion(suggestionId, reason);
+  }
+
+  /**
+   * Get learning insights summary
+   */
+  getLearningInsights(days = 7): {
+    totalInsights: number;
+    byType: Record<string, number>;
+    avgConfidence: number;
+    topInsights: LearningInsight[];
+  } {
+    if (!this.supervisedLearner) {
+      return {
+        totalInsights: 0,
+        byType: {},
+        avgConfidence: 0,
+        topInsights: []
+      };
+    }
+
+    return this.supervisedLearner.getInsightsSummary(days);
+  }
+
+  // ========== TRAINING LOOP METHODS ==========
+
+  /**
+   * Start the automated training loop
+   * Monitors feedback and triggers retraining when thresholds are met
+   */
+  async startTrainingLoop(): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.start();
+  }
+
+  /**
+   * Stop the automated training loop
+   */
+  async stopTrainingLoop(): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.stop();
+  }
+
+  /**
+   * Check if retraining should be triggered based on current metrics
+   */
+  shouldRetrain(metrics: {
+    feedbackCount: number;
+    successRate: number;
+    avgRating: number;
+    errorRate?: number;
+  }): {
+    shouldRetrain: boolean;
+    reasons: string[];
+  } {
+    if (!this.trainingOrchestrator) {
+      return { shouldRetrain: false, reasons: [] };
+    }
+
+    return this.trainingOrchestrator.shouldRetrain(metrics);
+  }
+
+  /**
+   * Manually trigger a training job
+   */
+  async triggerTraining(
+    feedback: FeedbackEntry[],
+    options?: {
+      baseModel?: string;
+      skipABTest?: boolean;
+      autoApprove?: boolean;
+    }
+  ): Promise<TrainingJob> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    return this.trainingOrchestrator.triggerTraining(feedback, 'manual', options);
+  }
+
+  /**
+   * Get all training jobs
+   */
+  getTrainingJobs(): TrainingJob[] {
+    if (!this.trainingOrchestrator) {
+      return [];
+    }
+
+    return this.trainingOrchestrator.getJobs();
+  }
+
+  /**
+   * Get currently active training job
+   */
+  getActiveTrainingJob(): TrainingJob | null {
+    if (!this.trainingOrchestrator) {
+      return null;
+    }
+
+    return this.trainingOrchestrator.getActiveJob();
+  }
+
+  /**
+   * Get training jobs awaiting approval
+   */
+  getTrainingJobsAwaitingApproval(): TrainingJob[] {
+    if (!this.trainingOrchestrator) {
+      return [];
+    }
+
+    return this.trainingOrchestrator.getJobsAwaitingApproval();
+  }
+
+  /**
+   * Approve and deploy a training job
+   */
+  async approveTrainingJob(jobId: string): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.approveJob(jobId);
+  }
+
+  /**
+   * Reject a training job
+   */
+  async rejectTrainingJob(jobId: string, reason: string): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.rejectJob(jobId, reason);
+  }
+
+  /**
+   * Convert feedback to training data
+   * Useful for exporting training datasets
+   */
+  async feedbackToTrainingData(
+    feedback: FeedbackEntry[],
+    format: 'chat_completion' | 'rag_documents' | 'classification' = 'chat_completion'
+  ): Promise<TrainingDataset> {
+    if (!this.trainingDataPipeline) {
+      throw new Error('Training data pipeline not initialized');
+    }
+
+    switch (format) {
+      case 'chat_completion':
+        return this.trainingDataPipeline.toChatCompletions(feedback);
+      case 'rag_documents':
+        return this.trainingDataPipeline.toRAGDocuments(feedback);
+      case 'classification':
+        return this.trainingDataPipeline.toClassificationExamples(feedback);
+      default:
+        throw new Error(`Unknown format: ${format}`);
+    }
+  }
+
+  /**
+   * Export training data to JSONL format
+   */
+  async exportTrainingData(dataset: TrainingDataset, format: 'jsonl' | 'json' = 'jsonl'): Promise<string> {
+    if (!this.trainingDataPipeline) {
+      throw new Error('Training data pipeline not initialized');
+    }
+
+    return format === 'jsonl'
+      ? this.trainingDataPipeline.exportJSONL(dataset)
+      : this.trainingDataPipeline.exportJSON(dataset);
+  }
+
+  // ========== CACHING METHODS ==========
+
+  /**
+   * Get cached response
+   */
+  getCachedResponse<T = any>(key: string): T | null {
+    if (!this.cache) return null;
+    return this.cache.get(key);
+  }
+
+  /**
+   * Set cached response
+   */
+  setCachedResponse<T = any>(key: string, value: T, ttl?: number): void {
+    if (!this.cache) return;
+    this.cache.set(key, value, ttl);
+  }
+
+  /**
+   * Clear cache
+   */
+  clearCache(): void {
+    if (!this.cache) return;
+    this.cache.clear();
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats(): CacheStats | null {
+    if (!this.cache) return null;
+    return this.cache.getStats();
+  }
+
+  /**
+   * Warm cache with popular queries
+   */
+  async warmCache(queries: Array<{ key: string; value: any; ttl?: number }>): Promise<void> {
+    if (!this.cache) return;
+    await this.cache.warm(queries);
+  }
+
+  // ========== RATE LIMITING METHODS ==========
+
+  /**
+   * Check rate limit for user
+   */
+  async checkRateLimit(userId: string, cost = 1): Promise<RateLimitResult> {
+    if (!this.rateLimiter) {
+      return {
+        allowed: true,
+        remaining: Number.MAX_SAFE_INTEGER,
+        resetAt: Date.now(),
+        limit: Number.MAX_SAFE_INTEGER
+      };
+    }
+
+    return this.rateLimiter.check(userId, cost);
+  }
+
+  /**
+   * Set user rate limit tier
+   */
+  setUserTier(userId: string, tier: keyof typeof RateLimitTiers): void {
+    if (!this.rateLimiter) return;
+    this.rateLimiter.setUserTier(userId, tier);
+  }
+
+  /**
+   * Get user rate limit tier
+   */
+  getUserTier(userId: string): keyof typeof RateLimitTiers {
+    if (!this.rateLimiter) return 'free';
+    return this.rateLimiter.getUserTier(userId);
+  }
+
+  /**
+   * Reset rate limit for user
+   */
+  resetRateLimit(userId: string): void {
+    if (!this.rateLimiter) return;
+    this.rateLimiter.reset(userId);
+  }
+
+  // ========== WEBHOOK METHODS ==========
+
+  /**
+   * Subscribe to webhook events
+   */
+  subscribeWebhook(
+    url: string,
+    events: WebhookEvent[],
+    options?: { secret?: string; metadata?: Record<string, any> }
+  ): WebhookSubscription | null {
+    if (!this.webhooks) return null;
+    return this.webhooks.subscribe(url, events, options);
+  }
+
+  /**
+   * Unsubscribe from webhook
+   */
+  unsubscribeWebhook(subscriptionId: string): boolean {
+    if (!this.webhooks) return false;
+    return this.webhooks.unsubscribe(subscriptionId);
+  }
+
+  /**
+   * Get webhook subscription
+   */
+  getWebhookSubscription(subscriptionId: string): WebhookSubscription | null {
+    if (!this.webhooks) return null;
+    return this.webhooks.getSubscription(subscriptionId);
+  }
+
+  /**
+   * Get all webhook subscriptions
+   */
+  getWebhookSubscriptions(): WebhookSubscription[] {
+    if (!this.webhooks) return [];
+    return this.webhooks.getAllSubscriptions();
+  }
+
+  /**
+   * Emit webhook event
+   */
+  async emitWebhook(event: WebhookEvent, data: any, metadata?: Record<string, any>): Promise<void> {
+    if (!this.webhooks) return;
+    await this.webhooks.emit(event, data, metadata);
+  }
+
+  /**
+   * Get webhook delivery statistics
+   */
+  getWebhookStats(): any {
+    if (!this.webhooks) return null;
+    return this.webhooks.getStats();
   }
 
   /**
