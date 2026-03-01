@@ -18,17 +18,31 @@ import { LlmClient } from '@auth-spine/llm-client';
 import type { LlmClientConfig } from '@auth-spine/llm-client';
 import { EnhancedLlmClient, type ChatMetrics, type StreamChunk } from './enhanced-llm-client.js';
 import { AIMetricsStore } from './ai-metrics-store.js';
+import { FeedbackCollector, type FeedbackEntry, type ThumbsFeedback } from './feedback-collector.js';
+import { SupervisedLearner, type LearningMode, type LearningInsight, type ImprovementSuggestion } from './supervised-learner.js';
 
 export interface AIPlatformConfig {
   llm?: LlmClientConfig;
   enableTools?: boolean;
   enableRag?: boolean;
   enableOracle?: boolean;
-  enableMetrics?: boolean;  // NEW: Enable Parquet-based metrics
+  enableMetrics?: boolean;  // Enable Parquet-based metrics
+  enableFeedback?: boolean;  // NEW: Enable feedback collection
+  enableLearning?: boolean;  // NEW: Enable supervised learning
   metricsConfig?: {
     dataDir?: string;
     retentionDays?: number;
     compression?: 'SNAPPY' | 'ZSTD' | 'GZIP';
+  };
+  feedbackConfig?: {  // NEW
+    dataDir?: string;
+    promptAfterResponses?: number;
+    proactivePrompts?: boolean;
+  };
+  learningConfig?: {  // NEW
+    mode?: LearningMode;
+    minFeedbackForInsight?: number;
+    requireApproval?: boolean;
   };
 }
 
@@ -37,12 +51,24 @@ export interface AIPlatformHealth {
   toolsReady: boolean;
   ragReady: boolean;
   oracleReady: boolean;
-  metricsReady: boolean;  // NEW
+  metricsReady: boolean;
+  feedbackReady: boolean;  // NEW
+  learningReady: boolean;  // NEW
   errors: string[];
-  performance?: {  // NEW: Real-time performance metrics
+  performance?: {
     avgLatencyMs: number;
     successRate: number;
     totalRequests: number;
+  };
+  feedback?: {  // NEW: Feedback statistics
+    totalFeedback: number;
+    helpfulRate: number;
+    avgRating: number;
+  };
+  learning?: {  // NEW: Learning statistics
+    totalInsights: number;
+    pendingSuggestions: number;
+    approvedSuggestions: number;
   };
 }
 
@@ -55,19 +81,25 @@ export class AIPlatformManager {
     ragReady: false,
     oracleReady: false,
     metricsReady: false,
+    feedbackReady: false,
+    learningReady: false,
     errors: []
   };
 
   // Public accessors for subsystems
   public llmClient?: LlmClient;
-  public enhancedLlmClient?: EnhancedLlmClient;  // NEW: Enhanced client with response modes
-  public metricsStore?: AIMetricsStore;  // NEW: Parquet-based metrics
+  public enhancedLlmClient?: EnhancedLlmClient;
+  public metricsStore?: AIMetricsStore;
+  public feedbackCollector?: FeedbackCollector;  // NEW: Feedback collection
+  public supervisedLearner?: SupervisedLearner;  // NEW: Supervised learning
   public toolRegistry?: ToolRegistry;
   public ragStore?: InMemoryKeywordStore;
 
   constructor(config: AIPlatformConfig = {}) {
     this.config = {
-      enableMetrics: true,  // Enable by default
+      enableMetrics: true,
+      enableFeedback: true,  // NEW: Enable by default
+      enableLearning: true,  // NEW: Enable by default
       ...config
     };
   }
@@ -88,13 +120,25 @@ export class AIPlatformManager {
         this.health.metricsReady = true;
       }
 
+      // Initialize Feedback Collector
+      if (this.config.enableFeedback !== false) {
+        this.feedbackCollector = new FeedbackCollector(this.config.feedbackConfig);
+        this.health.feedbackReady = true;
+      }
+
+      // Initialize Supervised Learner
+      if (this.config.enableLearning !== false) {
+        this.supervisedLearner = new SupervisedLearner(this.config.learningConfig);
+        this.health.learningReady = true;
+      }
+
       // Initialize LLM Client (legacy)
       if (this.config.llm) {
         this.llmClient = new LlmClient(this.config.llm);
         this.health.llmConnected = true;
       }
 
-      // Initialize Enhanced LLM Client with metrics
+      // Initialize Enhanced LLM Client with metrics and feedback
       if (this.config.llm) {
         this.enhancedLlmClient = new EnhancedLlmClient({
           baseUrl: this.config.llm.baseUrl,
@@ -164,6 +208,37 @@ export class AIPlatformManager {
         };
       } catch (error) {
         console.error('Failed to get performance metrics:', error);
+      }
+    }
+
+    // Add feedback statistics
+    if (this.feedbackCollector && this.health.feedbackReady) {
+      try {
+        const stats = await this.feedbackCollector.getStats();
+        this.health.feedback = {
+          totalFeedback: stats.totalFeedback,
+          helpfulRate: stats.helpfulRate,
+          avgRating: stats.avgRating
+        };
+      } catch (error) {
+        console.error('Failed to get feedback stats:', error);
+      }
+    }
+
+    // Add learning statistics
+    if (this.supervisedLearner && this.health.learningReady) {
+      try {
+        const summary = this.supervisedLearner.getInsightsSummary();
+        const pending = this.supervisedLearner.getPendingSuggestions();
+        const approved = this.supervisedLearner.getApprovedSuggestions();
+        
+        this.health.learning = {
+          totalInsights: summary.totalInsights,
+          pendingSuggestions: pending.length,
+          approvedSuggestions: approved.length
+        };
+      } catch (error) {
+        console.error('Failed to get learning stats:', error);
       }
     }
 
@@ -271,6 +346,188 @@ export class AIPlatformManager {
     }
 
     return this.metricsStore.getStatistics({ startDate, endDate }, groupBy);
+  }
+
+  // ========== FEEDBACK METHODS ==========
+
+  /**
+   * Record thumbs up/down feedback for a response
+   */
+  async giveFeedback(requestId: string, thumbs: ThumbsFeedback, context?: {
+    userId?: string;
+    tenantId?: string;
+    sessionId?: string;
+  }): Promise<void> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    await this.feedbackCollector.recordThumbs(requestId, thumbs, context);
+  }
+
+  /**
+   * Record detailed rating feedback
+   */
+  async rateResponse(requestId: string, rating: number, categories?: {
+    accuracy?: number;
+    helpfulness?: number;
+    tone?: number;
+    relevance?: number;
+    completeness?: number;
+  }, text?: string): Promise<void> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    await this.feedbackCollector.recordRating(requestId, rating, categories, { text });
+  }
+
+  /**
+   * Submit improvement suggestion
+   */
+  async suggestImprovement(requestId: string, suggestion: string, context?: {
+    wasHelpful?: boolean;
+    userId?: string;
+    tenantId?: string;
+  }): Promise<void> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    await this.feedbackCollector.recordTextFeedback(requestId, suggestion, {
+      improvementSuggestion: suggestion,
+      wasHelpful: context?.wasHelpful,
+      userId: context?.userId,
+      tenantId: context?.tenantId
+    });
+  }
+
+  /**
+   * Check if should prompt user for feedback
+   * Customer service feature - proactively asks for improvement suggestions
+   */
+  shouldAskForFeedback(): boolean {
+    if (!this.feedbackCollector) return false;
+    return this.feedbackCollector.shouldPromptForFeedback();
+  }
+
+  /**
+   * Get a feedback prompt to show to user
+   * Returns customer service style questions like:
+   * - "How could I improve my response?"
+   * - "What would make this more helpful?"
+   * - "Do you have any suggestions?"
+   */
+  getFeedbackPrompt(type?: 'improvement' | 'clarification' | 'satisfaction' | 'suggestion'): {
+    question: string;
+    context?: string;
+    followUp?: string;
+  } | null {
+    if (!this.feedbackCollector) return null;
+    
+    const prompt = this.feedbackCollector.getPrompt(type);
+    return {
+      question: prompt.question,
+      context: prompt.context,
+      followUp: prompt.followUp
+    };
+  }
+
+  /**
+   * Get feedback statistics
+   */
+  async getFeedbackStats(filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    userId?: string;
+    tenantId?: string;
+  }): Promise<any> {
+    if (!this.feedbackCollector) {
+      throw new Error('Feedback collector not initialized');
+    }
+
+    return this.feedbackCollector.getStats(filters);
+  }
+
+  // ========== LEARNING METHODS ==========
+
+  /**
+   * Analyze recent feedback and generate learning insights
+   * This is the supervised learning component
+   */
+  async analyzeAndLearn(feedback: FeedbackEntry[]): Promise<LearningInsight[]> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    return this.supervisedLearner.analyzeFeedback(feedback);
+  }
+
+  /**
+   * Generate improvement suggestions based on learned patterns
+   * Requires human approval in supervised mode
+   */
+  async generateImprovementSuggestions(): Promise<ImprovementSuggestion[]> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    return this.supervisedLearner.generateSuggestions();
+  }
+
+  /**
+   * Get pending suggestions that need human approval
+   */
+  getPendingApprovals(): ImprovementSuggestion[] {
+    if (!this.supervisedLearner) {
+      return [];
+    }
+
+    return this.supervisedLearner.getPendingSuggestions();
+  }
+
+  /**
+   * Approve a learning suggestion for deployment
+   * Human-in-the-loop approval workflow
+   */
+  async approveSuggestion(suggestionId: string, approvedBy: string, skipTesting = false): Promise<void> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    await this.supervisedLearner.approveSuggestion(suggestionId, approvedBy, skipTesting);
+  }
+
+  /**
+   * Reject a learning suggestion
+   */
+  async rejectSuggestion(suggestionId: string, reason?: string): Promise<void> {
+    if (!this.supervisedLearner) {
+      throw new Error('Supervised learner not initialized');
+    }
+
+    await this.supervisedLearner.rejectSuggestion(suggestionId, reason);
+  }
+
+  /**
+   * Get learning insights summary
+   */
+  getLearningInsights(days = 7): {
+    totalInsights: number;
+    byType: Record<string, number>;
+    avgConfidence: number;
+    topInsights: LearningInsight[];
+  } {
+    if (!this.supervisedLearner) {
+      return {
+        totalInsights: 0,
+        byType: {},
+        avgConfidence: 0,
+        topInsights: []
+      };
+    }
+
+    return this.supervisedLearner.getInsightsSummary(days);
   }
 
   /**
