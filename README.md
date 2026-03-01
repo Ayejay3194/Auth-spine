@@ -37,15 +37,32 @@ Auth-Spine is a **complete drop-in backend/full stack solution** - a unified Typ
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Method 1: Drop-In Integration (30 Seconds)
+
+Add Auth-Spine to your existing project:
 
 ```bash
-Node.js >= 18.0.0
-PostgreSQL >= 14.0
-npm >= 9.0.0
+# Install core package
+npm install @auth-spine/core
+
+# Use in your app
+import { AuthSpine } from '@auth-spine/core';
+
+const authSpine = new AuthSpine({
+  auth: { jwtSecret: process.env.JWT_SECRET },
+  ai: { enabled: true },
+  enterprise: { enabled: true }
+});
+
+await authSpine.initialize();
+// Done! Auth + AI/ML + Enterprise features ready
 ```
 
-### Installation
+**See [DROP_IN_INTEGRATION_GUIDE.md](DROP_IN_INTEGRATION_GUIDE.md) for complete integration guide.**
+
+### Method 2: Full Repository Setup
+
+Clone and run the complete system:
 
 ```bash
 # 1. Clone the repository
@@ -354,6 +371,15 @@ npm start
 - [ ] Review [SECURITY.md](SECURITY.md)
 
 ## 📚 API Documentation
+
+### Quick Reference
+
+- **[DROP_IN_INTEGRATION_GUIDE.md](DROP_IN_INTEGRATION_GUIDE.md)** - How to integrate Auth-Spine into any project
+- **[PACKAGE_CATALOG.md](PACKAGE_CATALOG.md)** - Complete catalog of all 42 packages
+- **[PACKAGE_ORGANIZATION.md](PACKAGE_ORGANIZATION.md)** - Package orchestration & extension guide
+- **[AI_ML_CAPABILITIES.md](AI_ML_CAPABILITIES.md)** - Complete AI/ML feature overview
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Comprehensive deployment guide
+- **[SECURITY.md](SECURITY.md)** - Security policy and best practices
 
 ### Auth Server (Port 4000)
 
