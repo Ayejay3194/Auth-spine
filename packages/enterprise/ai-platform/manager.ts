@@ -22,6 +22,9 @@ import { FeedbackCollector, type FeedbackEntry, type ThumbsFeedback } from './fe
 import { SupervisedLearner, type LearningMode, type LearningInsight, type ImprovementSuggestion } from './supervised-learner.js';
 import { TrainingDataPipeline, type TrainingDataset } from './training-data-pipeline.js';
 import { TrainingLoopOrchestrator, type TrainingJob, type RetrainingThresholds } from './training-loop-orchestrator.js';
+import { ResponseCache, type CacheConfig, type CacheStats } from './response-cache.js';
+import { UserRateLimiter, RateLimitTiers, type RateLimitResult } from './rate-limiter.js';
+import { WebhookManager, WebhookEvents, type WebhookEvent, type WebhookSubscription } from './webhook-system.js';
 
 export interface AIPlatformConfig {
   llm?: LlmClientConfig;
@@ -31,7 +34,10 @@ export interface AIPlatformConfig {
   enableMetrics?: boolean;  // Enable Parquet-based metrics
   enableFeedback?: boolean;  // Enable feedback collection
   enableLearning?: boolean;  // Enable supervised learning
-  enableTrainingLoop?: boolean;  // NEW: Enable automated training loops
+  enableTrainingLoop?: boolean;  // Enable automated training loops
+  enableCaching?: boolean;  // NEW: Enable response caching
+  enableRateLimiting?: boolean;  // NEW: Enable rate limiting
+  enableWebhooks?: boolean;  // NEW: Enable webhook notifications
   metricsConfig?: {
     dataDir?: string;
     retentionDays?: number;
@@ -47,12 +53,21 @@ export interface AIPlatformConfig {
     minFeedbackForInsight?: number;
     requireApproval?: boolean;
   };
-  trainingLoopConfig?: {  // NEW: Training loop configuration
+  trainingLoopConfig?: {
     baseModel?: string;
     thresholds?: Partial<RetrainingThresholds>;
     schedule?: 'hourly' | 'daily' | 'weekly' | 'monthly';
     requireApproval?: boolean;
     enableABTesting?: boolean;
+  };
+  cacheConfig?: Partial<CacheConfig>;  // NEW: Cache configuration
+  rateLimitConfig?: {  // NEW: Rate limiting configuration
+    defaultTier?: keyof typeof RateLimitTiers;
+  };
+  webhookConfig?: {  // NEW: Webhook configuration
+    maxAttempts?: number;
+    retryDelay?: number;
+    timeout?: number;
   };
 }
 
@@ -64,7 +79,10 @@ export interface AIPlatformHealth {
   metricsReady: boolean;
   feedbackReady: boolean;
   learningReady: boolean;
-  trainingLoopReady: boolean;  // NEW
+  trainingLoopReady: boolean;
+  cacheReady: boolean;  // NEW
+  rateLimitReady: boolean;  // NEW
+  webhooksReady: boolean;  // NEW
   errors: string[];
   performance?: {
     avgLatencyMs: number;
@@ -81,11 +99,21 @@ export interface AIPlatformHealth {
     pendingSuggestions: number;
     approvedSuggestions: number;
   };
-  trainingLoop?: {  // NEW: Training loop statistics
+  trainingLoop?: {
     activeJob: boolean;
     totalJobs: number;
     jobsAwaitingApproval: number;
     lastRetrainedAt?: Date;
+  };
+  cache?: CacheStats;  // NEW: Cache statistics
+  rateLimit?: {  // NEW: Rate limit statistics
+    totalUsers: number;
+    blockedRequests: number;
+  };
+  webhooks?: {  // NEW: Webhook statistics
+    totalSubscriptions: number;
+    activeSubscriptions: number;
+    successRate: number;
   };
 }
 
@@ -101,6 +129,9 @@ export class AIPlatformManager {
     feedbackReady: false,
     learningReady: false,
     trainingLoopReady: false,
+    cacheReady: false,
+    rateLimitReady: false,
+    webhooksReady: false,
     errors: []
   };
 
@@ -110,8 +141,12 @@ export class AIPlatformManager {
   public metricsStore?: AIMetricsStore;
   public feedbackCollector?: FeedbackCollector;
   public supervisedLearner?: SupervisedLearner;
-  public trainingDataPipeline?: TrainingDataPipeline;  // NEW: Training data pipeline
-  public trainingOrchestrator?: TrainingLoopOrchestrator;  // NEW: Training loop
+  public trainingDataPipeline?: TrainingDataPipeline;
+  public trainingOrchestrator?: TrainingLoopOrchestrator;
+  public cache?: ResponseCache;  // NEW: Response cache
+  public rateLimiter?: UserRateLimiter;  // NEW: Rate limiter
+  public webhooks?: WebhookManager;  // NEW: Webhook manager
+  public webhookEvents?: WebhookEvents;  // NEW: Webhook event helpers
   public toolRegistry?: ToolRegistry;
   public ragStore?: InMemoryKeywordStore;
 
@@ -120,7 +155,10 @@ export class AIPlatformManager {
       enableMetrics: true,
       enableFeedback: true,
       enableLearning: true,
-      enableTrainingLoop: true,  // NEW: Enable by default
+      enableTrainingLoop: true,
+      enableCaching: true,  // NEW: Enable by default
+      enableRateLimiting: true,  // NEW: Enable by default
+      enableWebhooks: true,  // NEW: Enable by default
       ...config
     };
   }
@@ -179,6 +217,25 @@ export class AIPlatformManager {
           }
         });
         this.health.trainingLoopReady = true;
+      }
+
+      // Initialize Response Cache
+      if (this.config.enableCaching !== false) {
+        this.cache = new ResponseCache(this.config.cacheConfig);
+        this.health.cacheReady = true;
+      }
+
+      // Initialize Rate Limiter
+      if (this.config.enableRateLimiting !== false) {
+        this.rateLimiter = new UserRateLimiter();
+        this.health.rateLimitReady = true;
+      }
+
+      // Initialize Webhook System
+      if (this.config.enableWebhooks !== false) {
+        this.webhooks = new WebhookManager(this.config.webhookConfig);
+        this.webhookEvents = new WebhookEvents(this.webhooks);
+        this.health.webhooksReady = true;
       }
 
       // Initialize LLM Client (legacy)
@@ -308,6 +365,45 @@ export class AIPlatformManager {
         };
       } catch (error) {
         console.error('Failed to get training loop stats:', error);
+      }
+    }
+
+    // Add cache statistics
+    if (this.cache && this.health.cacheReady) {
+      try {
+        this.health.cache = this.cache.getStats();
+      } catch (error) {
+        console.error('Failed to get cache stats:', error);
+      }
+    }
+
+    // Add rate limit statistics
+    if (this.rateLimiter && this.health.rateLimitReady) {
+      try {
+        const allStats = this.rateLimiter.getAllStats();
+        const blocked = allStats.reduce((sum, stat) => sum + stat.blocked, 0);
+        
+        this.health.rateLimit = {
+          totalUsers: allStats.length,
+          blockedRequests: blocked
+        };
+      } catch (error) {
+        console.error('Failed to get rate limit stats:', error);
+      }
+    }
+
+    // Add webhook statistics
+    if (this.webhooks && this.health.webhooksReady) {
+      try {
+        const stats = this.webhooks.getStats();
+        
+        this.health.webhooks = {
+          totalSubscriptions: stats.totalSubscriptions,
+          activeSubscriptions: stats.activeSubscriptions,
+          successRate: stats.successRate
+        };
+      } catch (error) {
+        console.error('Failed to get webhook stats:', error);
       }
     }
 
@@ -751,6 +847,144 @@ export class AIPlatformManager {
     return format === 'jsonl'
       ? this.trainingDataPipeline.exportJSONL(dataset)
       : this.trainingDataPipeline.exportJSON(dataset);
+  }
+
+  // ========== CACHING METHODS ==========
+
+  /**
+   * Get cached response
+   */
+  getCachedResponse<T = any>(key: string): T | null {
+    if (!this.cache) return null;
+    return this.cache.get(key);
+  }
+
+  /**
+   * Set cached response
+   */
+  setCachedResponse<T = any>(key: string, value: T, ttl?: number): void {
+    if (!this.cache) return;
+    this.cache.set(key, value, ttl);
+  }
+
+  /**
+   * Clear cache
+   */
+  clearCache(): void {
+    if (!this.cache) return;
+    this.cache.clear();
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats(): CacheStats | null {
+    if (!this.cache) return null;
+    return this.cache.getStats();
+  }
+
+  /**
+   * Warm cache with popular queries
+   */
+  async warmCache(queries: Array<{ key: string; value: any; ttl?: number }>): Promise<void> {
+    if (!this.cache) return;
+    await this.cache.warm(queries);
+  }
+
+  // ========== RATE LIMITING METHODS ==========
+
+  /**
+   * Check rate limit for user
+   */
+  async checkRateLimit(userId: string, cost = 1): Promise<RateLimitResult> {
+    if (!this.rateLimiter) {
+      return {
+        allowed: true,
+        remaining: Number.MAX_SAFE_INTEGER,
+        resetAt: Date.now(),
+        limit: Number.MAX_SAFE_INTEGER
+      };
+    }
+
+    return this.rateLimiter.check(userId, cost);
+  }
+
+  /**
+   * Set user rate limit tier
+   */
+  setUserTier(userId: string, tier: keyof typeof RateLimitTiers): void {
+    if (!this.rateLimiter) return;
+    this.rateLimiter.setUserTier(userId, tier);
+  }
+
+  /**
+   * Get user rate limit tier
+   */
+  getUserTier(userId: string): keyof typeof RateLimitTiers {
+    if (!this.rateLimiter) return 'free';
+    return this.rateLimiter.getUserTier(userId);
+  }
+
+  /**
+   * Reset rate limit for user
+   */
+  resetRateLimit(userId: string): void {
+    if (!this.rateLimiter) return;
+    this.rateLimiter.reset(userId);
+  }
+
+  // ========== WEBHOOK METHODS ==========
+
+  /**
+   * Subscribe to webhook events
+   */
+  subscribeWebhook(
+    url: string,
+    events: WebhookEvent[],
+    options?: { secret?: string; metadata?: Record<string, any> }
+  ): WebhookSubscription | null {
+    if (!this.webhooks) return null;
+    return this.webhooks.subscribe(url, events, options);
+  }
+
+  /**
+   * Unsubscribe from webhook
+   */
+  unsubscribeWebhook(subscriptionId: string): boolean {
+    if (!this.webhooks) return false;
+    return this.webhooks.unsubscribe(subscriptionId);
+  }
+
+  /**
+   * Get webhook subscription
+   */
+  getWebhookSubscription(subscriptionId: string): WebhookSubscription | null {
+    if (!this.webhooks) return null;
+    return this.webhooks.getSubscription(subscriptionId);
+  }
+
+  /**
+   * Get all webhook subscriptions
+   */
+  getWebhookSubscriptions(): WebhookSubscription[] {
+    if (!this.webhooks) return [];
+    return this.webhooks.getAllSubscriptions();
+  }
+
+  /**
+   * Emit webhook event
+   */
+  async emitWebhook(event: WebhookEvent, data: any, metadata?: Record<string, any>): Promise<void> {
+    if (!this.webhooks) return;
+    await this.webhooks.emit(event, data, metadata);
+  }
+
+  /**
+   * Get webhook delivery statistics
+   */
+  getWebhookStats(): any {
+    if (!this.webhooks) return null;
+    return this.webhooks.getStats();
   }
 
   /**
