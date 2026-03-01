@@ -12,13 +12,15 @@
 
 Auth-Spine is a **complete drop-in backend/full stack solution** - a unified TypeScript monorepo providing production-ready authentication, authorization, and business platform features. Perfect for SaaS applications, multi-tenant systems, and enterprise platforms.
 
+**🚀 Deploy anywhere in 5 minutes** - See [DROP_IN_GUIDE.md](DROP_IN_GUIDE.md) for the complete quick-start guide.
+
 ### 🚀 Ready to Deploy Anywhere
 
-- **Docker** - Full-stack orchestration with docker-compose
-- **Kubernetes** - Production-ready K8s manifests included
-- **Cloud** - Deploy to AWS, GCP, Azure, or any cloud provider
-- **Vercel/Netlify** - Automated CI/CD pipeline configured
-- **On-Premise** - Self-hosted with complete control
+- **Docker** - Full-stack orchestration with docker-compose ✅
+- **Kubernetes** - Production-ready K8s manifests included ✅
+- **Cloud** - Deploy to AWS, GCP, Azure, or any cloud provider ✅
+- **Vercel/Netlify** - Automated CI/CD pipeline configured ✅
+- **On-Premise** - Self-hosted with complete control ✅
 
 ### Key Features
 
