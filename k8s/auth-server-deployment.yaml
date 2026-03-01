@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-server
+  namespace: auth-spine
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-server
+  template:
+    metadata:
+      labels:
+        app: auth-server
+    spec:
+      containers:
+      - name: auth-server
+        image: auth-spine/auth-server:latest
+        ports:
+        - containerPort: 4000
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: DATABASE_URL
+          value: postgresql://authspine:$(POSTGRES_PASSWORD)@postgres:5432/authspine
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-spine-db
+              key: postgres-password
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: auth-spine-jwt
+              key: jwt-secret
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "2000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-server
+  namespace: auth-spine
+spec:
+  selector:
+    app: auth-server
+  ports:
+  - port: 4000
+    targetPort: 4000
+  type: ClusterIP
