@@ -20,6 +20,8 @@ import { EnhancedLlmClient, type ChatMetrics, type StreamChunk } from './enhance
 import { AIMetricsStore } from './ai-metrics-store.js';
 import { FeedbackCollector, type FeedbackEntry, type ThumbsFeedback } from './feedback-collector.js';
 import { SupervisedLearner, type LearningMode, type LearningInsight, type ImprovementSuggestion } from './supervised-learner.js';
+import { TrainingDataPipeline, type TrainingDataset } from './training-data-pipeline.js';
+import { TrainingLoopOrchestrator, type TrainingJob, type RetrainingThresholds } from './training-loop-orchestrator.js';
 
 export interface AIPlatformConfig {
   llm?: LlmClientConfig;
@@ -27,22 +29,30 @@ export interface AIPlatformConfig {
   enableRag?: boolean;
   enableOracle?: boolean;
   enableMetrics?: boolean;  // Enable Parquet-based metrics
-  enableFeedback?: boolean;  // NEW: Enable feedback collection
-  enableLearning?: boolean;  // NEW: Enable supervised learning
+  enableFeedback?: boolean;  // Enable feedback collection
+  enableLearning?: boolean;  // Enable supervised learning
+  enableTrainingLoop?: boolean;  // NEW: Enable automated training loops
   metricsConfig?: {
     dataDir?: string;
     retentionDays?: number;
     compression?: 'SNAPPY' | 'ZSTD' | 'GZIP';
   };
-  feedbackConfig?: {  // NEW
+  feedbackConfig?: {
     dataDir?: string;
     promptAfterResponses?: number;
     proactivePrompts?: boolean;
   };
-  learningConfig?: {  // NEW
+  learningConfig?: {
     mode?: LearningMode;
     minFeedbackForInsight?: number;
     requireApproval?: boolean;
+  };
+  trainingLoopConfig?: {  // NEW: Training loop configuration
+    baseModel?: string;
+    thresholds?: Partial<RetrainingThresholds>;
+    schedule?: 'hourly' | 'daily' | 'weekly' | 'monthly';
+    requireApproval?: boolean;
+    enableABTesting?: boolean;
   };
 }
 
@@ -52,23 +62,30 @@ export interface AIPlatformHealth {
   ragReady: boolean;
   oracleReady: boolean;
   metricsReady: boolean;
-  feedbackReady: boolean;  // NEW
-  learningReady: boolean;  // NEW
+  feedbackReady: boolean;
+  learningReady: boolean;
+  trainingLoopReady: boolean;  // NEW
   errors: string[];
   performance?: {
     avgLatencyMs: number;
     successRate: number;
     totalRequests: number;
   };
-  feedback?: {  // NEW: Feedback statistics
+  feedback?: {
     totalFeedback: number;
     helpfulRate: number;
     avgRating: number;
   };
-  learning?: {  // NEW: Learning statistics
+  learning?: {
     totalInsights: number;
     pendingSuggestions: number;
     approvedSuggestions: number;
+  };
+  trainingLoop?: {  // NEW: Training loop statistics
+    activeJob: boolean;
+    totalJobs: number;
+    jobsAwaitingApproval: number;
+    lastRetrainedAt?: Date;
   };
 }
 
@@ -83,6 +100,7 @@ export class AIPlatformManager {
     metricsReady: false,
     feedbackReady: false,
     learningReady: false,
+    trainingLoopReady: false,
     errors: []
   };
 
@@ -90,16 +108,19 @@ export class AIPlatformManager {
   public llmClient?: LlmClient;
   public enhancedLlmClient?: EnhancedLlmClient;
   public metricsStore?: AIMetricsStore;
-  public feedbackCollector?: FeedbackCollector;  // NEW: Feedback collection
-  public supervisedLearner?: SupervisedLearner;  // NEW: Supervised learning
+  public feedbackCollector?: FeedbackCollector;
+  public supervisedLearner?: SupervisedLearner;
+  public trainingDataPipeline?: TrainingDataPipeline;  // NEW: Training data pipeline
+  public trainingOrchestrator?: TrainingLoopOrchestrator;  // NEW: Training loop
   public toolRegistry?: ToolRegistry;
   public ragStore?: InMemoryKeywordStore;
 
   constructor(config: AIPlatformConfig = {}) {
     this.config = {
       enableMetrics: true,
-      enableFeedback: true,  // NEW: Enable by default
-      enableLearning: true,  // NEW: Enable by default
+      enableFeedback: true,
+      enableLearning: true,
+      enableTrainingLoop: true,  // NEW: Enable by default
       ...config
     };
   }
@@ -130,6 +151,34 @@ export class AIPlatformManager {
       if (this.config.enableLearning !== false) {
         this.supervisedLearner = new SupervisedLearner(this.config.learningConfig);
         this.health.learningReady = true;
+      }
+
+      // Initialize Training Data Pipeline
+      if (this.config.enableTrainingLoop !== false) {
+        this.trainingDataPipeline = new TrainingDataPipeline({
+          minRating: 4,
+          requireHelpful: true,
+          deduplicate: true
+        });
+      }
+
+      // Initialize Training Loop Orchestrator
+      if (this.config.enableTrainingLoop !== false) {
+        this.trainingOrchestrator = new TrainingLoopOrchestrator({
+          thresholds: this.config.trainingLoopConfig?.thresholds,
+          schedule: this.config.trainingLoopConfig?.schedule,
+          baseModel: this.config.trainingLoopConfig?.baseModel || this.config.llm?.defaultModel || 'gpt-3.5-turbo',
+          requireApproval: this.config.trainingLoopConfig?.requireApproval ?? true,
+          abTest: {
+            enabled: this.config.trainingLoopConfig?.enableABTesting ?? true,
+            trafficSplit: 0.5,
+            minSampleSize: 100,
+            maxDuration: 7 * 24 * 60 * 60,
+            significanceLevel: 0.05,
+            minImprovement: 0.05
+          }
+        });
+        this.health.trainingLoopReady = true;
       }
 
       // Initialize LLM Client (legacy)
@@ -239,6 +288,26 @@ export class AIPlatformManager {
         };
       } catch (error) {
         console.error('Failed to get learning stats:', error);
+      }
+    }
+
+    // Add training loop statistics
+    if (this.trainingOrchestrator && this.health.trainingLoopReady) {
+      try {
+        const activeJob = this.trainingOrchestrator.getActiveJob();
+        const allJobs = this.trainingOrchestrator.getJobs();
+        const awaitingApproval = this.trainingOrchestrator.getJobsAwaitingApproval();
+        
+        this.health.trainingLoop = {
+          activeJob: activeJob !== null,
+          totalJobs: allJobs.length,
+          jobsAwaitingApproval: awaitingApproval.length,
+          lastRetrainedAt: allJobs.filter(j => j.deployed).sort((a, b) => 
+            (b.deployedAt?.getTime() || 0) - (a.deployedAt?.getTime() || 0)
+          )[0]?.deployedAt
+        };
+      } catch (error) {
+        console.error('Failed to get training loop stats:', error);
       }
     }
 
@@ -528,6 +597,160 @@ export class AIPlatformManager {
     }
 
     return this.supervisedLearner.getInsightsSummary(days);
+  }
+
+  // ========== TRAINING LOOP METHODS ==========
+
+  /**
+   * Start the automated training loop
+   * Monitors feedback and triggers retraining when thresholds are met
+   */
+  async startTrainingLoop(): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.start();
+  }
+
+  /**
+   * Stop the automated training loop
+   */
+  async stopTrainingLoop(): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.stop();
+  }
+
+  /**
+   * Check if retraining should be triggered based on current metrics
+   */
+  shouldRetrain(metrics: {
+    feedbackCount: number;
+    successRate: number;
+    avgRating: number;
+    errorRate?: number;
+  }): {
+    shouldRetrain: boolean;
+    reasons: string[];
+  } {
+    if (!this.trainingOrchestrator) {
+      return { shouldRetrain: false, reasons: [] };
+    }
+
+    return this.trainingOrchestrator.shouldRetrain(metrics);
+  }
+
+  /**
+   * Manually trigger a training job
+   */
+  async triggerTraining(
+    feedback: FeedbackEntry[],
+    options?: {
+      baseModel?: string;
+      skipABTest?: boolean;
+      autoApprove?: boolean;
+    }
+  ): Promise<TrainingJob> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    return this.trainingOrchestrator.triggerTraining(feedback, 'manual', options);
+  }
+
+  /**
+   * Get all training jobs
+   */
+  getTrainingJobs(): TrainingJob[] {
+    if (!this.trainingOrchestrator) {
+      return [];
+    }
+
+    return this.trainingOrchestrator.getJobs();
+  }
+
+  /**
+   * Get currently active training job
+   */
+  getActiveTrainingJob(): TrainingJob | null {
+    if (!this.trainingOrchestrator) {
+      return null;
+    }
+
+    return this.trainingOrchestrator.getActiveJob();
+  }
+
+  /**
+   * Get training jobs awaiting approval
+   */
+  getTrainingJobsAwaitingApproval(): TrainingJob[] {
+    if (!this.trainingOrchestrator) {
+      return [];
+    }
+
+    return this.trainingOrchestrator.getJobsAwaitingApproval();
+  }
+
+  /**
+   * Approve and deploy a training job
+   */
+  async approveTrainingJob(jobId: string): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.approveJob(jobId);
+  }
+
+  /**
+   * Reject a training job
+   */
+  async rejectTrainingJob(jobId: string, reason: string): Promise<void> {
+    if (!this.trainingOrchestrator) {
+      throw new Error('Training loop orchestrator not initialized');
+    }
+
+    await this.trainingOrchestrator.rejectJob(jobId, reason);
+  }
+
+  /**
+   * Convert feedback to training data
+   * Useful for exporting training datasets
+   */
+  async feedbackToTrainingData(
+    feedback: FeedbackEntry[],
+    format: 'chat_completion' | 'rag_documents' | 'classification' = 'chat_completion'
+  ): Promise<TrainingDataset> {
+    if (!this.trainingDataPipeline) {
+      throw new Error('Training data pipeline not initialized');
+    }
+
+    switch (format) {
+      case 'chat_completion':
+        return this.trainingDataPipeline.toChatCompletions(feedback);
+      case 'rag_documents':
+        return this.trainingDataPipeline.toRAGDocuments(feedback);
+      case 'classification':
+        return this.trainingDataPipeline.toClassificationExamples(feedback);
+      default:
+        throw new Error(`Unknown format: ${format}`);
+    }
+  }
+
+  /**
+   * Export training data to JSONL format
+   */
+  async exportTrainingData(dataset: TrainingDataset, format: 'jsonl' | 'json' = 'jsonl'): Promise<string> {
+    if (!this.trainingDataPipeline) {
+      throw new Error('Training data pipeline not initialized');
+    }
+
+    return format === 'jsonl'
+      ? this.trainingDataPipeline.exportJSONL(dataset)
+      : this.trainingDataPipeline.exportJSON(dataset);
   }
 
   /**
