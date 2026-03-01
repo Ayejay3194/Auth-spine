@@ -197,6 +197,7 @@ curl -X POST http://localhost:4000/token \
 | File | Purpose |
 |------|---------|
 | `README.md` | Project overview and features |
+| `DROP_IN_GUIDE.md` | Complete drop-in solution guide (this file) |
 | `QUICK_START.md` | 5-minute setup guide |
 | `DEPLOYMENT.md` | Comprehensive deployment guide |
 | `SECURITY.md` | Security policy and best practices |

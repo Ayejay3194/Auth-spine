@@ -198,6 +198,13 @@ fi
 print_header "📊 Test Summary"
 
 total=$((PASSED + FAILED + WARNINGS))
+
+# Prevent division by zero
+if [ $total -eq 0 ]; then
+    echo "No tests were run"
+    exit 1
+fi
+
 pass_rate=$((PASSED * 100 / total))
 
 echo ""
